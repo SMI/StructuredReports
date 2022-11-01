@@ -1,0 +1,33 @@
+NLPOptions:
+
+  DicomJsonSR:
+    DisplayConceptPrefix: True
+    DisplayAttributes: True
+    SpaCyModel: en_core_web_sm
+
+  # Location of some DICOM files
+  DicomDir: /mnt/hgfs/OneDrive/SMI/DICOM/srdoc103
+
+  # Location to put intermediate files
+  TempDir: output
+
+  # Location of DicomToJson.exe
+  DicomToJsonDir: /home/arb/RiderProjects/SMIPlugin/Applications/DicomToJson/bin/Debug
+
+  # Options
+  #DicomJsonToSemEHR:
+  #  anonymise: False
+  #  split_sections_to_separate_files: False
+
+  # Location of SemEHR (as checked out from github)
+  SemEHRDir: /home/arb/src/semehr/CogStack-SemEHR
+
+  # inside the SemEHR directory are the input file and output files
+  SemEHRInputDir: tutorials/mtsamples-cohort/discharge_summaries
+  SemEHROutputDir: tutorials/mtsamples-cohort/output_docs
+  SemEHRCohortFile: tutorials/mtsamples-cohort/cohort.txt
+  SemEHRMapToPatientFile: tutorials/mtsamples-cohort/d2p.tsv
+  SemEHRDockerComposeDir: tutorials/tutorial1_compose_files
+  # within the ComposeDir are the service configuration files
+  SemEHRDockerServicesFile: semehr-tutorial1-servers-compose-arb.yml
+  SemEHRDockerRunFile: semehr-tutorial1-servers-compose-arb.yml

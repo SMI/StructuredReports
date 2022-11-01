@@ -1,0 +1,29 @@
+IdentifierMapperOptions:
+    QueueName: 'IdentifiableImageQueue'
+    QoSPrefetchCount: 2500
+    AutoAck: false
+    AnonImagesProducerOptions:
+        ExchangeName: 'AnonymousImageExchange'
+        MaxConfirmAttempts: 50
+    MappingConnectionString: 'Server=10.0.50.95;uid=smi;password=stuff;database=nss;'
+    MappingDatabaseType: 'MySQL'
+    MappingTableName: 'nss.MAPPING'
+    TimeoutInSeconds: 600
+    SwapColumnName: 'CHI_NUMBER'
+    ReplacementColumnName: 'ENCRYPTED_UPI'
+    SwapperType: 'Microservices.IdentifierMapper.Execution.Swappers.TableLookupWithGuidFallbackSwapper'
+    AllowRegexMatching: true
+    RedisConnectionString: "10.0.50.19:6379,abortConnect=false,password=nonsense"
+LoggingOptions:
+    LogsRoot: '.'
+PostgresDatabases:
+    SemEHRStoreOptions:
+        HostName: 'nsh-smi06'
+        UserName: 'semehr'
+        Password: 'semehr'
+        DatabaseName: 'semehr'
+    SemEHRReadOptions:
+        HostName: 'nsh-smi06'
+        UserName: 'semehrapi'
+        Password: '@awnwge@'
+        DatabaseName: 'semehr'

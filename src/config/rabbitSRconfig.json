@@ -1,0 +1,106 @@
+{
+  "vhosts": [
+    {
+      "name": "smi_sr"
+    }
+  ],
+  "policies": [
+    {
+      "vhost": "smi_sr",
+      "name": "deadLetterExtract",
+      "pattern": "",
+      "apply-to": "queues",
+      "definition": {
+        "dead-letter-exchange": "DLExchange"
+      },
+      "priority": 0
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "ControlExchange",
+      "vhost": "smi_sr",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "RequestExchange",
+      "vhost": "smi_sr",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "DLExchange",
+      "vhost": "smi_sr",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": true,
+      "arguments": {}
+    },
+    {
+      "name": "FatalLoggingExchange",
+      "vhost": "smi_sr",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "RequestQueue",
+      "vhost": "smi_sr",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "DLQueue",
+      "vhost": "smi_sr",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "FatalLoggingQueue",
+      "vhost": "smi_sr",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "DLExchange",
+      "vhost": "smi_sr",
+      "destination": "DLQueue",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "RequestExchange",
+      "vhost": "smi_sr",
+      "destination": "RequestQueue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "FatalLoggingExchange",
+      "vhost": "smi_sr",
+      "destination": "FatalLoggingQueue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

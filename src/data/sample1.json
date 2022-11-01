@@ -1,0 +1,37 @@
+{
+  "annotations": [
+    {
+      "start": 299,
+      "end": 303,
+      "str": "used",
+      "id": "cui-1",
+      "negation": "Affirmed",
+      "temporality": "Recent",
+      "experiencer": "Patient",
+      "sty": "Finding",
+      "cui": "C1",
+      "pref": "Used by",
+      "study_concepts": [],
+      "ruled_by": []
+    },
+    {
+      "start": 771,
+      "end": 777,
+      "str": "weight",
+      "id": "cui-2",
+      "negation": "Negated",
+      "temporality": "Recent",
+      "experiencer": "Patient",
+      "sty": "Health Care Activity",
+      "cui": "C2",
+      "pref": "Weight",
+      "study_concepts": [],
+      "ruled_by": []
+    }
+  ],
+  "PatientID": "12345",
+  "SeriesInstanceUID": "1-2-3",
+  "StudySInstanceUID": "2-3-4",
+  "Modalities": "CT\\MR",
+  "StudyDate": "2020-01-01"
+}

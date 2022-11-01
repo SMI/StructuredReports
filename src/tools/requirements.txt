@@ -1,0 +1,9 @@
+urllib3
+joblib
+SmiServices
+psycopg2_binary
+pymongo
+pyyaml
+spacy
+mysql_connector_python
+pyre2
