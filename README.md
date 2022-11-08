@@ -9,6 +9,7 @@ There are several aspects to the SR work:
 
 * anonymisation of SRs (in text format)
 * anonymisation of SRs (in DICOM format or from MongoDB)
+* reviewing SRs for PII
 * annotation (creating phenotype tags from text)
 * training ML models to improve phenotype detection
 * database to store annotations
@@ -63,6 +64,16 @@ The SRAnonTool mostly uses a python package called
 [SmiServices](https://github.com/SMI/SmiServices/tree/master/src/common/Smi_Common_Python)
 which contains code for decoding SRs in DICOM format or from MongoDB.
 See the `StructuredReport` and `DicomText` modules in particular.
+
+## Reviewing SRs for PII
+
+Any standard DICOM viewer with support for SRs can be used to view them,
+such as MicroDicom on Windows and Weasis on Linux. However these tools do
+not allow the user to review the text for PII. A simple GUI has been written
+for this purpose, called `review_SR_report.py` currently held in the
+`dicompixelanon` repo. It is there for historical reasons (shared code)
+but will be moved to this repo. It is designed to work with the report
+produced by IsIdentifiable, to aid in the finding and reviewing of PII.
 
 ## Annotation of phenotypes in text
 
