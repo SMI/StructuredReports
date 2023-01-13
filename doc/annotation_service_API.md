@@ -131,3 +131,15 @@ If an error occurs the response is:
   "message": "..."
 }
 ```
+
+## Example
+
+Use `--insecure` to ignore certificate errors with HTTPS. Use `sha256sum` to encode your password.
+
+```
+curl --insecure \
+     --get \
+     --data-urlencode 'passphrase=aa06b3414d1ef012810cff0cfa1e459318ebcdf033af6044bdde7533566b2c23' \
+     --data-urlencode 'j={"terms":[{"q":"C0205076"}],"filter":{"start_date":"2017-01-01","end_date":"2017-01-03"}}' \
+     https://localhost:8485/api/search_anns/x/
+```
