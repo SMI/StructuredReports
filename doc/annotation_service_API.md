@@ -143,3 +143,35 @@ curl --insecure \
      --data-urlencode 'j={"terms":[{"q":"C0205076"}],"filter":{"start_date":"2017-01-01","end_date":"2017-01-03"}}' \
      https://localhost:8485/api/search_anns/x/
 ```
+
+## Example with R
+
+```
+#install.packages('httr')
+#install.packages('jsonlite')
+#install.packages('dplyr')
+library(httr)
+library(jsonlite)
+library(dplyr)
+
+# PicturesDevAB = https://20.68.25.9:8485/vis/
+# curl -g -k 'https://20.68.25.9:8485/api/search_anns/C0205076/?j={"terms":[{"q":"C0205076"}]}'
+
+# Allow insecure requests (as the certificate is self-signed)
+httr::set_config(config(ssl_verifypeer = 0L))
+
+# Simple request for code C0205076
+rc <- GET('https://20.68.25.9:8485/api/search_anns/xxx/', query='j={"terms":[{"q":"C0205076"}]}')
+http_type(rc)    # should be "application/json"
+http_error(rc)   # should be FALSE
+rcJsonText <- content(rc, as="text")
+rcJsonText
+rcJsonParsed <- content(rc, as="parsed")
+rcJsonParsed
+fromJSON(rcJsonText)
+# You can see num_results, results, transactionId
+# Results should be an array of document identifiers:
+result_list <- rcJsonParsed$results
+result_list[1]
+result_list[2]
+```
