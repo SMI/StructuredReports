@@ -70,10 +70,11 @@ See the `StructuredReport` and `DicomText` modules in particular.
 Any standard DICOM viewer with support for SRs can be used to view them,
 such as MicroDicom on Windows and Weasis on Linux. However these tools do
 not allow the user to review the text for PII. A simple GUI has been written
-for this purpose, called `review_SR_report.py` currently held in the
-`dicompixelanon` repo. It is there for historical reasons (shared code)
-but will be moved to this repo. It is designed to work with the report
+for this purpose, called `review_SR_report.py`.
+It is designed to work with the report
 produced by IsIdentifiable, to aid in the finding and reviewing of PII.
+
+See the [review_SR_report](./doc/review_SR_report.md) document.
 
 ## Annotation of phenotypes in text
 
