@@ -220,6 +220,10 @@ plus these elements which are created from the DICOM database by `CTP_DicomToTex
 
 The redacted text is not currently indexed or searched. This would be
 slow and the intention is to use annotations for better results.
+A sample query might be
+`SELECT sopinstanceuid, semehr_results->'redacted_text' FROM
+semehr.semehr_results WHERE semehr_results->>'redacted_text'
+LIKE '%chest%';`
 
 The Content Date is stored in DICOM format YYYYMMDD
 but is indexed as a PostgreSQL date so it can be searched.
