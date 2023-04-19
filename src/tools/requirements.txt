@@ -6,4 +6,4 @@ pymongo
 pyyaml
 spacy
 mysql_connector_python
-pyre2
+pyre2_updated
