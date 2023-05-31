@@ -88,6 +88,10 @@ server can determine a sensible default value.
 Note that the JSON structure will obviously have to be a single line of text encoded
 suitably for a GET URL.
 
+Alternatively the query can be submitted using POST if it is large. The content
+needs to be a dictionary containing "terms" at the top level along with optional
+"passphrase", "filter" and "returnFields". The passphrase has to be in here and not in the URL.
+
 All fields except "terms[q]" are optional (omit them rather than trying to provide a
 default value, so that the API itself can choose a suitable default value).
 
@@ -141,6 +145,15 @@ curl --insecure \
      --get \
      --data-urlencode 'passphrase=aa06b3414d1ef012810cff0cfa1e459318ebcdf033af6044bdde7533566b2c23' \
      --data-urlencode 'j={"terms":[{"q":"C0205076"}],"filter":{"start_date":"2017-01-01","end_date":"2017-01-03"}}' \
+     https://localhost:8485/api/search_anns/x/
+```
+
+or using POST
+```
+curl --insecure \
+     -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"passphrase":"aa06b3414d1ef012810cff0cfa1e459318ebcdf033af6044bdde7533566b2c23","terms":[{"q":"C0205076"}],"returnFields":"SeriesInstanceUID"}' \
      https://localhost:8485/api/search_anns/x/
 ```
 
