@@ -172,10 +172,26 @@ enc_pass=digest(password, algo="sha256", serialize=F)
 need_pass=content(GET(paste0(api_url, "need_passphrase/")), as="parsed")
 pass_ok=content(GET(paste0(api_url, "check_phrase/", enc_pass, "/")), as="parsed")
 
-# Simple request for code C0205076
+# Simple request for code C0205076 in January 2018
+query_json = '{"terms":[{"q":"C0205076"}], "filter":{"start_date":"2018-01-01", "end_date":"2018-02-01"}}'
+# More complex request
+query_json = '
+{
+  "terms": [
+    { "q": "C0205076", "negation": "Any" }
+  ],
+  "filter": {
+    "start_date": "2018-01-01",
+    "end_date": "2018-02-01",
+    "modalities": [ "CT", "MR" ]
+  },
+  "returnFields": [ "SeriesInstanceUID" ]
+}'
+# Execute the query
 rc <- GET(paste0(api_url, 'search_anns/json/'),
-    query = list(j = '{"terms":[{"q":"C0205076"}], "filter":{"start_date":"2018-01-01", "end_date":"2018-02-01"}}',
+    query = list(j = query_json,
         passphrase = enc_pass))
+# Check the response
 http_type(rc)    # should be "application/json"
 http_error(rc)   # should be FALSE
 rcJsonText <- content(rc, as="text")
