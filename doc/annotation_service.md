@@ -174,12 +174,12 @@ sudo chown semehr:semehr /opt/semehr
 sudo -u semehr virtualenv /opt/semehr/venv
 ```
 
-Unpack the three repos into `~/src` so you have `~/src/SmiServices` and `~/src/structuredreports` and `~/src/CogStack-SemEHR` (ensure you are using the correct branch in each one).
+Unpack the three repos into `~/src` so you have `~/src/SmiServices` and `~/src/StructuredReports` and `~/src/CogStack-SemEHR` (ensure you are using the correct branch in each one).
 
 Create the SmiServices wheel
 ```
 cd ~/src/SmiServices/src/common/Smi_Common_Python
-python3 setup.py bdist_wheel
+python3 ./setup.py bdist_wheel
 # creates dist/SmiServices-0.0.0-py3-none-any.whl
 ```
 
@@ -189,7 +189,7 @@ You might need to be in a root shell to run these:
 
 ```
 sudo -u semehr bash -c "(source proxy.env; source /opt/semehr/venv/bin/activate ; pip install ~/src/SmiServices/src/common/Smi_Common_Python/dist/SmiServices-*-py3-none-any.whl)"
-sudo -u semehr bash -c "(source proxy.env; source /opt/semehr/venv/bin/activate ; pip install -r ~/src/structuredreports/src/tools/requirements.txt)"
+sudo -u semehr bash -c "(source proxy.env; source /opt/semehr/venv/bin/activate ; pip install -r ~/src/StructuredReports/src/tools/requirements.txt)"
 ```
 
 Now copy the rest of the software
@@ -286,6 +286,14 @@ To upgrade the web server software copy the `CogStack-SemEHR` repo into `/opt/se
 First stop the server `systemctl stop semehr`, make a backup of the current software,
 install the new software, and restart the server `systemctl start semehr`. Check file
 ownership (should be `semehr`).
+
+Be careful not to remove any of the ancillary files, especially
+`/opt/semehr/CogStack-SemEHR/umls/*.csv`
+
+If your copy of /opt/semehr/CogStack-SemEHR is directly cloned from git then you can
+just do a `git pull` through the proxy to update it.
+
+Restart the server after updating the software.
 
 # Usage
 
