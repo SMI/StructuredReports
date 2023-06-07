@@ -16,26 +16,51 @@ MongoDB.
 jq
 ```
 
+# Ancillary data
+
+Download:
+* https://cogstack.rosalind.kcl.ac.uk/exports/customised_handlers.tar.gz
+* http://netix.dl.sourceforge.net/project/gate/gate/8.1/gate-8.1-build5169-ALL.zip
+* https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-1.2.1-se.tar.gz
+* https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-resource-prep-output.2019.fixed.zip
+
 ## Install the required software
 
+Please review the script before running it!
 ```
+cd StructuredReports/src/tools
 ./install.sh
 ```
+
+The installation paths are configurable, and you can use symbolic links
+to keep the master copies on a shared/NFS location, but a suggested configuration is:
+```
+/opt/gcp/bio-yodie-1-2-2  -> should contain bio-yodie-resources, gazetteer-en, etc
+/opt/gcp/gate             -> should contain GAPE.app, gate.exe, etc
+/opt/gcp/gcp-2.5-18658    -> should contain gcp.jar, etc
+/opt/semehr/CogStack-SemEHR -> the checked-out repo
+/opt/semehr/data          -> temporary config and data
+```
+(In hindsight the `gcp` directory should be inside `/opt/semehr`)
 
 ## Initialise the MongoDB database
 
 Create a 'root' user in the admin database. Create a 'semehr' user with read/write access to the 'semehr' database.
+Please review the scripts before running them!
 
 ```
-mongo ./mongo_init_01.js
-./mongo_init_02.sh
-./mongo_init_03.sh
+cd StructuredReports/src/tools
+mongo ./mongo_init_01.js  # create the root user
+./mongo_init_02.sh        # configure mongodb service
+./mongo_init_03.sh        # create the semehr user
 ```
 
 ## Initialise the PostgreSQL database
 
+Please review the script before running it!
 ```
-./postgres_init_01.sh
+cd StructuredReports/src/tools
+./postgres_init_01.sh     # create users, tables, indexes
 ```
 
 ## Extract the sample documents
@@ -49,7 +74,7 @@ The CSV file is extracted into separate documents in `../data/mtsamples_ihi_docs
 ## Source the virtual environment
 
 ```
-source ~/SemEHR/virtenv/bin/activate
+source /opt/semehr/virtenv/bin/activate
 ```
 
 ## Anonymise a directory of text documents
