@@ -41,7 +41,10 @@ each concept rather than as multiple rows.
 
 
 ```
-./umls_to_csv.py
+./umls_to_csv.py [-h] [--sources SOURCES] [--chd] [--test TEST]
+  --sources SOURCES  comma-separated list of sources default MTH,SNOMEDCT_US
+  --chd              whether to include CHD (child) relationships, default True
+  --test TEST        CUI to display narrower concepts, default C0205076
 ```
 
 There is an option to specify whether the relationships should be filtered
@@ -60,13 +63,72 @@ The difference, as an example using concept C0205076 (Chest Wall) is:
 * SNOMED - has 16 child concepts, fully expands to 2283 children
 * both - same 16 child concepts, fully expands to 8075 children
 
+There are two types of parent/child relationship:
+* Broader/Narrower
+* Parent/Child
+
+Honghan thinks only Narrower is needed but the UMLS people say:
+* RB/RN are generally used when the relations are not part of a broader hierarchy.
+* PAR/CHD relations are generally part of a hierarchy. There may be some exceptions to this. 
+
+The option `--chd` can be used to disable the inclusion of Child relations,
+as the default is to include them.
+
 ```
 umls.py --cfg . --csvs SNOMED/
 umls.py --cfg . --csvs MTH/
 umls.py --cfg . --csvs MTH+SNOMED/
 ```
 
-# CSV files
+# Input RRF files
+
+N.B. you can read the 
+## SemGroups_2018.txt
+
+Maps a semantic type (tui) to a semantic type group
+i.e. groups together related tui into a set
+`Group|GroupName|Type|TypeLabel`
+eg. `ACTI|Activities & Behaviors|T052|Activity`
+
+
+## MRSTY.RRF
+
+Maps a concept to a semantic type
+`cui|tui|stn|sty|atui|cvf...`
+eg. `C0000005|T116|A1.4.1.2.1.7|Amino Acid, Peptide, or Protein|AT17648347|256|`
+
+## MRCONSO.RRF
+
+Maps from concept (cui) to other vocabularies
+
+```
+cui|lang|ts|lui|   stt|sui|IsPref|aui      |saui    |scui|sdui|sab|tty|code|str|srl|suppress|cvf
+```
+
+e.g.
+
+```
+C0205076|ENG|S|L0248726|PF|S2717960|N|A32395146|        |C62484||NCI_caDSR|SY|C62484|Chest Wall|0|N||
+C0205076|ENG|S|L0248726|PF|S2717960|Y|A26648386|        |M0407552|D035441|MSH|ET|D035441|Chest Wall|0|N|256|
+C0205076|ENG|P|L0780053|PF|S0836022|N|A3108835|503946010|78904004||SNOMEDCT_US|PT|78904004|Chest wall structure|9|N|256|
+C0205076|ENG|S|L0248726|VO|S0282525|Y|A2895894|130920016|78904004||SNOMEDCT_US|SY|78904004|Chest wall|9|N|256|
+```
+
+## MRREL.RRF
+
+Relationships between CUIs
+```
+cui1    |aui1     |typ1|rel|cui2    |aui2    |typ2|rela|rui|srui|sab|sl|rg|dir|suppress|cvf
+```
+
+e.g.
+```
+C0000005|A13433185|SCUI|RB|C0036775|A7466261|SCUI||R86000559||MSHFRE|MSHFRE|||N||
+```
+
+
+
+# Output CSV files
 
 Note that the files are pipe-separated so that the columns can contain
 commas more easily.
@@ -76,9 +138,12 @@ commas more easily.
 Maps CUI (concept id) to TUI (semantic type id), and also gives
 the TUI group names and a label (description) of the CUI.  The CUI
 can have several semantic types so they are comma-separated.
+The source file (MRCONSO) has multiple rows per CUI so the
+preferred label is chosen from LAT='ENG' and TS='P' and STT='PF'
+and ISPREF='Y' [ref](https://list.nih.gov/cgi-bin/wa.exe?A2=ind1910&L=UMLSUSERS-L&P=R655)
 
 ```
-(cui|tui|tuigroup|cuilabel
+cui|tui|tuigroup|cuilabel
 C0000005|T116,T121,T130|CHEM,CHEM,CHEM|(131)I-MAA
 ```
 
