@@ -82,7 +82,7 @@ for filename in filename_list:
         rc = pgcur.fetchall()
         if len(rc) != 1:
             print('ERROR1 %s not in database, len(rc)=%s' % (sop, len(rc)))
-            outcsv.writerow({'SOPInstanceUID':sop, 'filename':filename, 'concepts':'','narrower':''})
+            outcsv.writerow({'SOPInstanceUID':sop, 'filename':row[0].strip(), 'concepts':'','narrower':''})
             num_bad += 1
             continue
         if len(rc[0]) != 1: print('ERROR2 %s has len(rc[0])=%s' % (sop, len(rc[0])))
@@ -105,7 +105,7 @@ for filename in filename_list:
         for inters in intersection2:
             print('  intersection2: %s (%s)' % (inters, mapper.cui_to_label(inters)))
             int2_counts[inters] = int2_counts.get(inters, 0) + 1
-        outcsv.writerow({'SOPInstanceUID':sop, 'filename':filename, 'concepts':len(intersection1), 'narrower':len(intersection2)})
+        outcsv.writerow({'SOPInstanceUID':sop, 'filename':row[0].strip(), 'concepts':len(intersection1), 'narrower':len(intersection2)})
 
 outfd.close()
 
