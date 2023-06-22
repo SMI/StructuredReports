@@ -13,6 +13,42 @@ sense to keep the concepts identical
 * the 2021 version of the UMLS removed the relationships from the MRREL file
 and the replacement MRHIER file is not so useful
 
+## UMLS Hierarchy
+
+There are two types of parent/child relationship:
+* Broader/Narrower
+* Parent/Child
+
+See the abbreviations used https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html
+
+Honghan thinks only Narrower is needed but the UMLS people say:
+* RB/RN are generally used when the relations are not part of a broader hierarchy.
+* PAR/CHD relations are generally part of a hierarchy. There may be some exceptions to this. 
+
+Maybe they mean that PAR/CHD are used between concepts within one
+particular source vocabulary (e.g. SNOMED) whereas RB/RN are not.
+
+"The Semantic Structure of the UMLS Metathesaurus" by Stuart J. Nelson says:
+> In some instances these
+relationships are labelled, indicating that the two concepts
+are similar, with one being broader in meaning (but
+otherwise similar) than the other. Contextual information
+shows where the concept occurs in a source hierarchy,
+together with its parents, and siblings. The relationship
+with a parent is often that of an "is-a" relationship, but
+some other vertical relationships have been labelled as
+well. While not entirely true, it is frequently useful to
+think of non-labelled parent-child relationships as being of
+some type of relationship which involves subsumption.
+That is, in some sense the parent concept is broader in
+meaning than the child. Co-occurring data do not have
+any label on the link between concepts; the fact that two
+concepts have both been used to index the same article
+implies an empirically discovered relationship. Two
+entries with the same semantic type have an implied
+relationship, that of "similar to".
+
+
 ## Creation
 
 Download the UMLS metathesaurus (warning, needs 40GB space!). Unpack:
@@ -62,14 +98,6 @@ The difference, as an example using concept C0205076 (Chest Wall) is:
 * MTH - only has 1 child concept, fully expands to 2 children
 * SNOMED - has 16 child concepts, fully expands to 2283 children
 * both - same 16 child concepts, fully expands to 8075 children
-
-There are two types of parent/child relationship:
-* Broader/Narrower
-* Parent/Child
-
-Honghan thinks only Narrower is needed but the UMLS people say:
-* RB/RN are generally used when the relations are not part of a broader hierarchy.
-* PAR/CHD relations are generally part of a hierarchy. There may be some exceptions to this. 
 
 The option `--chd` can be used to disable the inclusion of Child relations,
 as the default is to include them.
