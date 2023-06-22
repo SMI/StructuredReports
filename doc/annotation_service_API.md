@@ -60,8 +60,8 @@ to specific modalities or a range of dates.
 The query is encoded as a JSON object string, not a traditional HTML form.
 
 The reason for doing it this way is because it has to be submitted as a GET query
-string not a POST due to CORS. Also GET has a low limit on length. The JSON format
-allows a much more flexible set of query terms.
+string not a POST due to CORS (although see below). Also GET has a low limit on length.
+The JSON format allows a much more flexible set of query terms.
 
 Most items are optional. Optional fields should not be transmitted, so that the
 server can determine a sensible default value.
@@ -80,9 +80,12 @@ server can determine a sensible default value.
 "filter" = {
   "start_date" = "YYYY-MM-DD",
   "end_date" = "YYYY-MM-DD",
-  "modalities" = [ "CT", "MR", "US", "PT", "CR", "OT", "XA", "RF", "DX", "MG", "PR", "NM" ]
+  "modalities" = [ "CT", "MR", "US", "PT", "CR", "OT", "XA", "RF", "DX", "MG", "PR", "NM" ],
+  "sopinstanceuid" = [ "nnn", ... ],
+  "seriesinstanceuid" = [ "nnn", ... ],
+  "studyinstanceuid" = [ "nnn", ... ]
 },
-"returnFields" = [ "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" ]
+"returnFields" = [ "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID", "PatientID" ]
 ```
 
 Note that the JSON structure will obviously have to be a single line of text encoded
@@ -94,6 +97,11 @@ needs to be a dictionary containing "terms" at the top level along with optional
 
 All fields except "terms[q]" are optional (omit them rather than trying to provide a
 default value, so that the API itself can choose a suitable default value).
+
+The query terms for negation, experiencer and temporality should not be specified
+unless necessary. In particular note the difference between `negation=Negated`,
+which means that the query term must be present in a negative context, vs the
+term not being mentioned in the document.
 
 The returnFields typically is only used for returning the SOPInstanceUID but if more
 than one field is requested then each row in the results will have an array of the
@@ -107,8 +115,16 @@ to include all sub-codes. If given free-text then it will currently only be matc
 against the 'pref' field in the database using a full-string case-sensitive match
 (to be confirmed).
 
+The date range will query the DICOM tag `ContentDate` (which is not the same as
+`StudyDate` unfortunately).
 Note that the date format in the query is "YYYY-MM-DD" but the date stored in the database
 is in DICOM format which is YYYYMMDD. If any dates are returned they will be in DICOM format.
+
+The modality will query the DICOM tag `ModalitiesInStudy` and will look for each of
+the terms in the query list inside the list in the DICOM tag, i.e. if any of the given
+list are found anywhere in the tag then it matches.
+
+The uid lists will restrict the query to only the given instances.
 
 The response is a dictionary of the form:
 ```
