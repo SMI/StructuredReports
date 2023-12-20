@@ -82,7 +82,7 @@ source /opt/semehr/virtenv/bin/activate
 This is optional for the example because there's nothing to anonymise in these documents, but
 export SMI_LOGS_ROOT=.
 export PYTHONPATH=/path/to/Smi_Common_Python # if SmiServices is not yet in your virtualenv
-./semehr_anon.py -i input_dir -o anon_dir --xml
+./semehr_anon.py -all -i input_dir -o anon_dir --xml
 
 
 ## Run SemEHR on the sample document to get the semehr_results

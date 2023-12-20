@@ -5,6 +5,8 @@
 #          -s path to the parent of CogStack-SemEHR dir.
 #          --spacy to use SpaCy named entity recogniser.
 #          --xml to write .knowtator.xml files.
+# NOTE: it only writes output if input contained PII,
+# so use the -a (--all) option to write all the others too.
 # To anonymise *DICOM* files you need CTP_SRAnonTool.sh
 # (which uses CTP_DicomToText, this script, and CTP_XMLToDicom).
 # NOTE: this script has superceded semehr_anon.sh.
@@ -21,7 +23,7 @@ use_spacy = False
 empty_knowtator_xml_document_string = '<?xml version="1.0" ?>\n<annotations>\n</annotations>\n'
 
 
-def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write_xml = False):
+def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write_xml = False, write_all = False):
 
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
@@ -29,6 +31,7 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     cfg_file = os.path.join(output_dir, 'anonymisation_task.json')
     phi_file = os.path.join(output_dir, 'anonymiser.phi')
     log_file = os.path.join(output_dir, 'anonymiser.log')
+    log_file = '/tmp/anon.log'
 
     # Create a config file in the output directory
     with open(semehr_anon_cfg_file) as fd:
@@ -62,8 +65,10 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     # Can either use the list of input files (if you want every input file to have an output file)
     # or the list of documents which were redacted (if you don't want failed docs in the output dir)
     list_of_docs = set([ii['doc'] for ii in phi_json]) # list of anonymised documents
-    if write_xml:
-        list_of_docs = next(os.walk(input_dir))[2]     # list of original filenames
+    if write_xml or write_all:
+        # next(walk) returns info about current directory (not subdirectories)
+        # then [2] returns just the list of filenames (not path or directories)
+        list_of_docs = sorted(next(os.walk(input_dir))[2])     # list of original filenames
     logging.info('Redacting %d files in %s' % (len(list_of_docs), output_dir))
 
     # For each document, reads the output document and fully anonymise it using the 'phi' file
@@ -104,7 +109,7 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     return
 
 
-def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, write_xml = False):
+def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, write_xml = False, write_all = False):
     # The anonymiser works on whole directories so
     # create temporary input/output directories and copy the file there.
     input_file = os.path.abspath(input_file)
@@ -112,7 +117,8 @@ def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, wr
     input_dir = tempfile.TemporaryDirectory()
     output_dir = tempfile.TemporaryDirectory()
     shutil.copyfile(input_file, os.path.join(input_dir.name, os.path.basename(input_file)))
-    anonymise_dir(input_dir.name, output_dir.name, semehr_dir, semehr_anon_cfg_file, write_xml=write_xml)
+    anonymise_dir(input_dir.name, output_dir.name, semehr_dir, semehr_anon_cfg_file,
+        write_xml=write_xml, write_all=write_all)
     shutil.copyfile(os.path.join(output_dir.name, os.path.basename(input_file)), output_file)
     if write_xml:
         xml_src = os.path.join(output_dir.name, os.path.basename(input_file) + '.knowtator.xml')
@@ -140,7 +146,8 @@ def main():
     parser = argparse.ArgumentParser(description='Redact text given knowtator XML')
     parser.add_argument('-i', dest='input', action="store", help='directory of text, or filename of one text file')
     parser.add_argument('-o', dest='output', action="store", help='path to output filename or directory where redacted text files will be written')
-    parser.add_argument('--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files')
+    parser.add_argument('-a', '--all', dest='write_all', action="store_true", help='write output file in output directory for all input files even if no PII', default=False)
+    parser.add_argument('-x', '--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files', default=False)
     parser.add_argument('-s', dest='semehr_dir', action="store", help='path to parent of CogStack-SemEHR directory')
     parser.add_argument('--spacy', dest='spacy', action='store_true', help='use SpaCy to identify names')
     args = parser.parse_args()
@@ -160,10 +167,12 @@ def main():
     semehr_anon_cfg_file = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation', 'conf', 'anonymisation_task.json') # i.e. /opt/semehr/CogStack-SemEHR/anonymisation/conf/anonymisation_task.json
 
     if os.path.isfile(args.input):
-        anonymise_file(args.input, args.output, semehr_dir, semehr_anon_cfg_file, write_xml=args.write_xml)
+        anonymise_file(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            write_xml=args.write_xml, write_all=args.write_all)
 
     elif os.path.isdir(args.input):
-        anonymise_dir(args.input, args.output, semehr_dir, semehr_anon_cfg_file, write_xml=args.write_xml)
+        anonymise_dir(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            write_xml=args.write_xml, write_all=args.write_all)
 
 
 if __name__ == '__main__':
