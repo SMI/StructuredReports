@@ -62,7 +62,7 @@ CTP_DicomToText.py -y $yamlout -y $yamlin -i $StudyDate -o $txt_dir  >> $log 2>&
 
 # Anonymise
 message "Anonymising text ..."
-semehr_anon.sh -i ${txt_dir} -o ${anon_dir}  >> $log 2>&1
+semehr_anon.sh --all -i ${txt_dir} -o ${anon_dir}  >> $log 2>&1
 
 # Redact the text before running SemEHR annotator
 message "Redacting text ..."
