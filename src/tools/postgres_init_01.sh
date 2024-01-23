@@ -77,6 +77,9 @@ sudo -u postgres psql ${DB} -c "SET ROLE semehr_admin; CREATE TABLE semehr.semeh
 # Create the table holding a count of each CUI
 sudo -u postgres psql ${DB} -c "SET ROLE semehr_admin; CREATE TABLE semehr.cui_count (cui varchar(20) primary key, count bigint);"
 
+# Create the table holding CUI for doc
+sudo -u postgres psql ${DB} -c "SET ROLE semehr_admin; CREATE TABLE semehr.cui_sop (cui varchar(20), SOPInstanceUID varchar(64));"
+
 # Add the trigram extension
 sudo -u postgres psql ${DB} -c "CREATE EXTENSION pg_trgm WITH SCHEMA pg_catalog;"
 sudo -u postgres psql ${DB} -c "CREATE EXTENSION pg_trgm WITH SCHEMA semehr;"
@@ -93,6 +96,8 @@ sudo -u postgres psql ${DB} -c 'create or replace function semehr.cast_to_date(s
 ' $$ language sql strict immutable;'
 
 # Create indexes
+#sudo -u postgres psql ${DB} -c "CREATE INDEX cui_count_idx ON semehr.cui_count (cui);" # cui is already primary key
+sudo -u postgres psql ${DB} -c "CREATE INDEX cui_sop_idx ON semehr.cui_sop (cui);"
 sudo -u postgres psql ${DB} -c "CREATE INDEX sopinstanceuid ON semehr.semehr_results ((semehr_results->>'SOPInstanceUID'));"
 sudo -u postgres psql ${DB} -c "CREATE INDEX sopclassuid ON semehr.semehr_results ((semehr_results->>'SOPClassUID'));"
 sudo -u postgres psql ${DB} -c "CREATE INDEX seriesinstanceuid ON semehr.semehr_results ((semehr_results->>'SeriesInstanceUID'));"

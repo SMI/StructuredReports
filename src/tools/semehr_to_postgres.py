@@ -73,6 +73,7 @@ pgDatabaseName = 'semehr'
 pgSchemaName = 'semehr'               # schema is semehr
 pgTableName = 'semehr_results'        # table is semehr_results
 pgCUITableName = 'cui_count'          # table is cui_count
+pgCUISOPTableName = 'cui_sop'         # table is cui_sop
 pgPKName = 'SOPInstanceUID'           # primary key column name
 pgJsonColumnName = 'semehr_results'   # JSON column name
 pgConnection = None # created in open()
@@ -233,6 +234,14 @@ def postgres_insert_dir(jsondir, txtdir, metadatadir):
                 pgCursor.execute(sql.SQL("INSERT INTO {tab} (cui, count) VALUES (%s, 1) "
                     "ON CONFLICT (cui) DO UPDATE SET count={tab}.count+1").format(tab=sql.Identifier(pgCUITableName)),
                     (cui,))
+            pgConnection.commit()
+            pgCursor.close()
+            # Add each CUI to a CUI-SOP mapping table, without duplicates
+            list_of_cui = set(list_of_cui)
+            pgCursor = pgConnection.cursor()
+            for cui in list_of_cui:
+                pgCursor.execute(sql.SQL("INSERT INTO {tab} (cui, SOPInstanceUID) VALUES (%s, %s) ").format(tab=sql.Identifier(pgCUISOPTableName)),
+                    (cui, doc['SOPInstanceUID']))
             pgConnection.commit()
             pgCursor.close()
             logging.info('insert %d CUIs completed for %s' % (len(list_of_cui), doc['SOPInstanceUID']))

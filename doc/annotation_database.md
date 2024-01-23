@@ -223,6 +223,27 @@ SELECT umls.cui.cuilabel, semehr.cui_count.count
 That requires the umls schema and tables be populated, see the
 CogStack-SemEHR repo for details.
 
+## Table: cui_sop
+
+The `cui_sop` table simply records the SOPInstanceUID for a given CUI,
+with columns `cui` and `SOPInstanceUID`. Every CUI found in every
+document will be added to this table (it will grow very large).
+This is an alternative way of getting the information which is more
+properly held in semehr_results annotations cui array.
+There is no primary key for performance reasons because it would have
+to be on both columns. There is an index on the cui column.
+The intended use is to find all documents which contain a given CUI,
+i.e. `select SOPInstanceUID from semehr.cui_sop where cui = 'Cnnn';`
+There will be billions of rows but hopefully this will be faster to
+query than the indexed array (see below).
+Warning: having no primary key or unique constraint means it's possible
+to have duplicate rows. The insert program won't insert duplicates
+(it deduplicates before insert) but there are no checks to prevent
+the same document being inserted twice. There's no index on SOPInstanceUID
+so no easy way to check - you'll have to pick a CUI and look through the
+list of returned documents. In short: make a note of what has been
+inserted and don't do it twice.
+
 ## Table: semehr_results
 
 The `semehr_results` table contains the (anonymous) documents, their metadata,
@@ -243,12 +264,15 @@ plus these elements which are created from the DICOM database by `CTP_DicomToTex
 * `ModalitiesInStudy`, related DICOM modalities, eg. CT or MR
 * `PatientID`, # this one will be mapped from CHI to EUPI
 
-The redacted text is not currently indexed or searched. This would be
+The redacted text can be searched but this would be
 slow and the intention is to use annotations for better results.
 A sample query might be
 `SELECT sopinstanceuid, semehr_results->'redacted_text' FROM
 semehr.semehr_results WHERE semehr_results->>'redacted_text'
 LIKE '%chest%';`
+The text in `str` is now indexed using two different methods
+(`gin_trgm_ops` index, and `to_tsvector` indexing); your query
+would have to contain the same syntax as the index for it to be used.
 
 The Content Date is stored in DICOM format YYYYMMDD
 but is indexed as a PostgreSQL date so it can be searched.
@@ -312,7 +336,7 @@ This makes sense for `cui` because the array query operators such as `@>` work w
 For strings it is still less useful as LIKE may not work well on an array of strings.
 The solution is for the custom function to concatenate all strings in the array into a single string.
 This means that all `pref` strings in the annotations array become a single string, which is useful
-because it is easy and quick to search a single string and the a match in any of the `pref` strings
+because it is easy and quick to search a single string and a match in any of the `pref` strings
 would return the whole document anyway.
 
 The functions can be defined like this:
