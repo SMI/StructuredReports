@@ -115,6 +115,8 @@ export SMI_LOGS_ROOT=.
 ```
 ./semehr_to_mongo.py
 ./semehr_to_postgres.py
+# Query for a particular CUI
+./semehr_to_postgres.py -q cui:C0205076
 # Count the number of records having the given ContentDate
 ./semehr_to_postgres.py --query-contentdate 2020-10-05 --count
 ```

@@ -16,6 +16,17 @@
 #   -t   directory of .txt file (the redacted text)
 #   -q   optional query to perform, eg. cui:C0205076 to find documents mentioning "chest wall"
 
+# Table semehr_results schema is SOPInstanceUID, semehr_results
+# where the semehr_results columns contains jsonb:
+#  "PatientID": "xxx",
+#  "ContentDate": "20100118",
+#  "SOPClassUID": "1.2.840.10008.5.1.4.1.1.88.33",
+#  "SOPInstanceUID": "1.2.840.113704.7.1.2219283228.6664.1263808370.4048",
+#  "StudyInstanceUID": "1.2.124.113532.10.48.85.25.20100118.54509.3249161",
+#  "ModalitiesInStudy": "CT\\SR",
+#  "SeriesInstanceUID": "1.2.840.113704.7.1.1.1485948920.1205405541.11190.194.2.26535"
+#  "redacted_text", "sentences", "annotations", "phenotypes"
+
 # output_docs has features:
 #   "PREF": "Rhythm"
 #   "Experiencer": "Patient"
@@ -260,11 +271,44 @@ def postgres_findOne(queryDict = {}):
     return
 
 
+def postgres_query_cui(cui):
+    # Construct SQL like this:
+    #  SELECT semehr_results FROM semehr_results WHERE
+    #    SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076' )
+    # or with a date range:
+    #  SELECT semehr_results FROM semehr_results WHERE
+    #    (cast_to_date(semehr_results->>'ContentDate') BETWEEN '2010-01-02' AND '2010-01-10') AND
+    #    SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076' )
+    start_date = "2010-01-02"  # None or 'YYYY-MM-DD'
+    end_date = "2010-01-10"    # None or 'YYYY-MM-DD'
+    sql_args = ()
+    pgCursor = pgConnection.cursor()
+    sql_str = "SELECT semehr_results FROM {tab} WHERE "
+    if start_date and end_date:
+        sql_str += "(cast_to_date(semehr_results->>'ContentDate') BETWEEN %s AND %s) AND "
+        sql_args += (start_date, end_date)
+    sql_str += " SOPInstanceUID IN ("
+    sql_str += "   SELECT SOPInstanceUID FROM {cuitab} WHERE cui = %s "
+    sql_args += (cui,)
+    sql_str += " );"
+    if verbose:
+        print(pgCursor.mogrify(sql_str.format(tab=sql.Identifier(pgTableName), cuitab=sql.Identifier(pgCUISOPTableName)), sql_args).decode())
+    pgCursor.execute(sql.SQL(sql_str).format(tab=sql.Identifier(pgTableName), cuitab=sql.Identifier(pgCUISOPTableName)), sql_args)
+    n=0
+    for rc in pgCursor:
+        print('%s' % json.dumps(rc[0]))
+        n = n+1
+    pgCursor.close()
+    print('%d documents matched' % n, file=sys.stderr)
+
 def postgres_query_annotation(featurename, featureval):
     # eg. "cui:C0205076"
     # Query for annotations which have the feature.
     # Can add other terms such as:  ,'negation':'Affirmed'
     # The dict is inside an array because each doc has an array of annotations
+    if featurename == 'cui':
+        postgres_query_cui(featureval)
+        return
     query_obj = [ { featurename:featureval } ]
     if verbose:
         print('postgres_query_annotation: %s' % query_obj)
