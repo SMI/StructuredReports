@@ -38,6 +38,12 @@ mongo ./mongo_init_01.js
 ./mongo_init_03.sh
 ```
 
+## Start a docker copy of PostgreSQL
+
+```
+sudo docker run -d --rm --name=pg -p 5432:5432 -e POSTGRES_PASSWORD=semehr postgres
+```
+
 ## Initialise the PostgreSQL database
 
 ```
