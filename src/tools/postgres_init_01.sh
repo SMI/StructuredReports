@@ -8,7 +8,8 @@
 # Create a table semehr.semehr_results(SOPInstanceUID varchar(64), semehr_results JSONB, PRIMARY KEY (SOPInstanceUID))
 
 # Choose whether you are using docker or a local copy of postgres:
-docker=True
+docker=False
+if [ "$1" == "--docker" ]; then docker=True; fi
 
 DB="semehr"       # database name
 SCH="semehr"      # schema within that database
