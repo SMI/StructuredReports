@@ -9,7 +9,7 @@ sudo yum autoremove
 sudo yum install -y yum-utils
 ```
 
-# Install dotnet
+## Install dotnet
 ```
 sudo rpm -Uvh https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
 sudo yum install dotnet-sdk-6.0
@@ -76,10 +76,10 @@ sudo docker pull howff/annotation_server_password_https
 
 ## Create directories for data and logs
 ```
-sudo mkdir -p /data/PACS
-sudo mkdir -p /data/logs
-sudo chgrp smi-admin /data/*
-sudo chmod g+w /data/*
+sudo mkdir -p /study_data/PACS
+sudo mkdir -p /study_data/logs
+sudo chgrp smi-admin /study_data/*
+sudo chmod g+w /study_data/*
 ```
 
 ## Install SemEHR into /opt/semehr
@@ -116,6 +116,10 @@ Do this every time you login:
 export PATH=${PATH}:~/src/SmiServices/src/applications/SRAnonTool
 export PATH=${PATH}:~/src/structuredreports/src/tools
 export SMI_ROOT=~/src/SmiServices
-export PACS_ROOT=/data/PACS
-export SMI_LOGS_ROOT=/data/logs
+export PACS_ROOT=/study_data/PACS
+export SMI_LOGS_ROOT=/study_data/logs
 ```
+
+# Testing
+
+See the testing.md document.

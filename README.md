@@ -158,6 +158,10 @@ See the [annotation eHOST](./doc/annotation_eHOST.md) document.
 
 A collection of useful utilities, see the [tools](./src/tools/README.md) document.
 
+## Testing
+
+See the [testing](./doc/testing.md) document.
+
 ## TODO
 
 - [X] Web UI for eDRIS to query structured reports
