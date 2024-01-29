@@ -129,7 +129,7 @@ $AUTH psql $CONNECTION ${DB} -c 'create or replace function semehr.cast_to_date(
 echo "$(date) Create indexes"
 #$AUTH psql $CONNECTION ${DB} -c "CREATE INDEX cui_count_idx ON semehr.cui_count (cui);" # cui is already primary key
 $AUTH psql $CONNECTION ${DB} -c "CREATE INDEX cui_sop_idx ON semehr.cui_sop (cui);"
-$AUTH psql $CONNECTION ${DB} -c "CREATE INDEX sopinstanceuid ON semehr.semehr_results ((semehr_results->>'SOPInstanceUID'));"
+$AUTH psql $CONNECTION ${DB} -c "CREATE INDEX sopinstanceuid_idx ON semehr.semehr_results (SOPInstanceUID);"
 $AUTH psql $CONNECTION ${DB} -c "CREATE INDEX sopclassuid ON semehr.semehr_results ((semehr_results->>'SOPClassUID'));"
 $AUTH psql $CONNECTION ${DB} -c "CREATE INDEX seriesinstanceuid ON semehr.semehr_results ((semehr_results->>'SeriesInstanceUID'));"
 $AUTH psql $CONNECTION ${DB} -c "CREATE INDEX studyinstanceuid ON semehr.semehr_results ((semehr_results->>'StudyInstanceUID'));"
