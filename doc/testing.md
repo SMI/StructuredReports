@@ -44,3 +44,9 @@ tar xf mtsamples_ihi_semehr_results.tar.xz
 Populate the database with the samples:
 ./semehr_to_postgres.py -t ../data/mtsamples_ihi_docs -j ../data/mtsamples_ihi_semehr_results -m ../data/mtsamples_ihi_meta
 
+### Query
+
+See the script to check if `postgres_query_cui` restricts to a range of dates, then
+```
+./semehr_to_postgres.py -q cui:C0205076
+```
