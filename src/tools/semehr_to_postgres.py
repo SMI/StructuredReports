@@ -376,7 +376,7 @@ def main():
         log_dir = os.environ['SMI_LOGS_ROOT']
 
     parser = argparse.ArgumentParser(description='Convert SemEHR output into PostgreSQL')
-    parser.add_argument('-v', dest='verbose', action='store', help='more verbose')
+    parser.add_argument('-v', dest='verbose', action='store_true', help='more verbose')
     parser.add_argument('-y', dest='yaml', action="store", help='default.yaml for PostgreSQL connection parameters')
     parser.add_argument('--pg-host', dest='pgHost', action="store", help="PostgreSQL hostname", default=pgHost)
     parser.add_argument('--pg-user', dest='pgUser', action="store", help="PostgreSQL username", default=pgUser)
@@ -420,6 +420,8 @@ def main():
     file_handler.setLevel(logging.DEBUG)
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.WARNING)
+    if verbose:
+        stdout_handler.setLevel(logging.INFO)
     logging.basicConfig(handlers=[file_handler, stdout_handler],
         format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
 
