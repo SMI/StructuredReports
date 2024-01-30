@@ -1,0 +1,283 @@
+Tests to find out the best syntax for using a cui_sop table
+to speed up queries by CUI.
+
+Build a cui_sop table that maps from cui to SOPInstanceUID
+having a row for every CUI in every document, indexed on cui.
+(The master table semehr_results is indexed on SOPInstanceUID).
+
+To use the cui_sop table in queries we can embed it as a subquery:
+SELECT * from semehr_results WHERE SOPInstanceUID IN
+  ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076' );
+But we need to optimise the case where we're looking for multiple CUIs
+so instead of = do we use IN or =ANY or =ANY(ARRAY)?
+
+semehr=> SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076' );
+    24
+
+semehr=> SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0024109' );
+   230
+
+Find more than one:
+
+Using IN
+
+semehr=> SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui IN ( 'C0024109','C0205076') );
+
+Using =ANY
+
+semehr=> SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui =ANY( ARRAY[  'C0024109','C0205076']) );
+
+Which is faster, IN or =ANY ?
+
+semehr=> explain SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui =ANY( ARRAY[  'C0024109','C0205076']) );
+ Aggregate  (cost=303.14..303.15 rows=1 width=8)
+   ->  Hash Join  (cost=218.43..302.98 rows=61 width=53)
+         Hash Cond: ((semehr_results.sopinstanceuid)::text = (cui_sop.sopinstanceuid)::text)
+         ->  Seq Scan on semehr_results  (cost=0.00..74.96 rows=3396 width=64)
+         ->  Hash  (cost=217.68..217.68 rows=60 width=11)
+               ->  HashAggregate  (cost=217.08..217.68 rows=60 width=11)
+                     Group Key: (cui_sop.sopinstanceuid)::text
+                     ->  Bitmap Heap Scan on cui_sop  (cost=9.33..216.93 rows=61 width=11)
+                           Recheck Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+                           ->  Bitmap Index Scan on cui_sop_idx  (cost=0.00..9.31 rows=61 width=0)
+                                 Index Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+
+semehr=> explain SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui IN ( 'C0024109','C0205076') );
+ Aggregate  (cost=314.04..314.05 rows=1 width=8)
+   ->  Hash Join  (cost=225.21..313.88 rows=63 width=53)
+         Hash Cond: ((semehr_results.sopinstanceuid)::text = (cui_sop.sopinstanceuid)::text)
+         ->  Seq Scan on semehr_results  (cost=0.00..78.62 rows=3562 width=64)
+         ->  Hash  (cost=224.44..224.44 rows=62 width=11)
+               ->  HashAggregate  (cost=223.82..224.44 rows=62 width=11)
+                     Group Key: (cui_sop.sopinstanceuid)::text
+                     ->  Bitmap Heap Scan on cui_sop  (cost=9.33..223.66 rows=63 width=11)
+                           Recheck Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+                           ->  Bitmap Index Scan on cui_sop_idx  (cost=0.00..9.31 rows=63 width=0)
+                                 Index Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+
+Both seem to have identical plans, and
+both use Seq Scan !!
+
+semehr=> create index sop on semehr_results (SOPInstanceUID);
+CREATE INDEX
+
+So the WHERE SOPInstanceUID in (list...) should use the index?
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID = '2.25.00001';
+ Aggregate  (cost=4.30..4.31 rows=1 width=8)
+   ->  Index Only Scan using sop on semehr_results  (cost=0.28..4.30 rows=1 width=0)
+         Index Cond: (sopinstanceuid = '2.25.00001'::text)
+
+Yes
+
+semehr=> explain SELECT count(semehr_results) FROM semehr_results WHERE
+   SOPInstanceUID = ANY ( SELECT SOPInstanceUID FROM cui_sop WHERE cui IN ( 'C0024109','C0205076') );
+ Aggregate  (cost=1890.61..1890.62 rows=1 width=8)
+   ->  Hash Join  (cost=1758.88..1888.63 rows=793 width=49)
+         Hash Cond: ((semehr_results.sopinstanceuid)::text = (cui_sop.sopinstanceuid)::text)
+         ->  Seq Scan on semehr_results  (cost=0.00..107.84 rows=4984 width=60)
+         ->  Hash  (cost=1749.79..1749.79 rows=727 width=11)
+               ->  HashAggregate  (cost=1742.52..1749.79 rows=727 width=11)
+                     Group Key: (cui_sop.sopinstanceuid)::text
+                     ->  Bitmap Heap Scan on cui_sop  (cost=14.98..1740.54 rows=793 width=11)
+                           Recheck Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+                           ->  Bitmap Index Scan on cui_sop_idx  (cost=0.00..14.79 rows=793 width=0)
+                                 Index Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+
+No, uses Seq Scan
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID IN (select SOPInstanceUID FROM semehr_results WHERE SOPinstanceUID =  '2.25.00001');
+ Aggregate  (cost=8.61..8.62 rows=1 width=8)
+   ->  Nested Loop Semi Join  (cost=0.56..8.61 rows=1 width=0)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..4.30 rows=1 width=11)
+               Index Cond: (sopinstanceuid = '2.25.00001'::text)
+         ->  Index Only Scan using sop on semehr_results semehr_results_1  (cost=0.28..4.30 rows=1 width=11)
+               Index Cond: (sopinstanceuid = '2.25.00001'::text)
+
+Yes
+
+semehr=> explain SELECT count(semehr_results) FROM semehr_results WHERE   SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui IN ( 'C0024109','C0205076') );
+ Aggregate  (cost=1890.61..1890.62 rows=1 width=8)
+   ->  Hash Join  (cost=1758.88..1888.63 rows=793 width=49)
+         Hash Cond: ((semehr_results.sopinstanceuid)::text = (cui_sop.sopinstanceuid)::text)
+         ->  Seq Scan on semehr_results  (cost=0.00..107.84 rows=4984 width=60)
+         ->  Hash  (cost=1749.79..1749.79 rows=727 width=11)
+               ->  HashAggregate  (cost=1742.52..1749.79 rows=727 width=11)
+                     Group Key: (cui_sop.sopinstanceuid)::text
+                     ->  Bitmap Heap Scan on cui_sop  (cost=14.98..1740.54 rows=793 width=11)
+                           Recheck Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+                           ->  Bitmap Index Scan on cui_sop_idx  (cost=0.00..14.79 rows=793 width=0)
+                                 Index Cond: ((cui)::text = ANY ('{C0024109,C0205076}'::text[]))
+
+No, back to Seq Scan
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID IN (select SOPInstanceUID FROM cui_sop WHERE SOPinstanceUID =  '2.25.00001');
+ Aggregate  (cost=6815.15..6815.16 rows=1 width=8)
+   ->  Nested Loop Semi Join  (cost=1000.28..6815.15 rows=1 width=0)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..4.30 rows=1 width=11)
+               Index Cond: (sopinstanceuid = '2.25.00001'::text)
+         ->  Gather  (cost=1000.00..6810.83 rows=90 width=11)
+               Workers Planned: 1
+               ->  Parallel Seq Scan on cui_sop  (cost=0.00..5801.83 rows=53 width=11)
+                     Filter: ((sopinstanceuid)::text = '2.25.00001'::text)
+
+Yes used sop index, but not index on cui_sop table - probably because it had no index on SOP only on cui.
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID IN (select SOPInstanceUID FROM cui_sop WHERE SOPinstanceUID =  '2.25.00001');
+ Aggregate  (cost=14.32..14.33 rows=1 width=8)
+   ->  Nested Loop Semi Join  (cost=0.70..14.32 rows=1 width=0)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..4.30 rows=1 width=11)
+               Index Cond: (sopinstanceuid = '2.25.00001'::text)
+         ->  Index Only Scan using cui_sop_sopinstanceuid_idx on cui_sop  (cost=0.42..10.00 rows=90 width=11)
+               Index Cond: (sopinstanceuid = '2.25.00001'::text)
+
+Better
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID IN (select SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076');
+ Aggregate  (cost=269.84..269.85 rows=1 width=8)
+   ->  Nested Loop  (cost=171.72..269.73 rows=46 width=0)
+         ->  HashAggregate  (cost=171.43..171.89 rows=46 width=11)
+               Group Key: (cui_sop.sopinstanceuid)::text
+               ->  Bitmap Heap Scan on cui_sop  (cost=4.78..171.32 rows=46 width=11)
+                     Recheck Cond: ((cui)::text = 'C0205076'::text)
+                     ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.77 rows=46 width=0)
+                           Index Cond: ((cui)::text = 'C0205076'::text)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..2.13 rows=1 width=11)
+               Index Cond: (sopinstanceuid = (cui_sop.sopinstanceuid)::text)
+
+Seems ok, but hang on, is there actually an index on SOPInstanceUID? Or only on semehr_results->>SOPInstanceUID?
+There is, I created it above.
+
+No try the two different approaches again:
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID IN (select SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076');
+ Aggregate  (cost=269.84..269.85 rows=1 width=8)
+   ->  Nested Loop  (cost=171.72..269.73 rows=46 width=0)
+         ->  HashAggregate  (cost=171.43..171.89 rows=46 width=11)
+               Group Key: (cui_sop.sopinstanceuid)::text
+               ->  Bitmap Heap Scan on cui_sop  (cost=4.78..171.32 rows=46 width=11)
+                     Recheck Cond: ((cui)::text = 'C0205076'::text)
+                     ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.77 rows=46 width=0)
+                           Index Cond: ((cui)::text = 'C0205076'::text)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..2.13 rows=1 width=11)
+               Index Cond: (sopinstanceuid = (cui_sop.sopinstanceuid)::text)
+
+semehr=> explain select count(*) from semehr_results where SOPInstanceUID = ANY (select SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076');
+ Aggregate  (cost=269.84..269.85 rows=1 width=8)
+   ->  Nested Loop  (cost=171.72..269.73 rows=46 width=0)
+         ->  HashAggregate  (cost=171.43..171.89 rows=46 width=11)
+               Group Key: (cui_sop.sopinstanceuid)::text
+               ->  Bitmap Heap Scan on cui_sop  (cost=4.78..171.32 rows=46 width=11)
+                     Recheck Cond: ((cui)::text = 'C0205076'::text)
+                     ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.77 rows=46 width=0)
+                           Index Cond: ((cui)::text = 'C0205076'::text)
+         ->  Index Only Scan using sop on semehr_results  (cost=0.28..2.13 rows=1 width=11)
+               Index Cond: (sopinstanceuid = (cui_sop.sopinstanceuid)::text)
+
+
+They seem the same actually.
+
+Try making the subquery into an array:
+
+semehr=> select sopinstanceuid from semehr_results where sopinstanceuid = any (select array(select SOPInstanceUID from cui_sop where cui = 'C0205076'));
+
+ERROR:  operator does not exist: character varying = character varying[]
+
+semehr=> explain select sopinstanceuid from semehr_results where sopinstanceuid = any ( array(select SOPInstanceUID from cui_sop where cui = 'C0205076'));
+ Index Only Scan using sop on semehr_results  (cost=171.60..210.32 rows=10 width=11)
+   Index Cond: (sopinstanceuid = ANY (($0)::text[]))
+   InitPlan 1 (returns $0)
+     ->  Bitmap Heap Scan on cui_sop  (cost=4.78..171.32 rows=46 width=11)
+           Recheck Cond: ((cui)::text = 'C0205076'::text)
+           ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.77 rows=46 width=0)
+                 Index Cond: ((cui)::text = 'C0205076'::text)
+
+Wow that seems better
+
+Check
+
+semehr=> explain select count(sopinstanceuid) from semehr_results where sopinstanceuid = any ( array(select SOPInstanceUID from cui_sop where cui = 'C0205076'));
+ Aggregate  (cost=210.34..210.35 rows=1 width=8)
+   InitPlan 1 (returns $0)
+     ->  Bitmap Heap Scan on cui_sop  (cost=4.78..171.32 rows=46 width=11)
+           Recheck Cond: ((cui)::text = 'C0205076'::text)
+           ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.77 rows=46 width=0)
+                 Index Cond: ((cui)::text = 'C0205076'::text)
+   ->  Index Only Scan using sop on semehr_results  (cost=0.28..39.00 rows=10 width=11)
+         Index Cond: (sopinstanceuid = ANY (($0)::text[]))
+
+Huh?
+
+explain select sopinstanceuid from semehr_results where sopinstanceuid = any ( array(select SOPInstanceUID from cui_sop where cui = 'C0205076'));
+
+Summary1: putting in array() definitely makes it quicker
+
+Now try with multiple CUIs
+
+semehr=> explain analyze select semehr_results from semehr_results where sopinstanceuid = any (array(select SOPInstanceUID from cui_sop where cui IN ('C0205076','C0024109')));
+
+ Index Scan using sop on semehr_results  (cost=1740.82..1783.55 rows=10 width=49) (actual time=1.300..3.097 rows=1021 loops=1)
+   Index Cond: ((sopinstanceuid)::text = ANY (($0)::text[]))
+   InitPlan 1 (returns $0)
+     ->  Bitmap Heap Scan on cui_sop  (cost=14.98..1740.54 rows=793 width=11) (actual time=0.154..1.005 rows=1056 loops=1)
+           Recheck Cond: ((cui)::text = ANY ('{C0205076,C0024109}'::text[]))
+           Heap Blocks: exact=895
+           ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..14.79 rows=793 width=0) (actual time=0.074..0.074 rows=1056 loops=1)
+                 Index Cond: ((cui)::text = ANY ('{C0205076,C0024109}'::text[]))
+ Planning Time: 0.141 ms
+ Execution Time: 3.146 ms
+
+OR using VALUES:
+
+semehr=> explain analyze select semehr_results from semehr_results where sopinstanceuid = any (array(select SOPInstanceUID from cui_sop where cui IN (VALUES ('C0205076'),('C0024109'))));
+
+ Index Scan using sop on semehr_results  (cost=439.13..481.85 rows=10 width=49) (actual time=2.682..4.578 rows=1021 loops=1)
+   Index Cond: ((sopinstanceuid)::text = ANY (($1)::text[]))
+   InitPlan 1 (returns $1)
+     ->  Nested Loop  (cost=4.93..438.85 rows=122 width=11) (actual time=0.188..1.059 rows=1056 loops=1)
+           ->  Unique  (cost=0.04..0.04 rows=2 width=32) (actual time=0.032..0.036 rows=2 loops=1)
+                 ->  Sort  (cost=0.04..0.04 rows=2 width=32) (actual time=0.031..0.032 rows=2 loops=1)
+                       Sort Key: "*VALUES*".column1
+                       Sort Method: quicksort  Memory: 25kB
+                       ->  Values Scan on "*VALUES*"  (cost=0.00..0.03 rows=2 width=32) (actual time=0.001..0.002 rows=2 loops=1)
+           ->  Bitmap Heap Scan on cui_sop  (cost=4.90..218.79 rows=61 width=20) (actual time=0.085..0.472 rows=528 loops=2)
+                 Recheck Cond: ((cui)::text = "*VALUES*".column1)
+                 Heap Blocks: exact=932
+                 ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.88 rows=61 width=0) (actual time=0.040..0.040 rows=528 loops=2)
+                       Index Cond: ((cui)::text = "*VALUES*".column1)
+ Planning Time: 0.206 ms
+ Execution Time: 4.635 ms
+
+
+
+Summary2: I'm not sure whether the array() makes it faster or slower, need to try on larger table?
+But remember to take caching into account...
+
+How to supply a large set of values?
+
+semehr=> explain analyze select sopinstanceuid from cui_sop where cui in (values ('C0205076'),('C0024109'));
+ Nested Loop  (cost=4.93..438.85 rows=122 width=11) (actual time=0.162..1.121 rows=1056 loops=1)
+   ->  Unique  (cost=0.04..0.04 rows=2 width=32) (actual time=0.008..0.012 rows=2 loops=1)
+         ->  Sort  (cost=0.04..0.04 rows=2 width=32) (actual time=0.007..0.008 rows=2 loops=1)
+               Sort Key: "*VALUES*".column1
+               Sort Method: quicksort  Memory: 25kB
+               ->  Values Scan on "*VALUES*"  (cost=0.00..0.03 rows=2 width=32) (actual time=0.001..0.002 rows=2 loops=1)
+   ->  Bitmap Heap Scan on cui_sop  (cost=4.90..218.79 rows=61 width=20) (actual time=0.084..0.490 rows=528 loops=2)
+         Recheck Cond: ((cui)::text = "*VALUES*".column1)
+         Heap Blocks: exact=932
+         ->  Bitmap Index Scan on cui_sop_cui_idx  (cost=0.00..4.88 rows=61 width=0) (actual time=0.039..0.039 rows=528 loops=2)
+               Index Cond: ((cui)::text = "*VALUES*".column1)
+
+To make a test query that has lots of CUIs in it, find a list of valid ones:
+
+sort -u <(jq -r < *lts/doc0001.json '.annotations[]|.cui') <(jq -r < *lts/doc0111.json '.annotations[]|.cui') | \
+  sed -e "s/^/'/" -e "s/$/'/" | paste -s -d ','
+
+explain analyze select semehr_results from semehr_results where sopinstanceuid = any (array(select SOPInstanceUID from cui_sop where cui IN ('C0000726','C0001511','C0003611', ..., 'C4553491')));
+
