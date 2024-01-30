@@ -280,7 +280,7 @@ def postgres_query_cui(cui):
     #    (cast_to_date(semehr_results->>'ContentDate') BETWEEN '2010-01-02' AND '2010-01-10') AND
     #    SOPInstanceUID IN ( SELECT SOPInstanceUID FROM cui_sop WHERE cui = 'C0205076' )
     start_date = "2010-01-02"  # None or 'YYYY-MM-DD'
-    end_date = "2010-01-10"    # None or 'YYYY-MM-DD'
+    end_date = None#"2010-01-10"    # None or 'YYYY-MM-DD'
     sql_args = ()
     pgCursor = pgConnection.cursor()
     sql_str = "SELECT semehr_results FROM {tab} WHERE "
