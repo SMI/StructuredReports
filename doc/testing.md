@@ -23,6 +23,18 @@ If you are using the whole annotation service in a docker container
 (see CogStack-SemEHR/Dockerfile.md) then you don't interact with postgres itself,
 only the externally-visible API, and it already has some sample documents loaded.
 
+### Starting postgresql
+
+To use the standard postgresql docker run
+```
+sudo docker run -d --rm --name=pg -p 5432:5432 -e POSTGRES_PASSWORD=semehr postgres
+```
+
+To use the annotation_server docker run
+```
+sudo docker run -d --rm --name=pg -p 8485:8485 -p 5432:5432 howff/annotation_server
+```
+
 ### Database creation
 
 First run `StructuredReports/src/tools/postgres_init_01.sh [--docker]` to create the
