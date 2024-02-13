@@ -27,6 +27,16 @@ def translate_req(req):
         req += '(%s)' % version
     return req
  
+def version_from_txt():
+    with open('version.txt') as fd:
+        ver = next(fd).strip()
+    version = ver.split('.')
+    version[2] = str(int(version[2]) + 1)
+    vernext = '.'.join(version)
+    with open('version.txt', 'w') as fd:
+        print(vernext, file=fd)
+    return ver
+
 def version_from_AssemblyInfo():
     ass_info = join(abspath(dirname(__file__)), '..', '..', 'SharedAssemblyInfo.cs')
     try:
@@ -39,7 +49,7 @@ def version_from_AssemblyInfo():
 
 setup(
     name='SmiServices',
-    version=version_from_AssemblyInfo(),
+    version=version_from_txt(),
     packages=find_packages(where=dirname(__file__), exclude=('tests',)),
     package_dir={'':dirname(__file__)},
     url='https://github.com/SMI/SmiServices',
@@ -49,3 +59,4 @@ setup(
     requires=[translate_req(r) for r in requirements],
     install_requires=requirements
 )
+

@@ -154,9 +154,18 @@ with eHOST, accepting the corrected annotations and training a ML model.
 
 See the [annotation eHOST](./doc/annotation_eHOST.md) document.
 
+## Library
+
+A collection of python modules, previously supplied as part of SmiServices.
+
+See the [library](./doc/library.md) document.
+
 ## Tools
 
-A collection of useful utilities, see the [tools](./src/tools/README.md) document.
+A collection of useful utilities, see the [tools](./doc/tools.md) document.
+
+See also the [sample SR](./doc/sample_SR.md) document.
+
 
 ## Testing
 
