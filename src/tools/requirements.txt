@@ -1,6 +1,7 @@
 urllib3
 joblib
 SmiServices
+SemEHR
 psycopg2_binary
 pymongo
 pyyaml
