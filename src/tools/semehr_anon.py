@@ -77,10 +77,7 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
 
         # If there's no record of doc in phi then it wasn't anonymised
         # so we can either copy it (might contain PII!) or create an empty one from /dev/null
-        if not renamed_dict:
-            input_file = '/dev/null' # '/dev/null' OR os.path.join(input_dir, doc)
-        else:
-            input_file = os.path.join(output_dir, doc)
+        input_file = os.path.join(output_dir, doc)
         with open(input_file, 'r') as fd:
             text = fd.read()
 
@@ -141,7 +138,6 @@ def main():
     parser = argparse.ArgumentParser(description='Redact text given knowtator XML')
     parser.add_argument('-i', dest='input', action="store", help='directory of text, or filename of one text file')
     parser.add_argument('-o', dest='output', action="store", help='path to output filename or directory where redacted text files will be written')
-    parser.add_argument('-a', '--all', dest='write_all', action="store_true", help='write output file in output directory for all input files even if no PII', default=False)
     parser.add_argument('-x', '--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files', default=False)
     parser.add_argument('-s', dest='semehr_dir', action="store", help='path to parent of CogStack-SemEHR directory')
     parser.add_argument('--spacy', dest='spacy', action='store_true', help='use SpaCy to identify names')
@@ -165,11 +161,11 @@ def main():
 
     if os.path.isfile(args.input):
         anonymise_file(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
-            write_xml=args.write_xml, write_all=args.write_all)
+            write_xml=args.write_xml, write_all=True)
 
     elif os.path.isdir(args.input):
         anonymise_dir(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
-            write_xml=args.write_xml, write_all=args.write_all)
+            write_xml=args.write_xml, write_all=True)
 
 
 if __name__ == '__main__':
