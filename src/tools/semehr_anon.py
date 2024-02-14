@@ -12,11 +12,12 @@
 # NOTE: this script has superceded semehr_anon.sh.
 
 import argparse, json, logging, re, sys, os, glob
+from logging import handlers
 import shutil # for copyfile
 import tempfile # for TemporaryDirectory
 import subprocess # for run
 from SmiServices import Knowtator
-from logging import handlers
+from SemEHR.anonymiser import do_anonymisation_by_conf
 
 # Configuration
 use_spacy = False
@@ -28,10 +29,10 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
 
-    cfg_file = os.path.join(output_dir, 'anonymisation_task.json')
+    #cfg_file = os.path.join(output_dir, 'anonymisation_task.json')
     phi_file = os.path.join(output_dir, 'anonymiser.phi')
     log_file = os.path.join(output_dir, 'anonymiser.log')
-    log_file = '/tmp/anon.log'
+    #log_file = '/tmp/anon.log'
 
     # Create a config file in the output directory
     with open(semehr_anon_cfg_file) as fd:
@@ -40,22 +41,28 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     cfg_json['anonymisation_output'] = output_dir
     cfg_json['extracted_phi'] = phi_file
     cfg_json['grouped_phi_output'] = '/dev/null'
-    cfg_json['logging_file'] = log_file
+    #cfg_json['logging_file'] = log_file
+    del cfg_json['logging_file']
     cfg_json['annotation_mode'] = False
     #cfg_json['number_threads'] = 0  # a bug in CPython causes hang/deadlock trying to acquire lock in logging __init__.py ?
     cfg_json['use_spacy'] = use_spacy
-    with open(cfg_file, 'w') as fd:
-        print(json.dumps(cfg_json), file=fd)
+    #with open(cfg_file, 'w') as fd:
+    #    print(json.dumps(cfg_json), file=fd)
 
     # Run SemEHR anonymiser
     cur_dir = os.getcwd()
     os.chdir(os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation'))
     logging.info('Running anonymiser from %s to %s' % (input_dir, output_dir))
-    result = subprocess.run(['python3', 'anonymiser.py', cfg_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        do_anonymisation_by_conf(cfg_json)
+    except Exception as e:
+        raise e
+        logging.error('ERROR: SemEHR anonymiser failed')
+    #result = subprocess.run(['python3', 'anonymiser.py', cfg_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     os.chdir(cur_dir)
-    if result.returncode:
-        logging.error('ERROR: SemEHR anonymiser failed: "%s"' % (result.stdout.decode('utf-8') + result.stderr.decode('utf-8')))
-        # XXX should return early?
+    #if result.returncode:
+    #    logging.error('ERROR: SemEHR anonymiser failed: "%s"' % (result.stdout.decode('utf-8') + result.stderr.decode('utf-8')))
+    #    # XXX should return early?
 
     # Read the JSON file "phi" to redact the words
     with open(phi_file) as fd:
@@ -103,9 +110,9 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
                 fd.write(xml_string)
 
     # Tidy up
-    os.remove(cfg_file)
+    #os.remove(cfg_file)
     os.remove(phi_file)
-    os.remove(log_file)
+    #os.remove(log_file)
     return
 
 
