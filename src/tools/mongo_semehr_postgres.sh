@@ -73,7 +73,7 @@ if [ $? -ne 0 ]; then fatal "ERROR: CTP_DicomToText.py failed on $StudyDate in $
 
 # Anonymise
 message "Anonymising text ..."
-semehr_anon.py --all -i ${txt_dir} -o ${anon_dir}  >> $log 2>&1
+semehr_anon.py -i ${txt_dir} -o ${anon_dir}  >> $log 2>&1
 if [ $? -ne 0 ]; then fatal "ERROR: semehr_anon.py failed on $StudyDate in $txt_dir"; fi
 
 # Run SemEHR annotator
