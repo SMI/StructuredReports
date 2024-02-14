@@ -131,6 +131,7 @@ def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, wr
 
 def main():
     global use_spacy
+    semehr_dir = None
 
 	# Configure logging
     if not os.environ.get('SMI_LOGS_ROOT'): raise Exception('Environment variable SMI_LOGS_ROOT must be set')
@@ -164,6 +165,8 @@ def main():
         semehr_dir = '/opt/semehr'
     if args.semehr_dir:
         semehr_dir = args.semehr_dir
+    if not semehr_dir:
+        raise Exception('cannot find CogStack-SemEHR in ~/SemEHR or /opt/semehr and -s option not used')
     semehr_anon_cfg_file = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation', 'conf', 'anonymisation_task.json') # i.e. /opt/semehr/CogStack-SemEHR/anonymisation/conf/anonymisation_task.json
 
     if os.path.isfile(args.input):
