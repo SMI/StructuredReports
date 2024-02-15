@@ -55,12 +55,14 @@ class DicomText:
     _redact_char = 'X'               # character used to redact text
     _redact_char_digit = '9'         # character used to redact digits in text
 
-    def __init__(self, filename, \
+    def __init__(
+        self, filename, \
         include_header = _include_header, \
         replace_HTML_entities = _replace_HTML_entities, \
         replace_HTML_char = _replace_HTML_char, \
         replace_newline_char = _replace_newline_char,
-        include_unexpected_tags = _include_unexpected_tags):
+        include_unexpected_tags = _include_unexpected_tags,
+    ):
         """ The DICOM file is read during construction.
         If include_header is True some DICOM header fields are output (default True).
         If replace_HTML_entities is True then all HTML is replaced by dots (default True).
@@ -158,9 +160,11 @@ class DicomText:
             rc += '\n'
             # Replace HTML tags with spaces
             if self._replace_HTML_entities and '<' in rc:
-                rc_parsed = redact_html_tags_in_string(rc,
+                rc_parsed = redact_html_tags_in_string(
+                    rc,
                     replace_char = self._replace_HTML_char,
-                    replace_newline = self._replace_newline_char)
+                    replace_newline = self._replace_newline_char,
+                )
             else:
                 rc_parsed = rc
         return (rc, rc_parsed)
@@ -174,8 +178,8 @@ class DicomText:
             return
         self._offset_list.append( {
             'offset':len(self._p_text),
-            'string': rc_parsed
-            } )
+            'string': rc_parsed,
+        }, )
         self._p_text = self._p_text + rc_parsed
 
     def parse(self):
@@ -185,7 +189,7 @@ class DicomText:
         self._p_text = ''
         # Start by enumerating all known desired tags (whitelist)
         #  except explicitly do not include TextValue, handled below
-        list_of_tagname_desired = [ k['tag'] for k in sr_keys_to_extract ]
+        list_of_tagname_desired = [ k['tag'] for k in sr_keys_to_extract]
         if self._include_header:
             # Add all the known [[something]] headers
             for srkey in sr_keys_to_extract:
@@ -217,9 +221,11 @@ class DicomText:
             textval = str(self._dicom_raw['TextValue'].value)
             self._p_text = self._p_text + '[[Text]]\n'
             if self._replace_HTML_entities and '<' in textval:
-                self._p_text = self._p_text + redact_html_tags_in_string(textval,
+                self._p_text = self._p_text + redact_html_tags_in_string(
+                    textval,
                     replace_char = self._replace_HTML_char,
-                    replace_newline = self._replace_newline_char)
+                    replace_newline = self._replace_newline_char,
+                )
             else:
                 self._p_text = self._p_text + textval
             self._p_text = self._p_text + '\n[[EndText]]\n'

@@ -37,7 +37,7 @@ class SmiPyMongoCollection:
         # strip off any full path prefix so it starts with the year
         DicomFilePath = re.sub('^.*PACS/', '', DicomFilePath)
 
-        return self.mongoCollection.find_one( { "header.DicomFilePath": DicomFilePath } )
+        return self.mongoCollection.find_one( { "header.DicomFilePath": DicomFilePath})
 
     def StudyDateToJSONList(self, StudyDate):
         """ After setting a collection(modality) you can extract a list of documents for a given date in the form YYYY/MM/DD.
@@ -47,11 +47,11 @@ class SmiPyMongoCollection:
         StudyDate = re.sub('[/ ]*', '', StudyDate)
         assert(len(StudyDate) == 8)
 
-        return self.mongoCollection.find( { "StudyDate" : StudyDate } )
+        return self.mongoCollection.find( { "StudyDate" : StudyDate})
 
     def findSOPInstanceUID(self, sopinstanceuid):
         """ This is intended to check for the existence of a document having the
         given SOPInstanceUID but since it also returns that document is can be
         used as a query """
         
-        return self.mongoCollection.find_one( { 'SOPInstanceUID': sopinstanceuid } )
+        return self.mongoCollection.find_one( { 'SOPInstanceUID': sopinstanceuid})

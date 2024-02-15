@@ -19,10 +19,10 @@ in_text_dir = '../data/mtsamples_ihi_docs/'
 
 forenames = ['Olivia', 'Emily', 'Isla', 'Freya', 'Ella', 'Amelia', 'Ava', 'Sophie', 'Grace', 'Millie']
 surnames = [ 'Smith', 'Brown', 'Wilson', 'Thomson', 'Robertson', 'Campbell', 'Stewart', 'Anderson', 'MacDonald', 'Scott']
-streets = [ 'Acacia', 'Banavie', 'Cross', 'Dunstan', 'Elcho' ]
-streettypes = [ 'Avenue', 'Lane', 'Street', 'Drive' ]
-districts = [ 'Ayr', 'Broughty Ferry', 'Castleton', 'Dunbar', 'Edinburgh', 'Forfar' ]
-postcodes = [ 'AB', 'BA', 'CH', 'DD', 'EH', 'KY', 'G' ]
+streets = [ 'Acacia', 'Banavie', 'Cross', 'Dunstan', 'Elcho']
+streettypes = [ 'Avenue', 'Lane', 'Street', 'Drive']
+districts = [ 'Ayr', 'Broughty Ferry', 'Castleton', 'Dunbar', 'Edinburgh', 'Forfar']
+postcodes = [ 'AB', 'BA', 'CH', 'DD', 'EH', 'KY', 'G']
 
 patient_forename = random.choice(forenames)
 patient_surname =  random.choice(surnames)
@@ -39,13 +39,17 @@ def random_date():
 
 def random_postcode():
 	letters = ['A','B','E','H','M','N','P','R','V','Y']
-	return '%s%d %d%s%s' % (random.choice(postcodes), random.randint(1,55),
-		random.randint(1,9), random.choice(letters), random.choice(letters))
+	return '%s%d %d%s%s' % (
+     random.choice(postcodes), random.randint(1,55),
+     random.randint(1,9), random.choice(letters), random.choice(letters),
+ )
 
 def random_address():
-	return '%d %s %s, %s, %s' % (random.randint(1,123),
-		random.choice(streets), random.choice(streettypes),
-		random.choice(districts), random_postcode())
+	return '%d %s %s, %s, %s' % (
+     random.randint(1,123),
+     random.choice(streets), random.choice(streettypes),
+     random.choice(districts), random_postcode(),
+ )
 
 fake_address = 'Discharged to %s' % random_address()
 fake_reporter = '%s\nVerified on %s by Dr %s %s, Consultant' % (fake_address, random_date(), doctor_forename, doctor_surname)

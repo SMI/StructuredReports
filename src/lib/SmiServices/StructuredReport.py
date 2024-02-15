@@ -17,47 +17,47 @@ from SmiServices.StringUtils import redact_html_tags_in_string
 # (all the others will be reported during testing to ensure no content is missed).
 sr_keys_to_extract = [
     # These are all of type PN:
-    { 'label':'Consulting Physician Name', 'tag':'ConsultingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Performing Physician Name', 'tag':'PerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Name Of Physicians Reading Study', 'tag':'NameOfPhysiciansReadingStudy', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Operators Name', 'tag':'OperatorsName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Other Patient Names', 'tag':'OtherPatientNames', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Patient Birth Name', 'tag':'PatientBirthName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Patient Mother Birth Name', 'tag':'PatientMotherBirthName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Secondary Reviewer Name', 'tag':'SecondaryReviewerName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Evaluator Name', 'tag':'EvaluatorName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Scheduled Performing Physician Name', 'tag':'ScheduledPerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Names Of Intended Recipients Of Results', 'tag':'NamesOfIntendedRecipientsOfResults', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Human Performer Name', 'tag':'HumanPerformerName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Verifying Observer Name', 'tag':'VerifyingObserverName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Person Name', 'tag':'PersonName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Content Creator Name', 'tag':'ContentCreatorName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Reviewer Name', 'tag':'ReviewerName', 'decode_func':Dicom.sr_decode_PNAME },
+    { 'label':'Consulting Physician Name', 'tag':'ConsultingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Performing Physician Name', 'tag':'PerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Name Of Physicians Reading Study', 'tag':'NameOfPhysiciansReadingStudy', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Operators Name', 'tag':'OperatorsName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Other Patient Names', 'tag':'OtherPatientNames', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Patient Birth Name', 'tag':'PatientBirthName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Patient Mother Birth Name', 'tag':'PatientMotherBirthName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Secondary Reviewer Name', 'tag':'SecondaryReviewerName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Evaluator Name', 'tag':'EvaluatorName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Scheduled Performing Physician Name', 'tag':'ScheduledPerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Names Of Intended Recipients Of Results', 'tag':'NamesOfIntendedRecipientsOfResults', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Human Performer Name', 'tag':'HumanPerformerName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Verifying Observer Name', 'tag':'VerifyingObserverName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Person Name', 'tag':'PersonName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Content Creator Name', 'tag':'ContentCreatorName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Reviewer Name', 'tag':'ReviewerName', 'decode_func':Dicom.sr_decode_PNAME},
     # Plain text:
-    { 'label':'Institution Name', 'tag':'InstitutionName', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Institution Address', 'tag':'InstitutionAddress', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Institutional Department Name', 'tag':'InstitutionalDepartmentName', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Patient Address', 'tag':'PatientAddress', 'decode_func':Dicom.sr_decode_plaintext },
+    { 'label':'Institution Name', 'tag':'InstitutionName', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Institution Address', 'tag':'InstitutionAddress', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Institutional Department Name', 'tag':'InstitutionalDepartmentName', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Patient Address', 'tag':'PatientAddress', 'decode_func':Dicom.sr_decode_plaintext},
     # First version:
-    { 'label':'Study Description', 'tag':'StudyDescription', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Study Date', 'tag':'StudyDate', 'decode_func':Dicom.sr_decode_date },
-    { 'label':'Series Description', 'tag':'SeriesDescription', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Series Date', 'tag':'SeriesDate', 'decode_func':Dicom.sr_decode_date },
-    { 'label':'Performed Procedure Step Description', 'tag':'PerformedProcedureStepDescription', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'ProtocolName', 'tag':'ProtocolName', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'StudyComments', 'tag':'StudyComments', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Content Date', 'tag':'ContentDate', 'decode_func':Dicom.sr_decode_date },
-    { 'label':'Patient ID', 'tag':'PatientID', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Patient Name', 'tag':'PatientName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Patient Birth Date', 'tag':'PatientBirthDate', 'decode_func':Dicom.sr_decode_date },
-    { 'label':'Patient Sex', 'tag':'PatientSex', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Patient Age', 'tag':'PatientAge', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Patient Weight', 'tag':'PatientWeight', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Medical Alerts', 'tag':'MedicalAlerts', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Allergies', 'tag':'Allergies', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Ethnic Group', 'tag':'EthnicGroup', 'decode_func':Dicom.sr_decode_plaintext },
-    { 'label':'Referring Physician Name', 'tag':'ReferringPhysicianName', 'decode_func':Dicom.sr_decode_PNAME },
-    { 'label':'Text', 'tag':'TextValue', 'decode_func':Dicom.sr_decode_plaintext },
+    { 'label':'Study Description', 'tag':'StudyDescription', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Study Date', 'tag':'StudyDate', 'decode_func':Dicom.sr_decode_date},
+    { 'label':'Series Description', 'tag':'SeriesDescription', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Series Date', 'tag':'SeriesDate', 'decode_func':Dicom.sr_decode_date},
+    { 'label':'Performed Procedure Step Description', 'tag':'PerformedProcedureStepDescription', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'ProtocolName', 'tag':'ProtocolName', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'StudyComments', 'tag':'StudyComments', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Content Date', 'tag':'ContentDate', 'decode_func':Dicom.sr_decode_date},
+    { 'label':'Patient ID', 'tag':'PatientID', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Patient Name', 'tag':'PatientName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Patient Birth Date', 'tag':'PatientBirthDate', 'decode_func':Dicom.sr_decode_date},
+    { 'label':'Patient Sex', 'tag':'PatientSex', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Patient Age', 'tag':'PatientAge', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Patient Weight', 'tag':'PatientWeight', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Medical Alerts', 'tag':'MedicalAlerts', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Allergies', 'tag':'Allergies', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Ethnic Group', 'tag':'EthnicGroup', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Referring Physician Name', 'tag':'ReferringPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Text', 'tag':'TextValue', 'decode_func':Dicom.sr_decode_plaintext},
 ]
 
 
@@ -253,7 +253,7 @@ sr_keys_to_ignore = [
     'EncapsulatedDocument', # XXX is this only PDF, or ???
     'MIMETypeOfEncapsulatedDocument',
     'InterpretationStatusID',
-    'ImageReference'        # XXX contains JSON, refers to other images, but also has PII
+    'ImageReference',        # XXX contains JSON, refers to other images, but also has PII
 ]
 
 
@@ -295,10 +295,12 @@ class StructuredReport:
     _redact_char = 'X'               # character used to redact text
     _redact_char_digit = '9'         # character used to redact digits in text
 
-    def __init__(self,
+    def __init__(
+        self,
         replace_HTML_entities = _replace_HTML_entities, \
         replace_HTML_char = _replace_HTML_char, \
-        replace_newline_char = _replace_newline_char):
+        replace_newline_char = _replace_newline_char,
+    ):
         """ Constructor
         """
         self._replace_HTML_entities = replace_HTML_entities
@@ -358,9 +360,11 @@ class StructuredReport:
         valstr = re.sub('\r+', '\n', valstr)
         # Replace all HTML
         if '<' in valstr and '>' in valstr:
-            valstr = redact_html_tags_in_string(valstr,
+            valstr = redact_html_tags_in_string(
+                valstr,
                 replace_char = self._replace_HTML_char,
-                replace_newline = self._replace_newline_char)
+                replace_newline = self._replace_newline_char,
+            )
         # Remove superfluous LFs
         valstr = re.sub('\n+', '\n', valstr)
         # If there is no key then do not print a prefix
@@ -505,83 +509,83 @@ def test_SR_parse_key():
             "vr": "SQ",
             "Value": [
                 {
-                    "RelationshipType": { "vr": "CS", "Value": [ "CONTAINS" ] },
-                    "ValueType": { "vr": "CS", "Value": [ "TEXT" ] },
+                    "RelationshipType": { "vr": "CS", "Value": [ "CONTAINS"]},
+                    "ValueType": { "vr": "CS", "Value": [ "TEXT"]},
                     "ConceptNameCodeSequence": {
                         "vr": "SQ",
                         "Value": [
                             {
-                                "CodeValue": { "vr": "SH", "Value": [ "RE.02" ] },
-                                "CodingSchemeDesignator": { "vr": "SH", "Value": [ "99_OFFIS_DCMTK" ] },
-                                "CodeMeaning": { "vr": "LO", "Value": [ "Request" ] }
-                            }
-                        ]
+                                "CodeValue": { "vr": "SH", "Value": [ "RE.02"]},
+                                "CodingSchemeDesignator": { "vr": "SH", "Value": [ "99_OFFIS_DCMTK"]},
+                                "CodeMeaning": { "vr": "LO", "Value": [ "Request"]},
+                            },
+                        ],
                     },
-                    "TextValue": { "vr": "UT", "Value": [ "MRI: Knee" ] }
+                    "TextValue": { "vr": "UT", "Value": [ "MRI: Knee"]},
                 },
                 {
-                  "RelationshipType": { "vr": "CS", "Value": [ "CONTAINS" ] },
-                  "ValueType": { "vr": "CS", "Value": [ "PNAME" ] },
-                  "ConceptNameCodeSequence": { "vr": "SQ", "Value": [ { "CodeMeaning": { "vr": "LO", "Value": [ "Physician" ] } } ] },
-                  "PersonName": { "vr": "PN", "Value": [ { "Alphabetic": "Klugman^^^Dr." } ] }
-                }
-            ]
+                  "RelationshipType": { "vr": "CS", "Value": [ "CONTAINS"]},
+                  "ValueType": { "vr": "CS", "Value": [ "PNAME"]},
+                  "ConceptNameCodeSequence": { "vr": "SQ", "Value": [ { "CodeMeaning": { "vr": "LO", "Value": [ "Physician"]}}]},
+                  "PersonName": { "vr": "PN", "Value": [ { "Alphabetic": "Klugman^^^Dr."}]},
+                },
+            ],
         },
         # Structured Reports often have the main body in a TextValue instead
-        "TextValue": { "vr": "UT", "Value": [ "Hello World" ] },
+        "TextValue": { "vr": "UT", "Value": [ "Hello World"]},
         # Add a sequence where you expect ConceptName=ConceptCode output
         "AcquisitionContextSequence": {
           "vr": "SQ",
           "Value": [
             {
-              "ValueType": {"vr": "CS", "Value": ["CODE" ] },
+              "ValueType": {"vr": "CS", "Value": ["CODE"]},
               "ConceptNameCodeSequence": {
                 "vr": "SQ",
                 "Value": [
                   {
-                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["DCM" ] },
-                    "CodeMeaning": {"vr": "LO", "Value": ["Fitzpatrick Skin Type" ] },
-                    "ContextUID": {"vr": "UI", "Value": ["1.2.840.10008.6.1.1346" ] }
-                  }
-                ]
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["DCM"]},
+                    "CodeMeaning": {"vr": "LO", "Value": ["Fitzpatrick Skin Type"]},
+                    "ContextUID": {"vr": "UI", "Value": ["1.2.840.10008.6.1.1346"]},
+                  },
+                ],
               },
               "ConceptCodeSequence": {
                 "vr": "SQ",
                 "Value": [
                   {
-                    "CodeValue": {"vr": "SH", "Value": ["C74571" ] },
-                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["LN" ] },
-                    "CodeMeaning": {"vr": "LO", "Value": ["Fitzpatrick Skin Type III" ] }
-                  }
-                ]
-              }
-            }
-          ]
+                    "CodeValue": {"vr": "SH", "Value": ["C74571"]},
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["LN"]},
+                    "CodeMeaning": {"vr": "LO", "Value": ["Fitzpatrick Skin Type III"]},
+                  },
+                ],
+              },
+            },
+          ],
         },
         # Now add a ValueType and ConceptNameCodeSequence at the root level
         # in the document, very unusual, only seen in Dermatology SRs,
         # normally these are inside a proper Sequence.
-        "ValueType": {"vr": "CS", "Value": ["CODE" ] },
+        "ValueType": {"vr": "CS", "Value": ["CODE"]},
         "ConceptNameCodeSequence": {
           "vr": "SQ",
           "Value": [
             {
-              "CodeValue": {"vr": "SH", "Value": ["2F23" ] },
-              "CodingSchemeDesignator": {"vr": "SH", "Value": ["I11" ] },
-              "CodeMeaning": {"vr": "LO", "Value": ["Benign dermal fibrous or fibrohistiocytic neoplasms" ] }
-            }
-          ]
+              "CodeValue": {"vr": "SH", "Value": ["2F23"]},
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["I11"]},
+              "CodeMeaning": {"vr": "LO", "Value": ["Benign dermal fibrous or fibrohistiocytic neoplasms"]},
+            },
+          ],
         },
         "ConceptCodeSequence": {
           "vr": "SQ",
           "Value": [
             {
-              "CodeValue": {"vr": "SH", "Value": ["2F23.0" ] },
-              "CodingSchemeDesignator": {"vr": "SH", "Value": ["I11" ] },
-              "CodeMeaning": {"vr": "LO", "Value": ["Dermatofibroma" ] }
-            }
-          ]
-        }
+              "CodeValue": {"vr": "SH", "Value": ["2F23.0"]},
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["I11"]},
+              "CodeMeaning": {"vr": "LO", "Value": ["Dermatofibroma"]},
+            },
+          ],
+        },
     }
 
     # Create a SR object
@@ -591,13 +595,15 @@ def test_SR_parse_key():
     with TemporaryFile(mode='w+', encoding='utf-8') as fd:
         sr.SR_parse(SR_dict, 'Test', fd)
         fd.seek(0)
-        assert(fd.read() == '[[Document name]] Test\n'
+        assert(
+            fd.read() == '[[Document name]] Test\n'
             '[[Text]] Hello World\n'
             '[[Other Names]] Dr. Klugman\n'
             '[[Request]] MRI: Knee\n'
             '[[Physician]] Klugman^^^Dr.\n'
             '[[Fitzpatrick Skin Type]] Fitzpatrick Skin Type III\n'
-            '[[Benign dermal fibrous or fibrohistiocytic neoplasms]] Dermatofibroma\n')
+            '[[Benign dermal fibrous or fibrohistiocytic neoplasms]] Dermatofibroma\n'
+        )
 
     # Add some HTML into the string and check it's redacted
     SR_dict['ContentSequence']['Value'][0]['TextValue']['Value'][0] = "<html><style class=\"nice\">MRI: Knee"
@@ -617,8 +623,8 @@ def test_find_PersonNames():
     sr = StructuredReport()
     jd = {
         'InstitutionName': 'Ninewells Hospital',
-        'Sequence': [ { 'PersonName': 'Klugman^^^Dr.' } ],
-        'Something Else': 'Other'
+        'Sequence': [ { 'PersonName': 'Klugman^^^Dr.'}],
+        'Something Else': 'Other',
     }
     names_list = []
     sr.find_PersonNames(jd, names_list)

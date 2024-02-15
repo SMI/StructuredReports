@@ -39,7 +39,8 @@ for json_file in args.input:
                 'end_char': ii['start']+len(ii['str']),
                 'text': ii['str'],
                 'pref': ii['pref'],
-                'cui':  ii['cui']
-                } for ii in jj['annotations']]
+                'cui':  ii['cui'],
+            } for ii in jj['annotations']
+            ]
             xml_string = Knowtator.dict_to_annotation_xml_string(renamed_dict, anonymise=args.anon, annotate=args.ann)
             print(xml_string, file=xml_fd)

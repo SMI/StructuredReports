@@ -110,12 +110,16 @@ def postgres_add_index():
     pgCursor = pgConnection.cursor()
     try:
         # Create functions to be used in indexes
-        pgCursor.execute("create or replace function annotation_array_as_text(doc jsonb, fieldname text) returns text as $$ "
+        pgCursor.execute(
+            "create or replace function annotation_array_as_text(doc jsonb, fieldname text) returns text as $$ "
                 "   select array_agg(x)::text from (select jsonb_array_elements(doc->'annotations')->>fieldname) as f(x);"
-            " $$ language sql strict immutable;")
-        pgCursor.execute("create or replace function annotation_array_as_text_array(doc jsonb, fieldname text) returns text[] as $$ "
+            " $$ language sql strict immutable;",
+        )
+        pgCursor.execute(
+            "create or replace function annotation_array_as_text_array(doc jsonb, fieldname text) returns text[] as $$ "
             "   select array_agg(x) from (select jsonb_array_elements(doc->'annotations')->>fieldname) as f(x);"
-            " $$ language sql strict immutable;")
+            " $$ language sql strict immutable;",
+        )
         # Create text indexes
         # eg. CREATE INDEX pref_as_text  ON semehr.semehr_results USING GIN (annotation_array_as_text(semehr_results, 'pref') gin_trgm_ops);
         for elem in ['pref', 'str']:
@@ -167,9 +171,13 @@ def postgres_insert_files(jsonfiles):
                     (doc['PatientID'], doc['SOPInstanceUID']) = jsonfilename.split('_')
                 pgCursor = pgConnection.cursor()
                 try:
-                    pgCursor.execute(sql.SQL("INSERT INTO {tab} (SOPInstanceUID, semehr_results) VALUES (%s, %s)").format(tab=sql.Identifier(pgTableName)),
-                        (doc['SOPInstanceUID'],
-                        json.dumps(doc)))
+                    pgCursor.execute(
+                        sql.SQL("INSERT INTO {tab} (SOPInstanceUID, semehr_results) VALUES (%s, %s)").format(tab=sql.Identifier(pgTableName)),
+                        (
+                            doc['SOPInstanceUID'],
+                            json.dumps(doc),
+                        ),
+                    )
                 except psycopg2.errors.UniqueViolation:
                     logging.error('document with SOPInstanceUID %s already in database when trying to add %s' % (doc['SOPInstanceUID'], jsonfile))
                     pgCursor.execute("ROLLBACK")
@@ -222,11 +230,15 @@ def postgres_insert_dir(jsondir, txtdir, metadatadir):
             # Insert document into database
             pgCursor = pgConnection.cursor()
             try:
-                pgCursor.execute(sql.SQL("INSERT INTO {tab} (SOPInstanceUID, semehr_results) VALUES (%s, %s)").format(tab=sql.Identifier(pgTableName)),
-                    (doc['SOPInstanceUID'],
-                    json.dumps(doc)))
+                pgCursor.execute(
+                    sql.SQL("INSERT INTO {tab} (SOPInstanceUID, semehr_results) VALUES (%s, %s)").format(tab=sql.Identifier(pgTableName)),
+                    (
+                        doc['SOPInstanceUID'],
+                        json.dumps(doc),
+                    ),
+                )
                 # Make a list of all the CUIs in this document (keep duplicates)
-                list_of_cui = [ ann['cui'] for ann in doc['annotations'] ]
+                list_of_cui = [ ann['cui'] for ann in doc['annotations']]
             except psycopg2.errors.UniqueViolation:
                 logging.warning('document with SOPInstanceUID %s already in database when trying to add %s' % (doc['SOPInstanceUID'], jsonfile))
                 pgCursor.execute("ROLLBACK")
@@ -237,17 +249,23 @@ def postgres_insert_dir(jsondir, txtdir, metadatadir):
             # Increment the count of each CUI
             pgCursor = pgConnection.cursor()
             for cui in list_of_cui:
-                pgCursor.execute(sql.SQL("INSERT INTO {tab} (cui, count) VALUES (%s, 1) "
-                    "ON CONFLICT (cui) DO UPDATE SET count={tab}.count+1").format(tab=sql.Identifier(pgCUITableName)),
-                    (cui,))
+                pgCursor.execute(
+                    sql.SQL(
+                        "INSERT INTO {tab} (cui, count) VALUES (%s, 1) "
+                        "ON CONFLICT (cui) DO UPDATE SET count={tab}.count+1",
+                    ).format(tab=sql.Identifier(pgCUITableName)),
+                    (cui,),
+                )
             pgConnection.commit()
             pgCursor.close()
             # Add each CUI to a CUI-SOP mapping table, without duplicates
             list_of_cui = set(list_of_cui)
             pgCursor = pgConnection.cursor()
             for cui in list_of_cui:
-                pgCursor.execute(sql.SQL("INSERT INTO {tab} (cui, SOPInstanceUID) VALUES (%s, %s) ").format(tab=sql.Identifier(pgCUISOPTableName)),
-                    (cui, doc['SOPInstanceUID']))
+                pgCursor.execute(
+                    sql.SQL("INSERT INTO {tab} (cui, SOPInstanceUID) VALUES (%s, %s) ").format(tab=sql.Identifier(pgCUISOPTableName)),
+                    (cui, doc['SOPInstanceUID']),
+                )
             pgConnection.commit()
             pgCursor.close()
             logging.info('insert %d CUIs completed for %s' % (len(list_of_cui), doc['SOPInstanceUID']))
@@ -304,7 +322,7 @@ def postgres_query_annotation(featurename, featureval):
     if featurename == 'cui':
         postgres_query_cui(featureval)
         return
-    query_obj = [ { featurename:featureval } ]
+    query_obj = [ { featurename:featureval}]
     if verbose:
         print('postgres_query_annotation: %s' % query_obj)
     pgCursor = pgConnection.cursor()
@@ -314,10 +332,12 @@ def postgres_query_annotation(featurename, featureval):
     # uses helper func Json to ensure python object properly converted to json string (could use json.dumps too)
     if verbose:
         pgCursor.execute(" SET enable_seqscan TO off;")
-        pgCursor.execute("EXPLAIN ANALYZE SELECT * FROM semehr_results WHERE semehr_results->'annotations'  @>  %s::jsonb;", ( Json( query_obj ), ))
+        pgCursor.execute("EXPLAIN ANALYZE SELECT * FROM semehr_results WHERE semehr_results->'annotations'  @>  %s::jsonb;", ( Json( query_obj),))
         print(pgCursor.fetchall())
-    pgCursor.execute(sql.SQL("SELECT * FROM {} WHERE semehr_results->'annotations'  @>  %s::jsonb;").format(sql.Identifier(pgTableName)),
-        ( Json( query_obj ), ))
+    pgCursor.execute(
+        sql.SQL("SELECT * FROM {} WHERE semehr_results->'annotations'  @>  %s::jsonb;").format(sql.Identifier(pgTableName)),
+        ( Json( query_obj),),
+    )
     n=0
     for (SOPInstanceUID, semehr_results) in pgCursor:
         print('Got one %s' % (SOPInstanceUID)) # first annotation would be: semehr_results['annotations'][0]
@@ -347,8 +367,8 @@ def postgres_query_key(featurename, featureval, countOnly):
         sql_where = sql.SQL("cast_to_date(semehr_results->>{f}) = %s;").format(f = sql.Literal(featurename))
     # XXX need to modify query for dates to use the cast_to_date function so the index is used.
     if verbose:
-        print(pgCursor.mogrify(sql_select + sql_from + sql_where, ( featureval, )).decode())
-    pgCursor.execute(sql_select + sql_from + sql_where, ( featureval, ))
+        print(pgCursor.mogrify(sql_select + sql_from + sql_where, ( featureval,)).decode())
+    pgCursor.execute(sql_select + sql_from + sql_where, ( featureval,))
     if countOnly:
         # returns (n,) tuple so take first element
         n = int(next(pgCursor)[0])
@@ -417,8 +437,10 @@ def main():
     stdout_handler.setLevel(logging.WARNING)
     if verbose:
         stdout_handler.setLevel(logging.INFO)
-    logging.basicConfig(handlers=[file_handler, stdout_handler],
-        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
+    logging.basicConfig(
+        handlers=[file_handler, stdout_handler],
+        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+    )
 
     postgres_open()
 

@@ -30,7 +30,7 @@ mongoConnection = MongoClient(host=mongoHost, username=mongoUser, password=mongo
 mongoDb = mongoConnection[mongoDatabaseName]
 mongoCollection = mongoDb[mongoCollectionName]
 #cursor = mongoCollection.find_one( {  } )
-cursor = mongoCollection.aggregate([{'$sample': {'size': num_random_docs }}])
+cursor = mongoCollection.aggregate([{'$sample': {'size': num_random_docs}}])
 jsonstr = dumps(cursor)
 jsonarray = json.loads(jsonstr)
 for jsondict in jsonarray:

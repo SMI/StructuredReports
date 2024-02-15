@@ -63,8 +63,8 @@ def body_part_lookup(bpe):
             'BACK': False,
             'HIP': False,
             'EXTREMITY': False,
-            'TRUNK': False
-        }
+            'TRUNK': False,
+    }
     if not bpe or len(bpe) < 4:
         return rc
     if 'BRAIN' in bpe or 'HEAD' in bpe:
@@ -103,6 +103,6 @@ with open('sample_SR.csv', 'w', newline='') as fd:
             'StudyInstanceUID':  series['StudyInstanceUID'],
             'PatientID':         image['PatientID'],
             'ContentDate':       series['SeriesDate'],
-            'ModalitiesInStudy': '%s\\SR' % series['Modality']
-            })
+            'ModalitiesInStudy': '%s\\SR' % series['Modality'],
+        })
         id += 1

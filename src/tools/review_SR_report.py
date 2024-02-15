@@ -53,10 +53,12 @@ class SRReviewDB():
 
     def __init__(self):
         self.db=DAL('sqlite://review_SR_report.sqlite.db', folder = SRReviewDB.db_path) # debug=True
-        self.db.define_table('ReviewedSRs', Field('filename', required=True, notnull=True), # unique=True
+        self.db.define_table(
+            'ReviewedSRs', Field('filename', required=True, notnull=True), # unique=True
             Field('word'), Field('review'),
             Field('last_modified', type='datetime'),
-            Field('last_modified_by'))
+            Field('last_modified_by'),
+        )
         self.db.executesql('CREATE INDEX IF NOT EXISTS filenameidx ON ReviewedSRs (filename);')
         self.username = getpass.getuser() # os.getlogin fails when in a GUI
 
@@ -78,8 +80,8 @@ class SRReviewDB():
         review = ''
         for row in self.db(
                 (self.db.ReviewedSRs.filename == filename) &
-                (self.db.ReviewedSRs.word == word)
-                ).select():
+                (self.db.ReviewedSRs.word == word),
+        ).select():
             review = row['review']
         return review
 
@@ -96,12 +98,15 @@ class SRReviewDB():
         if already_reviewed:
             self.db((self.db.ReviewedSRs.filename == filename) & (self.db.ReviewedSRs.word == word)).update(
                 review = review,
-                last_modified = lastmod, last_modified_by = self.username)
+                last_modified = lastmod, last_modified_by = self.username,
+            )
         else:
-            self.db.ReviewedSRs.update_or_insert(filename=filename,
+            self.db.ReviewedSRs.update_or_insert(
+                filename=filename,
                 word = word,
                 review = review,
-                last_modified = lastmod, last_modified_by = self.username)
+                last_modified = lastmod, last_modified_by = self.username,
+            )
         self.db.commit()
 
     def mark_as_false_positive(self, filename, word):
@@ -200,9 +205,9 @@ def load_report(report_filename, root_dir = ''):
             'classif': classif,
             'context': context,
             'offset': offset,
-            'filename': os.path.join(root_dir, filename) }
+            'filename': os.path.join(root_dir, filename), }
         if word not in csv_words:
-            csv_words[word] = [ word_dict ]
+            csv_words[word] = [ word_dict]
         else:
             csv_words[word].append(word_dict)
     csv_fd.close()
@@ -266,10 +271,12 @@ def create_gui(csv_words):
         [gui.Combo([''], size=(80,1), key='Files', enable_events=True)],
         [gui.Multiline("", size=(80,15), key='Output')],
         #[gui.Button('Select word'), gui.Button('Load')], # not needed
-        [gui.Button('Mark as False Positive', button_color=good_button_colour),
+        [
+            gui.Button('Mark as False Positive', button_color=good_button_colour),
             gui.Button('Reviewed', button_color=other_button_colour),
-            gui.Button('Mark as PII', button_color=bad_button_colour)],
-        [gui.Button('Quit', button_color=default_button_colour)]
+            gui.Button('Mark as PII', button_color=bad_button_colour),
+        ],
+        [gui.Button('Quit', button_color=default_button_colour)],
     ]
 
     gui_window = gui.Window('Reviewer', gui_layout)

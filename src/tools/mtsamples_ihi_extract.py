@@ -44,7 +44,7 @@ for row in reader:
             "SeriesInstanceUID": '1.2.34.5678.%04d' % doc_num,
             "ContentDate": '20201005',
             "ModalitiesInStudy": 'CT\\SR',
-            "PatientID": '1234567890'
+            "PatientID": '1234567890',
         }
         print(json.dumps(metadict), file=meta_fp)
     doc_num += 1

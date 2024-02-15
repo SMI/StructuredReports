@@ -41,7 +41,8 @@ def _get_pika_connection_parameters(yaml_dict):
         virtual_host=yaml_dict['RabbitOptions']['RabbitMqVirtualHost'],
         credentials=pika.PlainCredentials(
             username=yaml_dict['RabbitOptions']['RabbitMqUserName'],
-            password=yaml_dict['RabbitOptions']['RabbitMqPassword'])
+            password=yaml_dict['RabbitOptions']['RabbitMqPassword'],
+        ),
     )
 
 def _get_pika_message_properties(producerExecutableName, producerProcessId = -1):
@@ -61,8 +62,8 @@ def _get_pika_message_properties(producerExecutableName, producerProcessId = -1)
             "ProducerExecutableName": str(producerExecutableName),
             "ProducerProcessID": int(producerProcessId),
             #"OriginalPublishTimestamp": int(ts), # XXX causes class java.lang.Integer cannot be cast to class java.lang.Long AND similar in .net because they expect long but pika sends int.
-            "Parents": ""
-        }
+            "Parents": "",
+        },
     )
 
 
@@ -202,11 +203,13 @@ class RabbitProducer:
         self._pika_connection.close()
 
     def sendMessage(self, msg : smiMessage):
-        self._pika_model.basic_publish(exchange = self._exchange,
-                        routing_key = self._routingKey,
-                        body = msg.to_json(),
-                        properties = _get_pika_message_properties(self._producerName, self._producerPID),
-                        mandatory = True)
+        self._pika_model.basic_publish(
+            exchange = self._exchange,
+            routing_key = self._routingKey,
+            body = msg.to_json(),
+            properties = _get_pika_message_properties(self._producerName, self._producerPID),
+            mandatory = True,
+        )
 
 
 # ----------------------------------------------------------------------
@@ -227,11 +230,13 @@ def send_CTP_Start_Message(yaml_dict, input_file, extraction_dir, project_name):
     pika_connection = pika.BlockingConnection(_get_pika_connection_parameters(yaml_dict))
     pika_model = pika_connection.channel()
 
-    pika_model.basic_publish(exchange = "", # rabbit will send direct to the named queue:
-                            routing_key = queueName,
-                            body = msg.to_json(),
-                            properties = _get_pika_message_properties("myProducerName", 1234),
-                            mandatory = True)
+    pika_model.basic_publish(
+        exchange = "", # rabbit will send direct to the named queue:
+        routing_key = queueName,
+        body = msg.to_json(),
+        properties = _get_pika_message_properties("myProducerName", 1234),
+        mandatory = True,
+    )
     print("Published %s" % msg.to_json())
 
 
@@ -285,11 +290,13 @@ def send_IsIdentifiable_Start_Message(yaml_dict, extraction_directory, anonymise
     pika_model = pika_connection.channel()
 
     msg = IsIdentifiable_Start_Message(yaml_dict, extraction_directory, anonymised_filename, project_number)
-    pika_model.basic_publish(exchange = "", # rabbit will send direct to the named queue:
-                            routing_key = queueName,
-                            body = msg.to_json(),
-                            properties = _get_pika_message_properties("myProducerName", 1234),
-                            mandatory = True)
+    pika_model.basic_publish(
+        exchange = "", # rabbit will send direct to the named queue:
+        routing_key = queueName,
+        body = msg.to_json(),
+        properties = _get_pika_message_properties("myProducerName", 1234),
+        mandatory = True,
+    )
     print("Published %s" % msg.to_json())
 
 

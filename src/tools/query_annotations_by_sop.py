@@ -54,7 +54,7 @@ mapper = UMLSmap(settings = pgconf)
 # For every concept of interest, find all the 'narrower' CUIs
 cui_set2 = set()
 for cui in cui_set:
-    cui_set2.update( mapper.cui_narrower(cui) )
+    cui_set2.update( mapper.cui_narrower(cui))
 print('number of narrow concepts %d' % len(cui_set2))
 
 # For writing log file
@@ -118,9 +118,17 @@ print("SRs with at least one narrower concept of interest: %d" % num_int2)
 min_count=2
 print( "Primary concept occurrences:")
 print( "      <fewer than %d occurrences omitted>" % min_count)
-print("\n".join(["%4d = %s (%s)"%(int1_counts[k],k,mapper.cui_to_label(k))
-    for k in sorted(int1_counts, key=int1_counts.get) if int1_counts[k]>=min_count]))
+print(
+    "\n".join([
+        "%4d = %s (%s)"%(int1_counts[k],k,mapper.cui_to_label(k))
+        for k in sorted(int1_counts, key=int1_counts.get) if int1_counts[k]>=min_count
+    ]),
+)
 print( "Narrower concept occurrences:")
 print( "      <fewer than %d occurrences omitted>" % min_count)
-print("\n".join(["%4d = %s (%s)"%(int2_counts[k],k,mapper.cui_to_label(k))
-    for k in sorted(int2_counts, key=int2_counts.get) if int2_counts[k]>=min_count]))
+print(
+    "\n".join([
+        "%4d = %s (%s)"%(int2_counts[k],k,mapper.cui_to_label(k))
+        for k in sorted(int2_counts, key=int2_counts.get) if int2_counts[k]>=min_count
+    ]),
+)

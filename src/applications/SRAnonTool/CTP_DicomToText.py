@@ -220,8 +220,10 @@ if __name__ == '__main__':
     # Now we know the LogsRoot we can set up logging
     log_file_handler = logging.handlers.RotatingFileHandler(filename = os.path.join(log_dir,'SRAnonymiser.log'), maxBytes=64*1024*1024, backupCount=9)
     log_stdout_handler = logging.StreamHandler(sys.stdout)
-    logging.basicConfig(level=logging.INFO, handlers=[log_file_handler, log_stdout_handler],
-        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO, handlers=[log_file_handler, log_stdout_handler],
+        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+    )
 
     # ---------------------------------------------------------------------
     # Initialise the PatientID mapping by opening a DB connection
@@ -238,7 +240,7 @@ if __name__ == '__main__':
         #'include_header' : True,
         #'replace_HTML_entities' : True,
         'replace_HTML_char' : '.',
-        'replace_newline_char' : '\n'
+        'replace_newline_char' : '\n',
     }
     if args.replace_html:
         DicomTextArgs['replace_HTML_char'] = args.replace_html

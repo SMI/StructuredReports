@@ -145,7 +145,7 @@ SOPClassUID_mapping = {
     '1.2.840.10008.1.2.6.1': 'RFC 2557 MIME Encapsulation',
     '1.2.840.10008.1.2.4.100': 'MPEG2 Main Profile Main Level',
     '1.2.840.10008.1.2.4.102': 'MPEG-4 AVC/H.264  High Profil Level 4.1',
-    '1.2.840.10008.1.2.4.103': 'MPEG-4 AVC/H.264 BD High Profil Level 4.1'
+    '1.2.840.10008.1.2.4.103': 'MPEG-4 AVC/H.264 BD High Profil Level 4.1',
 }
 
 

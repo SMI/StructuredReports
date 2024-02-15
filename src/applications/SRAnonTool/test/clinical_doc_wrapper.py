@@ -63,7 +63,7 @@ def fake_anonymise(doc_filename):
 	# Create the XML dict by finding the pattern in the text:
 	with open(txt_file, 'r') as fd:
 		txt = fd.read()
-	xml_dict = [{ 'start_char': m.start(), 'end_char': m.end(), 'text': fake_pattern } for m in re.finditer(fake_pattern, txt)]
+	xml_dict = [{ 'start_char': m.start(), 'end_char': m.end(), 'text': fake_pattern} for m in re.finditer(fake_pattern, txt)]
 	# Create the XML file:
 	xml_str = Knowtator.dict_to_annotation_xml_string(xml_dict)
 	with open(xml_file, 'w') as fd:
@@ -80,8 +80,10 @@ def main():
 	input_dir = os.path.join(semehr_root_dir, 'data', 'input_docs')
 	output_dir = os.path.join(semehr_root_dir, 'data', 'anonymised')
 
-	logging.basicConfig(level=logging.DEBUG,
-		format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
+	logging.basicConfig(
+     level=logging.DEBUG,
+     format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+ )
 
 	parser = argparse.ArgumentParser(description='SemEHR-Anonymiser')
 	parser.add_argument('-s', dest='semehr_dir', action="store", help='root path for semehr, default %s' % semehr_root_dir)

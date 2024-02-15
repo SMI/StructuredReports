@@ -138,7 +138,7 @@ def sr_decode_PNAME(pname):
 
 def test_sr_decode_PNAME():
     assert sr_decode_PNAME('Fukuda^Katherine M.^^^M. D.') == 'Katherine M. Fukuda M. D.'
-    assert sr_decode_PNAME({ "Alphabetic" : 'Fukuda^Katherine M.^^^M. D.' }) == 'Katherine M. Fukuda M. D.'
+    assert sr_decode_PNAME({ "Alphabetic" : 'Fukuda^Katherine M.^^^M. D.'}) == 'Katherine M. Fukuda M. D.'
 
 
 # ---------------------------------------------------------------------
@@ -153,7 +153,7 @@ def sr_decode_ReferencedSOPSequence(rss):
 
 def test_sr_decode_ReferencedSOPSequence():
     assert sr_decode_ReferencedSOPSequence([]) == ''
-    assert sr_decode_ReferencedSOPSequence( [ { 'ReferencedSOPInstanceUID' : 'rsiuid' } ] ) == 'rsiuid'
+    assert sr_decode_ReferencedSOPSequence( [ { 'ReferencedSOPInstanceUID' : 'rsiuid'}]) == 'rsiuid'
 
 
 # ---------------------------------------------------------------------
@@ -170,7 +170,7 @@ def sr_decode_ConceptNameCodeSequence(cncs):
 
 def test_sr_decode_ConceptNameCodeSequence():
     assert sr_decode_ConceptNameCodeSequence([]) == ''
-    assert sr_decode_ConceptNameCodeSequence( [ { 'CodeMeaning': 'cm', 'CodeValue': 'cv' } ] ) == 'cm'
+    assert sr_decode_ConceptNameCodeSequence( [ { 'CodeMeaning': 'cm', 'CodeValue': 'cv'}]) == 'cm'
 
 
 # ---------------------------------------------------------------------
@@ -188,7 +188,7 @@ def sr_decode_SourceImageSequence(sis):
 
 def test_sr_decode_SourceImageSequence():
     assert sr_decode_SourceImageSequence([]) == ''
-    assert sr_decode_SourceImageSequence( [ {'ReferencedSOPClassUID':'1.2', 'ReferencedSOPInstanceUID':'1.2.3.4.5'} ] ) == '1.2.3.4.5'
+    assert sr_decode_SourceImageSequence( [ {'ReferencedSOPClassUID':'1.2', 'ReferencedSOPInstanceUID':'1.2.3.4.5'}]) == '1.2.3.4.5'
 
 
 # ---------------------------------------------------------------------
@@ -208,7 +208,7 @@ def sr_decode_MeasurementUnitsCodeSequence(mucs):
 
 def test_sr_decode_MeasurementUnitsCodeSequence():
     assert sr_decode_MeasurementUnitsCodeSequence([]) == ''
-    assert sr_decode_MeasurementUnitsCodeSequence( [ { 'CodeMeaning': 'cm', 'CodeValue': 'cv' } ] ) == 'cv'
+    assert sr_decode_MeasurementUnitsCodeSequence( [ { 'CodeMeaning': 'cm', 'CodeValue': 'cv'}]) == 'cv'
 
 
 def sr_decode_MeasuredValueSequence(mvs):
@@ -229,10 +229,10 @@ def sr_decode_MeasuredValueSequence(mvs):
 
 def test_sr_decode_MeasuredValueSequence():
     assert sr_decode_MeasuredValueSequence(None) == ''
-    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': None, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm' } ] } ] ) == 'None mm'
-    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': { 'vr':'DS' }, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm' } ] } ] ) == ' mm'
-    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': { 'vr':'DS', 'Value': '23' }, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm' } ] } ] ) == '23 mm'
-    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': '23', 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm' } ] } ] ) == '23 mm'
+    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': None, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm'}]}]) == 'None mm'
+    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': { 'vr':'DS'}, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm'}]}]) == ' mm'
+    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': { 'vr':'DS', 'Value': '23'}, 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm'}]}]) == '23 mm'
+    assert sr_decode_MeasuredValueSequence( [ { 'NumericValue': '23', 'MeasurementUnitsCodeSequence': [ { 'CodeMeaning': 'cm', 'CodeValue': 'mm'}]}]) == '23 mm'
 
 
 

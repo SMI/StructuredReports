@@ -68,14 +68,14 @@ def annotation_xml_to_dict(xmlroot):
                     end = int(prop.attrib['end'])
                 elif prop.tag == 'spannedText':
                     txt = prop.text
-            item_list.append({ 'start_char':start, 'end_char':end, 'text':txt })
+            item_list.append({ 'start_char':start, 'end_char':end, 'text':txt})
         elif item.tag == 'classMention':
             # assuming order is always annotation followed by classMention
             # update the last annotation with this class, being "pref(cui)"
             for prop in item:
                 if prop.tag == 'mentionClass' and '(' in prop.attrib['id']:
                     (pref, cui) = re.search(r'(.*)\((.*)\)', prop.attrib['id']).groups()
-                    item_list.append( { 'pref': pref, 'cui': cui, **item_list.pop() } )
+                    item_list.append( { 'pref': pref, 'cui': cui, **item_list.pop()})
     return(sorted(item_list, key=itemgetter('start_char')))
 
 
@@ -152,8 +152,8 @@ def test_Knowtator():
     #xmldictlist = knowtator_xml_to_dict(xmlroot)
     # Test round-trip starting from a dict:
     adict = [
-        { 'start_char': 5, 'end_char': 7, 'text': 'stuff' },
-        { 'start_char': 15, 'end_char': 17, 'text': 'nonsense', 'pref': 'nothing', 'cui': 'C000' }
+        { 'start_char': 5, 'end_char': 7, 'text': 'stuff'},
+        { 'start_char': 15, 'end_char': 17, 'text': 'nonsense', 'pref': 'nothing', 'cui': 'C000'},
     ]
     axmlstr = dict_to_annotation_xml_string(adict)
     axmlroot = xml.etree.ElementTree.fromstring(axmlstr)

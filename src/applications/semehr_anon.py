@@ -114,8 +114,10 @@ def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, wr
     input_dir = tempfile.TemporaryDirectory()
     output_dir = tempfile.TemporaryDirectory()
     shutil.copyfile(input_file, os.path.join(input_dir.name, os.path.basename(input_file)))
-    anonymise_dir(input_dir.name, output_dir.name, semehr_dir, semehr_anon_cfg_file,
-        write_xml=write_xml, write_all=write_all)
+    anonymise_dir(
+        input_dir.name, output_dir.name, semehr_dir, semehr_anon_cfg_file,
+        write_xml=write_xml, write_all=write_all,
+    )
     shutil.copyfile(os.path.join(output_dir.name, os.path.basename(input_file)), output_file)
     if write_xml:
         xml_src = os.path.join(output_dir.name, os.path.basename(input_file) + '.knowtator.xml')
@@ -137,8 +139,10 @@ def main():
     file_handler = logging.handlers.RotatingFileHandler(filename=log_file, maxBytes=256*1024*1024, backupCount=9)
     stdout_handler = logging.StreamHandler(sys.stdout)
     handlers = [file_handler, stdout_handler]
-    logging.basicConfig(level=logging.DEBUG, handlers=handlers,
-        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.DEBUG, handlers=handlers,
+        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+    )
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Redact text given knowtator XML')
@@ -166,12 +170,16 @@ def main():
     semehr_anon_cfg_file = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation', 'conf', 'anonymisation_task.json') # i.e. /opt/semehr/CogStack-SemEHR/anonymisation/conf/anonymisation_task.json
 
     if os.path.isfile(args.input):
-        anonymise_file(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
-            write_xml=args.write_xml, write_all=True)
+        anonymise_file(
+            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            write_xml=args.write_xml, write_all=True,
+        )
 
     elif os.path.isdir(args.input):
-        anonymise_dir(args.input, args.output, semehr_dir, semehr_anon_cfg_file,
-            write_xml=args.write_xml, write_all=True)
+        anonymise_dir(
+            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            write_xml=args.write_xml, write_all=True,
+        )
 
 
 if __name__ == '__main__':

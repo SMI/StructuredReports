@@ -84,7 +84,7 @@ mongoIndexes = [
     "features.STY",          "annotations.sty",
     "features.string_orig",  "annotations.str",
     "features.PREF",         "annotations.pref",
-    "features.TUI" # this is only available in output_docs
+    "features.TUI", # this is only available in output_docs
 ]
 
 
@@ -127,23 +127,24 @@ def doc_to_mongo(doc):
 def test_doc_to_mongo():
     # Test output_docs format
     output_docs = { 'annotations': [
-        [ {'type':'Mention', 'features': {'STY':'Finding'}}, {'type':'Mention', 'features': {'STY':'Finding'}} ],
-        [ {'type':'Phenotype', 'start':0} ],
-        [ {'type':'Sentence','start':0}] ]}
+        [ {'type':'Mention', 'features': {'STY':'Finding'}}, {'type':'Mention', 'features': {'STY':'Finding'}}],
+        [ {'type':'Phenotype', 'start':0}],
+        [ {'type':'Sentence','start':0}], ],
+    }
     expected_result = {
-        'annotations': [{ 'features': { 'STY': 'Finding' } }, {'features':{'STY':'Finding'}}],
+        'annotations': [{ 'features': { 'STY': 'Finding'}}, {'features':{'STY':'Finding'}}],
         'phenotypes': [{'start':0}],
-        'sentences': [{'start':0}] }
+        'sentences': [{'start':0}], }
     assert(doc_to_mongo(output_docs) == expected_result)
     # Test semehr_results format
     semehr_results = {
-        'annotations': [ {'sty':'Finding'} ],
-        'phenotypes': [ {'start':0} ],
-        'sentences': [ {'start':0} ] } 
+        'annotations': [ {'sty':'Finding'}],
+        'phenotypes': [ {'start':0}],
+        'sentences': [ {'start':0}], } 
     expected_result = {
-        'annotations': [ { 'sty': 'Finding' } ],
-        'phenotypes': [ {'start':0} ],
-        'sentences': [ {'start':0}] }
+        'annotations': [ { 'sty': 'Finding'}],
+        'phenotypes': [ {'start':0}],
+        'sentences': [ {'start':0}], }
     assert(doc_to_mongo(semehr_results) == expected_result)
 
 
@@ -198,11 +199,11 @@ def mongo_create_indexes():
     as defined globally in mongoIndexes.
     """
     for idx in mongoIndexes:
-        rc = mongoCollection.create_index( [ (idx, ASCENDING) ] )
+        rc = mongoCollection.create_index( [ (idx, ASCENDING)])
         logging.info('create_index(%s) on %s rc = %s' % (idx, mongoCollectionName, rc))
     # Create a "text" index on the "pref" field. Can add other fields into the same index,
     # BUT can only have ONE text index.
-    rc = mongoCollection.create_index( [ ('annotations.pref', TEXT) ] )
+    rc = mongoCollection.create_index( [ ('annotations.pref', TEXT)])
     logging.info('create_index(%s, TEXT) on %s rc = %s' % ('annotations.pref', mongoCollectionName, rc))
 
 
@@ -288,13 +289,13 @@ def mongo_query_feature(featurename, featureval):
     # append .explain() to get the query explanation
     # append .explain()['executionStats']
     # Query for annotations which have the feature AND are negated/affirmed
-    query_obj = { featurename : featureval, 'negation':'Negated' }
+    query_obj = { featurename : featureval, 'negation':'Negated'}
     # If you want to search for a regex then use this:
     #query_obj = { featurename : { "$regex": featureval }, 'negation':'Negated' }
     # If you want to search using the "text" index you need this:
     # BUT can it include other clauses like negation?
     #query_obj = { '$text': { '$search': featureval } }
-    mongoCursor = mongoCollection.find( { "annotations" : { "$elemMatch": query_obj } } )
+    mongoCursor = mongoCollection.find( { "annotations" : { "$elemMatch": query_obj}})
     queryStats = mongoCursor.explain()['executionStats']
     print('Number of results: %d' % queryStats['nReturned'])
     print('Query time: %s ms' % queryStats['executionTimeMillis'])
@@ -354,8 +355,10 @@ def main():
 
     file_handler = logging.FileHandler(filename='semehr_to_mongo.log')
     stdout_handler = logging.StreamHandler(sys.stdout)
-    logging.basicConfig(level=logging.DEBUG, handlers=[file_handler, stdout_handler],
-        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.DEBUG, handlers=[file_handler, stdout_handler],
+        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+    )
 
     mongo_open()
 

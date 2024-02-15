@@ -41,8 +41,12 @@ for fn in sys.argv[1:]:
     missing = meta-annot
     percent_missing = 100.0*missing/meta
     msg = 'ERROR' if percent_missing > max_bad_percent else ''
-    print("%s extracted %d ->anon %d ->annot %d (%d missing %.1f%%) %s" % (fn,
-      meta, anon, annot, missing, percent_missing, msg))
+    print(
+        "%s extracted %d ->anon %d ->annot %d (%d missing %.1f%%) %s" % (
+            fn,
+            meta, anon, annot, missing, percent_missing, msg,
+        ),
+    )
     if percent_missing < max_bad_percent:
         year_count[year] = year_count.get(year,0)+1
         year_docs[year]  = year_docs.get(year,0) + meta

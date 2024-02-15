@@ -57,8 +57,14 @@ cui_fd, cui_col = opener(cui_filename, cui_column_name)
 sop_fd, sop_col = opener(sop_filename, sop_column_name)
 
 print('{"passphrase":"%s",' % passphrase)
-print('"terms":[ {"q":[%s]}],' %
-    ','.join(reader(cui_fd, cui_col)))
-print('"filter":{"%s":[%s]},' % (sop_type.lower(),
-    ','.join(reader(sop_fd, sop_col))))
+print(
+    '"terms":[ {"q":[%s]}],' %
+    ','.join(reader(cui_fd, cui_col)),
+)
+print(
+    '"filter":{"%s":[%s]},' % (
+        sop_type.lower(),
+        ','.join(reader(sop_fd, sop_col)),
+    ),
+)
 print('"returnFields":%s}' % json.dumps(returnfields))

@@ -95,7 +95,7 @@ class RedactingHTMLParser(HTMLParser):
             # Rebuild string by cutting out redacted section and replacing it
             self.html_str = self.html_str[:startoffset] + redact_str + self.html_str[endoffset:]
             # Create array of offsets which might be returned
-            self.rc.append( (startoffset, endoffset) )
+            self.rc.append( (startoffset, endoffset))
 
     def prepare_next(self, data_active):
         self.data_active = data_active

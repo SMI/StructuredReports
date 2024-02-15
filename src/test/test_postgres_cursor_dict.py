@@ -20,7 +20,7 @@ pgConnection = psycopg2.connect(host='localhost', user='semehr', password='semeh
 #pgCursor = pgConnection.cursor(cursor_factory = RealDictCursor)
 pgCursor = pgConnection.cursor()
 
-colnames=[ 'SOPInstanceUID', 'StudyInstanceUID', 'SeriesInstanceUID' ]
+colnames=[ 'SOPInstanceUID', 'StudyInstanceUID', 'SeriesInstanceUID']
 
 # SOPInstanceUID,semehr_results ->> 'SOPInstanceUID',semehr_results ->> 'StudyInstanceUID' 
 sql = """SELECT SOPInstanceUID,semehr_results ->> 'StudyInstanceUID',semehr_results ->> 'SeriesInstanceUID' FROM "semehr_results" WHERE (annotation_array_as_text_array(semehr_results, 'cui') && ARRAY['C0224357','C1744536','C1279035','C0224337','C1183784','C0224338','C0224358','C0205076','C1744608','C0581269','C0222762','C0225799','C1744535']) AND (semehr_results->'annotations' @> '[{"cui":"C0205076"}]')  AND (regexp_split_to_array(semehr_results->>'ModalitiesInStudy', '\\\\') && ARRAY['MR','CT'])  AND (cast_to_date(semehr_results->>'ContentDate') BETWEEN '20200202' AND '20210907')"""

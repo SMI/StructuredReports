@@ -61,5 +61,5 @@ setup(
     description='Common Python modules for SmiServices',
     long_description='SmiServices common modules provide useful functions for reading DICOM files, especially Structured Reports, and interacting with RabbitMQ and MongoDB',
     requires=[translate_req(r) for r in requirements],
-    install_requires=requirements
+    install_requires=requirements,
 )

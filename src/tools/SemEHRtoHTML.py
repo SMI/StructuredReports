@@ -150,7 +150,7 @@ for input_file in glob.glob(os.path.join(semehr_output_dir, '*')):
                         get_feature_attr('Experiencer') + ', ' +
                         get_feature_attr('Negation') + ', ' +
                         get_feature_attr('Temporality') +
-                        ')'
+                        ')',
                 }
                 semehr_ents.append(item_ent)
 
@@ -159,34 +159,34 @@ for input_file in glob.glob(os.path.join(semehr_output_dir, '*')):
                 # The label is the 'type' of the node and
                 # the relationship is how it relates to the experiencer (patient)
                 concept_to_relationship_map = {
-                    'Acquired Abnormality':    { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Anatomical Abnormality':  { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Antibiotic':              { 'label': 'Drug', 'rel': 'IS_ADMINISTERED' },
-                    'Body Location or Region': { 'label': 'Body', 'rel': 'HAS_BODY' },
-                    'Body Part, Organ, or Organ Component': { 'label': 'Body', 'rel': 'HAS_BODY' },
-                    'Body Space or Junction':  { 'label': 'Body', 'rel': 'HAS_BODY' },
-                    'Body System':             { 'label': 'Body', 'rel': 'HAS_BODY' },
-                    'Clinical Attribute':      { 'label': 'Clinical', 'rel': 'IS_CLINICAL' },  # XXX ? (eg. "age")
-                    'Clinical Drug':           { 'label': 'Drug', 'rel': 'IS_ADMINISTERED' },
-                    'Congenital Abnormality':  { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Diagnostic Procedure':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT' },
-                    'Disease or Syndrome':     { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Disease or Syndrome,Anatomical Abnormality': { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Finding':                 { 'label': 'Condition', 'rel': 'HAS_FINDING' },  # XXX ? (eg. "intact")
-                    'Health Care Activity':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT' },
-                    'Health Care Related Organization': { 'label': 'Org', 'rel': 'AT_LOCATION' },
-                    'Individual Behavior':     { 'label': 'Condition', 'rel': 'IS_BEHAVIOUR' },  # XXX ? (eg. "impression")
-                    'Injury or Poisoning':     { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Laboratory Procedure':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT' },
-                    'Mental Process':          { 'label': 'Condition', 'rel': 'IS_MENTALPROCESS' }, # XXX ?
-                    'Neoplastic Process':      { 'label': 'Condition', 'rel': 'IS_NEOPLASTIC' }, # XXX ?
-                    'Pathologic Function':     { 'label': 'Condition', 'rel': 'IS_PATHOLOGIC' }, # XXX ?
-                    'Pharmacologic Substance': { 'label': 'Drug', 'rel': 'HAS_PHARMACOLOGIC' }, # XXX ?
-                    'Research Activity':       { 'label': 'Treatment', 'rel': 'IS_RESEARCH' },  # XXX ? (eg. "study")
-                    'Sign or Symptom':         { 'label': 'Condition', 'rel': 'HAS_CONDITION' },
-                    'Temporal Concept':        { 'label': 'Temporal', 'rel': 'IS_TEMPORAL' },  # XXX ? (eg. "old" or "year")
-                    'Therapeutic or Preventive Procedure': { 'label': 'Treatment', 'rel': 'HAS_TREATMENT' },
-                    'Tissue':                  { 'label': 'Body', 'rel': 'HAS_BODY' },
+                    'Acquired Abnormality':    { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Anatomical Abnormality':  { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Antibiotic':              { 'label': 'Drug', 'rel': 'IS_ADMINISTERED'},
+                    'Body Location or Region': { 'label': 'Body', 'rel': 'HAS_BODY'},
+                    'Body Part, Organ, or Organ Component': { 'label': 'Body', 'rel': 'HAS_BODY'},
+                    'Body Space or Junction':  { 'label': 'Body', 'rel': 'HAS_BODY'},
+                    'Body System':             { 'label': 'Body', 'rel': 'HAS_BODY'},
+                    'Clinical Attribute':      { 'label': 'Clinical', 'rel': 'IS_CLINICAL'},  # XXX ? (eg. "age")
+                    'Clinical Drug':           { 'label': 'Drug', 'rel': 'IS_ADMINISTERED'},
+                    'Congenital Abnormality':  { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Diagnostic Procedure':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT'},
+                    'Disease or Syndrome':     { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Disease or Syndrome,Anatomical Abnormality': { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Finding':                 { 'label': 'Condition', 'rel': 'HAS_FINDING'},  # XXX ? (eg. "intact")
+                    'Health Care Activity':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT'},
+                    'Health Care Related Organization': { 'label': 'Org', 'rel': 'AT_LOCATION'},
+                    'Individual Behavior':     { 'label': 'Condition', 'rel': 'IS_BEHAVIOUR'},  # XXX ? (eg. "impression")
+                    'Injury or Poisoning':     { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Laboratory Procedure':    { 'label': 'Treatment', 'rel': 'HAS_TREATMENT'},
+                    'Mental Process':          { 'label': 'Condition', 'rel': 'IS_MENTALPROCESS'}, # XXX ?
+                    'Neoplastic Process':      { 'label': 'Condition', 'rel': 'IS_NEOPLASTIC'}, # XXX ?
+                    'Pathologic Function':     { 'label': 'Condition', 'rel': 'IS_PATHOLOGIC'}, # XXX ?
+                    'Pharmacologic Substance': { 'label': 'Drug', 'rel': 'HAS_PHARMACOLOGIC'}, # XXX ?
+                    'Research Activity':       { 'label': 'Treatment', 'rel': 'IS_RESEARCH'},  # XXX ? (eg. "study")
+                    'Sign or Symptom':         { 'label': 'Condition', 'rel': 'HAS_CONDITION'},
+                    'Temporal Concept':        { 'label': 'Temporal', 'rel': 'IS_TEMPORAL'},  # XXX ? (eg. "old" or "year")
+                    'Therapeutic or Preventive Procedure': { 'label': 'Treatment', 'rel': 'HAS_TREATMENT'},
+                    'Tissue':                  { 'label': 'Body', 'rel': 'HAS_BODY'},
                 }
 
                 # For a given concept return the relationship
@@ -244,7 +244,7 @@ for input_file in glob.glob(os.path.join(semehr_output_dir, '*')):
             item_ent = {
                 'start' : ent.start_char,
                 'end'   : ent.end_char,
-                'label' : ent.label_
+                'label' : ent.label_,
             }
             new_ents.append(item_ent)
 
@@ -253,7 +253,7 @@ for input_file in glob.glob(os.path.join(semehr_output_dir, '*')):
 
         # Create a new dict for SpaCy's HTML renderer
         # containing text, title and ents
-        render_dict = { 'text' : original_text, 'title' : None }
+        render_dict = { 'text' : original_text, 'title' : None}
         render_dict['ents'] = sorted(new_ents, key=itemgetter('start'))
 
         # Convert to HTML
