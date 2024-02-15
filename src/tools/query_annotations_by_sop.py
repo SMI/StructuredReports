@@ -67,8 +67,8 @@ num_empty = 0
 num_int1 = 0
 num_int2 = 0
 
-int1_counts = dict()
-int2_counts = dict()
+int1_counts = {}
+int2_counts = {}
 
 for filename in filename_list:
     print('Reading list of files from %s' % filename)
