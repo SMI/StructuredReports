@@ -19,4 +19,3 @@ else
 	# New style service
 	sudo systemctl restart mongod
 fi
-

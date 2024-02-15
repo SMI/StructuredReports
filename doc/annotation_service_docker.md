@@ -89,4 +89,3 @@ docker exec -it $(docker ps|grep annotation_server|awk '{print$1}') /bin/bash
 docker login
 docker push howff/annotation_server
 ```
-

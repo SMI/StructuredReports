@@ -45,4 +45,3 @@ sed -n -e 's,\\,\\\\,' -e '2,$s/,/ /gp' sample_SR.csv | while read id sop series
     fi
 
 done
-

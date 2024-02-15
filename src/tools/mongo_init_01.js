@@ -19,4 +19,3 @@ db.createUser(
 );
 
 // No need to do this, next script will restart mongo: db.adminCommand( { shutdown: 1 } )
-

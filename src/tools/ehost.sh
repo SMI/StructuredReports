@@ -19,4 +19,3 @@ cp $data_dir/mtsamples_ihi_docs/doc000?.txt            $ehost_dir/$ehost_project
 
 cd $ehost_dir
 java -jar ehost-1.31-SNAPSHOT.jar
-

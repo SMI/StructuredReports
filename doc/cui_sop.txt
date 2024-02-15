@@ -280,4 +280,3 @@ sort -u <(jq -r < *lts/doc0001.json '.annotations[]|.cui') <(jq -r < *lts/doc011
   sed -e "s/^/'/" -e "s/$/'/" | paste -s -d ','
 
 explain analyze select semehr_results from semehr_results where sopinstanceuid = any (array(select SOPInstanceUID from cui_sop where cui IN ('C0000726','C0001511','C0003611', ..., 'C4553491')));
-
