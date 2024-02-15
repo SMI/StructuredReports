@@ -47,7 +47,7 @@ semehr_annotate.sh -i anon_dir/ -o annot_dir/
 
 ## DICOM SR annotation
 
-This is simlar to Standalone document annotation but with a preceding
+This is similar to Standalone document annotation but with a preceding
 step of extracting the text from a DICOM file. Also supported is
 extracting the text from a MongoDB database (where the tags are stored
 in SMI format).

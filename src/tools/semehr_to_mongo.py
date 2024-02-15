@@ -287,7 +287,7 @@ def mongo_query_feature(featurename, featureval):
     # OLD x = mongoCursor = mongoCollection.find( { "Mention" : { "$elemMatch": { "features."+featurename : featureval } } } )
     # NOW x = mongoCursor = mongoCollection.find( { "annotations" : { "$elemMatch": { featurename : featureval } } } )
     # append .count()  to get just the number of results
-    # append .explain() to get the query explaination
+    # append .explain() to get the query explanation
     # append .explain()['executionStats']
     # Query for annotations which have the feature AND are negated/affirmed
     query_obj = { featurename : featureval, 'negation':'Negated' }

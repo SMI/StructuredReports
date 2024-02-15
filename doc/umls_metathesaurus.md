@@ -200,7 +200,7 @@ snomed|cui
 
 Describes a Semantic Type. The identifier TUI is a member of a group of similar
 types tuigroup, and the group has a label tuigrouplabel. This is used to find out
-if a concept is related to other concepts that also share a simlar Semantic Type,
+if a concept is related to other concepts that also share a similar Semantic Type,
 i.e. their types are both members of the same Semantic Group.
 
 ```

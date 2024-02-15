@@ -424,7 +424,7 @@ Pass = 'semehr'
 DatabaseName = 'semehr'
 Schema = 'semehr'
 Table = 'semehr_results'
-# Connecto to database
+# Connect to database
 pgConnection = psycopg2.connect(host=Host, user=User, password=Pass, dbname=DatabaseName)
 # Search for all documents having an annotation where featurename = "cui" featureval = "C0175252"
 query_obj = [ { featurename: featureval, 'Negation': 'Affirmed' } ]
@@ -493,7 +493,7 @@ but is indexed as a PostgreSQL date so it can be searched.
 The annotations array has elements like this:
 * `start`, `end`, the character offsets into `redacted_text`
 * `str`, the original text string
-* `id`, an indentifier for this annotation
+* `id`, an identifier for this annotation
 * `negation`, whether affirmed or negated
 * `temporality`, whether recent or historical
 * `experiencer`, whether the patient or other

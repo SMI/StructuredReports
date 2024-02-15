@@ -127,7 +127,7 @@ Rule document structure
 ```
 
 The `general data structure` of an atom rule.
-```javscript
+```javascript
 
 "RULE_NAME": {
     "pattern": "REGULAR_EXPRESSION_(WITH_GROUPS)", 

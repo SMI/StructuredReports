@@ -9,7 +9,7 @@
 # so use the -a (--all) option to write all the others too.
 # To anonymise *DICOM* files you need CTP_SRAnonTool.sh
 # (which uses CTP_DicomToText, this script, and CTP_XMLToDicom).
-# NOTE: this script has superceded semehr_anon.sh.
+# NOTE: this script has supersceded semehr_anon.sh.
 
 import argparse, json, logging, re, sys, os, glob
 from logging import handlers

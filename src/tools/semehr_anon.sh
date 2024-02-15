@@ -6,7 +6,7 @@
 # To anonymise *DICOM* files you need CTP_SRAnonTool.sh.
 # NOTE: this script uses several external programs:
 #   jq, CTP_PhiToXML.py, semehr_redact.py
-# NOTE: this script has been superceded by semehr_anon.py.
+# NOTE: this script has been supersceded by semehr_anon.py.
 
 prog="$0"
 usage="usage: $prog [-s semehr_dir] -i input -o output"
