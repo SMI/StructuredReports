@@ -379,7 +379,7 @@ def test_DicomText():
     """ The test function requires a specially-crafted DICOM file
     as provided with SRAnonTool that has been modified to include HTML.
     """
-    dcm = os.path.join(os.path.dirname(__file__), '../../../applications/SRAnonTool/test/report10html.dcm')
+    dcm = os.path.join(os.path.dirname(__file__), '../../../src/applications/SRAnonTool/test/report10html.dcm')
     expected_without_header = """[[ContentSequence]]
 # Request
 MRI: Knee
