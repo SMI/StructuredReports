@@ -33,6 +33,7 @@ _EOF
 Check if you want a password by editing the file `RESTful_service/conf/settings.json`
 You can remove the whole entry if you do not need a password.
 (You could also put in a Basic Authentication password at the nginx stage if desired).
+
 ```
   "passphrase": "something",
 ```
@@ -63,15 +64,16 @@ su postgres -c "pg_ctl -D /var/lib/postgresql/data2 -l /tmp/logfile start"
 python3  ./webserver.py -d -p 8080
 ```
 
-
 # Run live web server
 
 You won't be able to CTRL-C out of this, use docker stop to terminate:
+
 ```
 docker run --rm -p 8485:8485 howff/annotation_server
 ```
 
 Test the live web server (should use SSL on port 8485):
+
 ```
 curl -D /dev/tty -k https://localhost:8485/vis/
 curl -g -k 'https://localhost:8485/api/search_anns/C0205076/?j={"terms":[{"q":"C0205076"}]}'
@@ -79,6 +81,7 @@ curl -g -k 'https://localhost:8485/api/search_anns/C0205076/?callback=jQueryCB&j
 ```
 
 To enter into the running container
+
 ```
 docker exec -it $(docker ps|grep annotation_server|awk '{print$1}') /bin/bash
 ```

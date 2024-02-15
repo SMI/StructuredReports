@@ -5,7 +5,7 @@ This document describes how to collect feedback for SemEHR annotations for train
 The user interface is provided by eHOST which can display a document
 with markup taken from an XML file. The markup shows where the desired
 phenotypes have been detected. eHOST allows users to make corrections,
-removing incorrect phenotypes or added ones that were missed.  A config
+removing incorrect phenotypes or added ones that were missed. A config
 file defines which phenotypes can be added. For simplicity, rather than
 allowing a full set of phenotypes to be defined, the config can contain
 just 'correct', 'incorrect' and 'add new'. (The reason for this is that
@@ -24,12 +24,12 @@ marked-up (corrected) annotations and the learned models are study-specific
 but contain valuable manually-curated information so they form the most
 important part of the system.
 
-
 ## Download eHOST
 
 eHOST is available from two places
-* https://github.com/chrisleng/ehost (the original location)
-* https://github.com/jianlins/ehost  (an improved fork)
+
+- https://github.com/chrisleng/ehost (the original location)
+- https://github.com/jianlins/ehost (an improved fork)
 
 Download from `https://github.com/jianlins/ehost/releases/download/1.3.1-SNAPSHOT/eHOST_1.31-SNAPSHOT_linux_jre.zip`
 Unpack the zip to get the executable `ehost-1.31-SNAPSHOT.jar`
@@ -49,6 +49,7 @@ python ann_converter.py  config_file
 ```
 
 - `config file` is a JSON file containing:
+
 ```
 {
     "full_text_folder": directory of txt files,
@@ -65,7 +66,8 @@ python ann_converter.py  config_file
 }
 
 ```
-- `text_file` is the full text file 
+
+- `text_file` is the full text file
 - `semehr_ann_file` is the SemEHR result json file with annotations
 - `cui2label_mapping_file` is a json file to map UMLS CUI to a label, see below as an example for mapping two CUIs to `Ischemic stroke`. It can also be in the same format as nlp2phenome's mapping file; see the second example:
 
@@ -100,12 +102,13 @@ of training it is easier for users to see only two classes,
 relevant or not relevant, so the labels can be simplified.
 `simplified_label`: string, the label to be used as the class in eHOST. Every annotation will be labelled as this class. When it does not present, the conversion will use: `pref` attribute for UMLS mentions or `minor_type` of customised dictionary term (see the annotation doc for details of customised dictionaries).
 Simplified conversion will ignore all annotations which are:
-* negated,
-* with an experiencer who is not the patient, and
-* ruled out by any rules.
-It is possible to use label simplification and also have
-a label mapping file if you want this behaviour and more than
-one label.
+
+- negated,
+- with an experiencer who is not the patient, and
+- ruled out by any rules.
+  It is possible to use label simplification and also have
+  a label mapping file if you want this behaviour and more than
+  one label.
 
 Remember that the eHOST config file will have to be provided
 containing a negative ("not relevant") entry if you wish this
@@ -115,10 +118,11 @@ let eHOST generate the config from the input xml files.
 ## eHOST operation
 
 The eHOST program requires two directories, corpus and saved.
-* corpus is the text documents
-* saved is the knowtator.xml documents
-The xml filename is just the document txt filename with `.knowtator.xml` appended.
-* eHOST will create a config directory and file if none is given.
+
+- corpus is the text documents
+- saved is the knowtator.xml documents
+  The xml filename is just the document txt filename with `.knowtator.xml` appended.
+- eHOST will create a config directory and file if none is given.
 
 It also uses a config directory containing `projectschema.xml`.
 The config file contains the 'classMentions' which are the classes that
@@ -133,6 +137,7 @@ the negative value and have the positives added automatically.
 ## Annotation process
 
 Use eHOST to load the outputs and ask the annotators to do three things:
+
 - `delete` not relevant annotations
 - `add` missed annotations using relevant labels from the mapping file
 - `correct` mislabelled annotations by changing the class to a correct label
@@ -143,6 +148,7 @@ updates the timestamp on all files even those not modified).
 ## eHOST config examples
 
 The eHOST program in nsh-smi05 is:
+
 ```
 eHOST/
   eHOST-mk5.1.jar
@@ -152,11 +158,13 @@ eHOST/
 ```
 
 The annotationadmin.xml file contains:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?><catalog><server url="localhost" port="8080"/></catalog>
 ```
 
 The eHOST.sys file contains
+
 ```
 // =================== These are comments ===================
 
@@ -235,6 +243,7 @@ false
 ```
 
 The workspace/project contains:
+
 ```
 project/
   config/
@@ -243,12 +252,13 @@ project/
   saved/
 ```
 
-* corpus is the text documents
-* saved is the knowtator.xml documents
+- corpus is the text documents
+- saved is the knowtator.xml documents
 
 The `projectschema.xml` file defines the annotation/mention classes
 which the user will use to mark up or correct the document.
 An empty version looks like this:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <eHOST_Project_Configure Version="1.0">
@@ -273,6 +283,7 @@ An empty version looks like this:
 ```
 
 The anonymisation training looks like this:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <eHOST_Project_Configure Version="1.0">
@@ -322,6 +333,7 @@ The anonymisation training looks like this:
 ```
 
 The body parts training (v3) looks like this:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <eHOST_Project_Configure Version="1.0">

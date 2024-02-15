@@ -16,10 +16,12 @@ Upon exit the lists are written to files.
 ## Installation
 
 Requires the Python database abstraction layer and a simple GUI toolkit:
+
 ```
 pip install pydal
 pip install PySimpleGUI
 ```
+
 You can use `PySimpleGUIQt` instead if you prefer.
 
 ## Usage
@@ -47,9 +49,10 @@ The `Resource` is the filename of the SR.
 ## Results
 
 The results are saved into files in the `../data` directory relative to the program directory:
-* reviewed_as_false_positives.csv - the particular word highlighted is not PII, it's a false positive
-* reviewed_as_PII.csv - the particular word highlighted is definitely PII
-* reviewed.csv - marked as "reviewed" but no indication of whether words were PII or not. May be just used to indicate "don't show me this file again"?
+
+- reviewed_as_false_positives.csv - the particular word highlighted is not PII, it's a false positive
+- reviewed_as_PII.csv - the particular word highlighted is definitely PII
+- reviewed.csv - marked as "reviewed" but no indication of whether words were PII or not. May be just used to indicate "don't show me this file again"?
 
 Note that the same document can be reported multiple times,
 where some words may be found to be PII and other words may be found to be false positives,

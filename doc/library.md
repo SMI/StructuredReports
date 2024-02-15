@@ -155,10 +155,10 @@ Some utility functions are used by the DicomText module.
 
 Generally speaking you can work with Structured Reports in any of these ways:
 
--   dcm2json - outputs a JSON document (you can parse with `jq`, and use our
-    `dicom_tag_string_replace.py` script to turn tag numbers into names)
--   read it with pydicom
--   read it from MongoDB
+- dcm2json - outputs a JSON document (you can parse with `jq`, and use our
+  `dicom_tag_string_replace.py` script to turn tag numbers into names)
+- read it with pydicom
+- read it from MongoDB
 
 `dcm2json` - Depending on the source of the JSON, use `.val` or `.Value[0]`:
 

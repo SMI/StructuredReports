@@ -19,14 +19,16 @@ jq
 # Ancillary data
 
 Download:
-* https://cogstack.rosalind.kcl.ac.uk/exports/customised_handlers.tar.gz
-* http://netix.dl.sourceforge.net/project/gate/gate/8.1/gate-8.1-build5169-ALL.zip
-* https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-1.2.1-se.tar.gz
-* https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-resource-prep-output.2019.fixed.zip
+
+- https://cogstack.rosalind.kcl.ac.uk/exports/customised_handlers.tar.gz
+- http://netix.dl.sourceforge.net/project/gate/gate/8.1/gate-8.1-build5169-ALL.zip
+- https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-1.2.1-se.tar.gz
+- https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-resource-prep-output.2019.fixed.zip
 
 ## Install the required software
 
 Please review the script before running it!
+
 ```
 cd StructuredReports/src/tools
 ./install.sh
@@ -34,6 +36,7 @@ cd StructuredReports/src/tools
 
 The installation paths are configurable, and you can use symbolic links
 to keep the master copies on a shared/NFS location, but a suggested configuration is:
+
 ```
 /opt/gcp/bio-yodie-1-2-2  -> should contain bio-yodie-resources, gazetteer-en, etc
 /opt/gcp/gate             -> should contain GAPE.app, gate.exe, etc
@@ -41,6 +44,7 @@ to keep the master copies on a shared/NFS location, but a suggested configuratio
 /opt/semehr/CogStack-SemEHR -> the checked-out repo
 /opt/semehr/data          -> temporary config and data
 ```
+
 (In hindsight the `gcp` directory should be inside `/opt/semehr`)
 
 ## Initialise the MongoDB database
@@ -58,6 +62,7 @@ mongo ./mongo_init_01.js  # create the root user
 ## Initialise the PostgreSQL database
 
 Please review the script before running it!
+
 ```
 cd StructuredReports/src/tools
 ./postgres_init_01.sh     # create users, tables, indexes
@@ -83,7 +88,6 @@ This is optional for the example because there's nothing to anonymise in these d
 export SMI_LOGS_ROOT=.
 export PYTHONPATH=/path/to/Smi_Common_Python # if SmiServices is not yet in your virtualenv
 ./semehr_anon.py -all -i input_dir -o anon_dir --xml
-
 
 ## Run SemEHR on the sample document to get the semehr_results
 
@@ -127,7 +131,6 @@ export SMI_LOGS_ROOT=.
 
 The script `CogStack-SemEHR/RESTful_service/test_api.py` runs a set of queries.
 
-
 # Example code
 
 Both MongoDB and PostgreSQL have a database called "semehr".
@@ -146,7 +149,7 @@ from pymongo import MongoClient, ASCENDING
 from pymongo.errors import DuplicateKeyError
 mongoHost = 'localhost'
 mongoUser = 'semehr'
-mongoPass = 'semehr' 
+mongoPass = 'semehr'
 mongoDatabaseName = 'semehr'
 mongoCollectionName = 'semehr_results'
 # Connect to database
@@ -189,9 +192,10 @@ Note: all tables, indexes and functions reside in the `semehr` schema of the `se
 
 The `cui_count` table contains a record of the frequency of each CUI,
 so we can determine
-* which CUIs are actually present in the database (so users know they do not
-need to search for those which are never used, and the query expansion can do likewise),
-* how often each one occurs (so users know which CUIs are common and which are rare)
+
+- which CUIs are actually present in the database (so users know they do not
+  need to search for those which are never used, and the query expansion can do likewise),
+- how often each one occurs (so users know which CUIs are common and which are rare)
 
 The table schema is `cui: varchar (primary key), count (bigint)`
 
@@ -201,12 +205,14 @@ deleted. It is only meant to serve as a helpful cache of CUIs not as a
 primary record of data holdings.
 
 Show the number of unique CUIs in the database:
+
 ```
 SELECT COUNT(*) FROM semehr.cui_count;
 -- currently 93,517 for 2010 to 2018
 ```
 
 Show the total number of annotations (instances of a CUI) in the database:
+
 ```
 SELECT SUM(count) FROM semehr.cui_count;
 -- 918,340,602 for 2010 to 2018, nearly 1 billion,
@@ -214,12 +220,14 @@ SELECT SUM(count) FROM semehr.cui_count;
 ```
 
 A simple query to show the most common CUIs, translated to common name:
+
 ```
 SELECT umls.cui.cuilabel, semehr.cui_count.count
  FROM  semehr.cui_count INNER JOIN umls.cui
   ON   umls.cui.cui = semehr.cui_count.cui
  ORDER BY semehr.cui_count.count DESC;
 ```
+
 That requires the umls schema and tables be populated, see the
 CogStack-SemEHR repo for details.
 
@@ -251,18 +259,19 @@ and the annotations which records the CUIs of each concept found within. The
 primary key is the `SOPInstanceUID` which is unique for each and every DICOM.
 The only other column is `semehr_results` which is a JSONB document containing
 these elements which are created by the SemEHR Annotator:
-* `annotations`, an array
-* `sentences`, an array
-* `phenotypes`, an array
-* `redacted_text`, a text field being the body of the document
-plus these elements which are created from the DICOM database by `CTP_DicomToText`:
-* `SOPInstanceUID`, another copy of the unique id
-* `SOPClassUID`, the type of Structured Report
-* `StudyInstanceUID`, the Study id
-* `SeriesInstanceUID`, the Series id
-* `ContentDate`, the date of the report
-* `ModalitiesInStudy`, related DICOM modalities, eg. CT or MR
-* `PatientID`, # this one will be mapped from CHI to EUPI
+
+- `annotations`, an array
+- `sentences`, an array
+- `phenotypes`, an array
+- `redacted_text`, a text field being the body of the document
+  plus these elements which are created from the DICOM database by `CTP_DicomToText`:
+- `SOPInstanceUID`, another copy of the unique id
+- `SOPClassUID`, the type of Structured Report
+- `StudyInstanceUID`, the Study id
+- `SeriesInstanceUID`, the Series id
+- `ContentDate`, the date of the report
+- `ModalitiesInStudy`, related DICOM modalities, eg. CT or MR
+- `PatientID`, # this one will be mapped from CHI to EUPI
 
 The redacted text can be searched but this would be
 slow and the intention is to use annotations for better results.
@@ -278,26 +287,29 @@ The Content Date is stored in DICOM format YYYYMMDD
 but is indexed as a PostgreSQL date so it can be searched.
 
 The annotations array has elements like this:
-* `start`, `end`, the character offsets into `redacted_text`
-* `str`, the original text string
-* `id`, an identifier for this annotation
-* `negation`, whether affirmed or negated
-* `temporality`, whether recent or historical
-* `experiencer`, whether the patient or other
-* `sty`, the semantic type of this annotation
-* `cui`, the concept identifier
-* `pref`, the preferred text of this cui (a synonym of str)
-* `study_concepts`, an array
-* `ruled_by`, an array how this concept was identified
+
+- `start`, `end`, the character offsets into `redacted_text`
+- `str`, the original text string
+- `id`, an identifier for this annotation
+- `negation`, whether affirmed or negated
+- `temporality`, whether recent or historical
+- `experiencer`, whether the patient or other
+- `sty`, the semantic type of this annotation
+- `cui`, the concept identifier
+- `pref`, the preferred text of this cui (a synonym of str)
+- `study_concepts`, an array
+- `ruled_by`, an array how this concept was identified
 
 # PostgreSQL indexing and queries
 
 To index just a single (top-level) field from the JSON document (note it has to be in double brackets):
+
 ```
 CREATE INDEX seriesinstanceuid ON semehr.semehr_results ((semehr_results->>'SeriesInstanceUID'));
 ```
 
 That can be queried like this:
+
 ```
 SELECT COUNT(*) FROM semehr.semehr_results WHERE semehr_results->>'SeriesInstanceUID' = '1.2.3.4.5';
 ```
@@ -384,7 +396,7 @@ SELECT count(*) FROM semehr.semehr_results WHERE to_tsvector('english',semehr.an
 
 Note that the actual queries made to the database by the annotation server
 are more complex, especially if the query includes additional attributes such
-as `experiencer`, `negated` or `temporality`.  In this case the first part of
+as `experiencer`, `negated` or `temporality`. In this case the first part of
 the query searches for the CUIs using the `&&` ARRAY notation, to get any
 documents which contain any of the CUIs. The second part of the query
 (`AND`ed to the first part) then narrows it down by specifying the attributes
@@ -398,9 +410,8 @@ Also filters are added such as by modality or date range.
  AND (cast_to_date(semehr_results->>'ContentDate') BETWEEN {YYYYMMDD} AND {YYYYMMDD}) "
 ```
 
-
 # References
 
-* https://www.postgresql.org/docs/14/functions-json.html
-* https://www.postgresql.org/docs/14/functions-array.html
-* https://scalegrid.io/blog/using-jsonb-in-postgresql-how-to-effectively-store-index-json-data-in-postgresql/
+- https://www.postgresql.org/docs/14/functions-json.html
+- https://www.postgresql.org/docs/14/functions-array.html
+- https://scalegrid.io/blog/using-jsonb-in-postgresql-how-to-effectively-store-index-json-data-in-postgresql/

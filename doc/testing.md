@@ -3,11 +3,11 @@
 ## Database
 
 The main requirement for testing is a postgres database, preferably
-populated with some sample (or real!) data.  The options are:
+populated with some sample (or real!) data. The options are:
 
-* a locally installed copy of postgres
-* postgres running in a docker container
-* the whole annotation service running in a docker container
+- a locally installed copy of postgres
+- postgres running in a docker container
+- the whole annotation service running in a docker container
 
 If you have a local copy of postgres running then you also have the `postgres` user
 and the `psql` command line tool. You can run the database initialisation scripts
@@ -26,11 +26,13 @@ only the externally-visible API, and it already has some sample documents loaded
 ### Starting postgresql
 
 To use the standard postgresql docker run
+
 ```
 sudo docker run -d --rm --name=pg -p 5432:5432 -e POSTGRES_PASSWORD=semehr postgres
 ```
 
 To use the annotation_server docker run
+
 ```
 sudo docker run -d --rm --name=pg -p 8485:8485 -p 5432:5432 howff/annotation_server
 ```
@@ -48,6 +50,7 @@ database. Before running this uncompress the supplied CSV files, `tar xf umls_20
 ### Sample data
 
 Uncompress the supplied data files:
+
 ```
 cd StructuredReports/src/data
 tar xf mtsamples_ihi_semehr_results.tar.xz
@@ -59,6 +62,7 @@ Populate the database with the samples:
 ### Query
 
 See the script to check if `postgres_query_cui` restricts to a range of dates, then
+
 ```
 ./semehr_to_postgres.py -q cui:C0205076
 ```

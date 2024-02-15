@@ -65,6 +65,7 @@ The JSON format allows a much more flexible set of query terms.
 
 Most items are optional. Optional fields should not be transmitted, so that the
 server can determine a sensible default value.
+
 ```
 /api/search_anns/term/?j=JSON - where JSON is a structure like this:
 
@@ -127,6 +128,7 @@ list are found anywhere in the tag then it matches.
 The uid lists will restrict the query to only the given instances.
 
 The response is a dictionary of the form:
+
 ```
 {
   "success": true,
@@ -145,6 +147,7 @@ for example, if requesting SOPInstanceUID,SeriesInstanceUID,
 ## Error response
 
 If an error occurs the response is:
+
 ```
 {
   "success": false,
@@ -165,6 +168,7 @@ curl --insecure \
 ```
 
 or using POST
+
 ```
 curl --insecure \
      -X POST \

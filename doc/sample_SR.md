@@ -4,10 +4,10 @@ Creating a test dataset of Structured Reports.
 
 Summary:
 
-* Use `./rdmp_csv_to_sample.py` to convert the BadMedicine CSV files into `sample_SR.csv`
-* Use `./sample_SR.sh` to create DICOM files based on that CSV
-* Use `./mtsamples_ihi_uids.py` to rewrite the mtsamples meta .json files
-* Then you can add the mtsamples files to the annotation database
+- Use `./rdmp_csv_to_sample.py` to convert the BadMedicine CSV files into `sample_SR.csv`
+- Use `./sample_SR.sh` to create DICOM files based on that CSV
+- Use `./mtsamples_ihi_uids.py` to rewrite the mtsamples meta .json files
+- Then you can add the mtsamples files to the annotation database
 
 ## Creating a SR in a DICOM file
 
@@ -49,7 +49,7 @@ CSV file `sample_SR.csv`
 The CSV file has the header
 `id,SOPInstanceUID,SeriesInstanceUID,StudyInstanceUID,PatientID,ContentDate,ModalitiesInStudy`
 
-The output DICOM files will have the filename *SOPInstanceUID*.dcm
+The output DICOM files will have the filename _SOPInstanceUID_.dcm
 
 The text will be randomly selected from the set of documents in
 `../data/mtsamples_ihi_docs/` but if you want a consistent

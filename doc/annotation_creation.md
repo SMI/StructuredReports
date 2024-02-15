@@ -1,11 +1,12 @@
 # Annotation creation
 
 There are five scenarios for creating annotations:
-* standalone, for one or more text documents
-* standalone, for one or more DICOM Structured Reports
-* batch processing of DICOM SRs
-* as part of the SMI data load pipeline
-* on demand as part of the SMI data extraction pipeline
+
+- standalone, for one or more text documents
+- standalone, for one or more DICOM Structured Reports
+- batch processing of DICOM SRs
+- as part of the SMI data load pipeline
+- on demand as part of the SMI data extraction pipeline
 
 The input to the annotation process is a plain text document.
 It should already have been anonymised. In theory there is some
@@ -22,8 +23,9 @@ These items are useful as-is, and could be passed onto researchers
 if that was what they wanted.
 
 These items can be ingested into the annotation database to allow:
-* cohort builders to perform a search of all SRs for specific concepts or annotations so that they can build a cohort for image requests
-* researchers to perform a search of all SRs for specific concepts in context so that they can access patient reports about specific phenotypes
+
+- cohort builders to perform a search of all SRs for specific concepts or annotations so that they can build a cohort for image requests
+- researchers to perform a search of all SRs for specific concepts in context so that they can access patient reports about specific phenotypes
 
 The annotation algorithm is currently performed by the CogStack-SemEHR
 annotator, although a similar one might be MedCat. It should be possible
@@ -34,13 +36,16 @@ repopulated; it would not be possible to mix the two outputs.
 ## Standalone document annotation
 
 The first (optional) step is to anonymise the documents:
+
 ```
 semehr_anon.py --all -i txt_dir -o anon_dir [--xml]
 ```
+
 Note: using `--all` writes an output file for every input file, otherwise
 only files actually anonymised (those containing PII) are written.
 
 The annotation step can be performed with:
+
 ```
 semehr_annotate.sh -i anon_dir/ -o annot_dir/
 ```
@@ -53,6 +58,7 @@ extracting the text from a MongoDB database (where the tags are stored
 in SMI format).
 
 Use the `CTP_DicomToText.py` script to extract the text, for example from MongoDB in SMI extract all documents with metadata for a given StudyDate:
+
 ```
 CTP_DicomToText -y dataLoad.yaml -y dataExtract.yaml \
     -i <StudyDate> \
@@ -64,6 +70,7 @@ CTP_DicomToText -y dataLoad.yaml -y dataExtract.yaml \
 See a separate document for the preparation of the database tables.
 
 Use this script to load annotations into PostgreSQL:
+
 ```
 semehr_to_postgres.py -j annot_dir/ -t txt_dir/ -m meta_dir/
 ```
@@ -76,7 +83,7 @@ It could be `anon_dir` from `semehr_anon.py` if you want to
 store anonymised versions.
 The `meta_dir` is an (optional) directory of corresponding metadata
 files in JSON format giving information like
-  `"SOPClassUID",
+`"SOPClassUID",
   "SOPInstanceUID",
   "StudyInstanceUID",
   "SeriesInstanceUID",
@@ -112,26 +119,26 @@ and could trigger the annotation at the end of each date.
 
 If there is a requirement for annotations to be delivered during an
 extraction there are some options.
-* create the annotations during extraction. The CTP Anonymiser already has
-to call an external program to perform SR anonymisation so annotation could
-also be done at this time. That would leave additional files outside the
-pipeline, so the IsIdentifiable step and Reporting step would not see them.
-It would be possible to pass the annotations through IsIdentifiable but the
-output would not be any different because the text is already checked when
-it's put back into the DICOM. The main problem with doing annotation this way
-is that it's done per-document, but the start-up overhead of annotation
-(loading dictionaries, etc) makes it more efficient to annotate many documents
-together. The advantage is that improvements to the annotation algorithm would
-be made available to subsequent extractions.
-The main modification to the pipeline would be:
+
+- create the annotations during extraction. The CTP Anonymiser already has
+  to call an external program to perform SR anonymisation so annotation could
+  also be done at this time. That would leave additional files outside the
+  pipeline, so the IsIdentifiable step and Reporting step would not see them.
+  It would be possible to pass the annotations through IsIdentifiable but the
+  output would not be any different because the text is already checked when
+  it's put back into the DICOM. The main problem with doing annotation this way
+  is that it's done per-document, but the start-up overhead of annotation
+  (loading dictionaries, etc) makes it more efficient to annotate many documents
+  together. The advantage is that improvements to the annotation algorithm would
+  be made available to subsequent extractions.
+  The main modification to the pipeline would be:
   - modify CTP or CTP_SRAnonTool to perform the annotation
   - modify the reporting to know about the extra files
   - make sure the extra files are copied to the researcher
-* retrieve stored annotations from a database. A similar process to the above,
-except that the overhead of creating annotations is skipped. However it does
-require that access to the database be granted, and the database is currently
-in a PPZ.
-
+- retrieve stored annotations from a database. A similar process to the above,
+  except that the overhead of creating annotations is skipped. However it does
+  require that access to the database be granted, and the database is currently
+  in a PPZ.
 
 # SemEHR annotation
 
@@ -151,7 +158,6 @@ major_type is the study name eg. LothianDerm
 so when you convert to eHOST you say study name and it will report the appropriate annotations with phenotype matching major_type,
 ie. the words matching minor_type will be highlighted.
 
-
 ## Troubleshooting
 
 Check which version of bio-yodie is used. The path `bio-yodie-1-2-1` is hardcoded. However you need to download the full-size version from Honghan.
@@ -166,12 +172,20 @@ The study annotations can be ignored if you've already created them in the maste
 nothing in semehr_results
 Because documents needed to be called %s.txt - fix the template in the config file
 
-run in PICTURES vm - millions of docanalysis lines like this
-  docanalysis(587) root 2021-07-05 15:40:19,789 INFO to be developed [2558, 2573] ruled by hypothetical_filters.json
+run in PICTURES vm - millions of docanalysis lines like this:
+
+```bash
+docanalysis(587) root 2021-07-05 15:40:19,789 INFO to be developed [2558, 2573] ruled by hypothetical_filters.json
+```
+
 see above
 
 also errors like this:
-  docanalysis(587) root 2021-07-05 15:40:19,810 INFO very slow [2662, 2671] ruled by hypothetical_filters.json
+
+```bash
+docanalysis(587) root 2021-07-05 15:40:19,810 INFO very slow [2662, 2671] ruled by hypothetical_filters.json
     error doing <function analyse_doc_anns_file at 0x7fd442960f70> on /run/user/1000/semehr/tmp_semehr_run.sh_31062/output_docs/doc2299.json
     'cmp' is an invalid keyword argument for sort()docanalysis(587) root 2021-07-05 15:40:19,811 INFO knee [1285, 1289] ruled by not_mention_filters.json
+```
+
 Fixed the source code to use a different cmp, see the repo commits

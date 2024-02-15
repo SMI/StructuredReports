@@ -80,7 +80,6 @@ export SMI_LOGS_ROOT=.
 export PYTHONPATH=/path/to/Smi_Common_Python # if SmiServices is not yet in your virtualenv
 ./semehr_anon.py -i input_dir -o anon_dir --xml
 
-
 ## Run SemEHR on the sample document to get the semehr_results
 
 ```
@@ -127,7 +126,7 @@ The script `CogStack-SemEHR/RESTful_service/test_api.py` runs a set of queries.
 
 ## Study-specific training
 
-See the `nlp2phenome` repo.  The `safehaven_mini` branch was used in HIC
+See the `nlp2phenome` repo. The `safehaven_mini` branch was used in HIC
 safe haven for a project. It has extra functions for stroke but useful for
 others to do patient level inference.
 
@@ -149,6 +148,7 @@ Use `run_learning` where `corpus` is the redacted text, `gold` is the xml.
 It does 10 iterations of kfold. The performance metrics are in a CSV.
 The output is two files: lm and model. lm is label metadata. model is
 random forest. Both are binary serialised Python objects.
+
 ```
 run_learning.py
 ```
@@ -156,12 +156,14 @@ run_learning.py
 Next time a search is performed the search results can be filtered using the
 learned model to remove the ones which had poor annotations. It calculates p,
 the probability, and if over a threshold the result is kept.
+
 ```
 python predict_helper.py ./pretrained_models/stroke_settings/prediction_task.json
 ```
 
 The `doc_inference` code is not needed because it's document-level inference
 which, as there's one document per patient, is essentially patient-level inference.
+
 ```
 python doc_inference.py ./pretrained_models/stroke_settings/doc_infer.json
 ```
@@ -172,6 +174,7 @@ Download from `https://github.com/jianlins/ehost/releases/download/1.3.1-SNAPSHO
 Unpack the zip to get the executable `ehost-1.31-SNAPSHOT.jar`
 
 The eHOST program in nsh-smi05 is:
+
 ```
 eHOST/
   eHOST-mk5.1.jar
@@ -181,11 +184,13 @@ eHOST/
 ```
 
 The annotationadmin.xml file contains:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?><catalog><server url="localhost" port="8080"/></catalog>
 ```
 
 The eHOST.sys file contains
+
 ```
 // =================== These are comments ===================
 
@@ -264,6 +269,7 @@ false
 ```
 
 The workspace/project contains:
+
 ```
 project/
   config/
@@ -272,12 +278,13 @@ project/
   saved/
 ```
 
-* corpus is the text documents
-* saved is the knowtator.xml documents
+- corpus is the text documents
+- saved is the knowtator.xml documents
 
 The `projectschema.xml` file defines the annotation/mention classes
 which the user will use to mark up or correct the document.
 An empty version looks like this:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <eHOST_Project_Configure Version="1.0">
@@ -302,6 +309,7 @@ An empty version looks like this:
 ```
 
 The body parts training (v3) looks like this:
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <eHOST_Project_Configure Version="1.0">
@@ -400,7 +408,7 @@ from pymongo import MongoClient, ASCENDING
 from pymongo.errors import DuplicateKeyError
 mongoHost = 'localhost'
 mongoUser = 'semehr'
-mongoPass = 'semehr' 
+mongoPass = 'semehr'
 mongoDatabaseName = 'semehr'
 mongoCollectionName = 'semehr_results'
 # Connect to database
@@ -443,9 +451,10 @@ Note: all tables, indexes and functions reside in the `semehr` schema of the `se
 
 The `cui_count` table contains a record of the frequency of each CUI,
 so we can determine
-* which CUIs are actually present in the database (so users know they do not
-need to search for those which are never used, and the query expansion can do likewise),
-* how often each one occurs (so users know which CUIs are common and which are rare)
+
+- which CUIs are actually present in the database (so users know they do not
+  need to search for those which are never used, and the query expansion can do likewise),
+- how often each one occurs (so users know which CUIs are common and which are rare)
 
 The table schema is `cui: varchar (primary key), count (bigint)`
 
@@ -455,12 +464,14 @@ deleted. It is only meant to serve as a helpful cache of CUIs not as a
 primary record of data holdings.
 
 A simple query to show the most common CUIs, translated to common name:
+
 ```
 SELECT umls.cui.cuilabel, semehr.cui_count.count
  FROM  semehr.cui_count INNER JOIN umls.cui
   ON   umls.cui.cui = semehr.cui_count.cui
  ORDER BY semehr.cui_count.count DESC;
 ```
+
 That requires the umls schema and tables be populated, see the
 CogStack-SemEHR repo for details.
 
@@ -471,18 +482,19 @@ and the annotations which records the CUIs of each concept found within. The
 primary key is the `SOPInstanceUID` which is unique for each and every DICOM.
 The only other column is `semehr_results` which is a JSONB document containing
 these elements which are created by the SemEHR Annotator:
-* `annotations`, an array
-* `sentences`, an array
-* `phenotypes`, an array
-* `redacted_text`, a text field being the body of the document
-plus these elements which are created from the DICOM database by `CTP_DicomToText`:
-* `SOPInstanceUID`, another copy of the unique id
-* `SOPClassUID`, the type of Structured Report
-* `StudyInstanceUID`, the Study id
-* `SeriesInstanceUID`, the Series id
-* `ContentDate`, the date of the report
-* `ModalitiesInStudy`, related DICOM modalities, eg. CT or MR
-* `PatientID`, # this one will be mapped from CHI to EUPI
+
+- `annotations`, an array
+- `sentences`, an array
+- `phenotypes`, an array
+- `redacted_text`, a text field being the body of the document
+  plus these elements which are created from the DICOM database by `CTP_DicomToText`:
+- `SOPInstanceUID`, another copy of the unique id
+- `SOPClassUID`, the type of Structured Report
+- `StudyInstanceUID`, the Study id
+- `SeriesInstanceUID`, the Series id
+- `ContentDate`, the date of the report
+- `ModalitiesInStudy`, related DICOM modalities, eg. CT or MR
+- `PatientID`, # this one will be mapped from CHI to EUPI
 
 The redacted text is not currently indexed or searched. This would be
 slow and the intention is to use annotations for better results.
@@ -491,26 +503,29 @@ The Content Date is stored in DICOM format YYYYMMDD
 but is indexed as a PostgreSQL date so it can be searched.
 
 The annotations array has elements like this:
-* `start`, `end`, the character offsets into `redacted_text`
-* `str`, the original text string
-* `id`, an identifier for this annotation
-* `negation`, whether affirmed or negated
-* `temporality`, whether recent or historical
-* `experiencer`, whether the patient or other
-* `sty`, the semantic type of this annotation
-* `cui`, the concept identifier
-* `pref`, the preferred text of this cui (a synonym of str)
-* `study_concepts`, an array
-* `ruled_by`, an array how this concept was identified
+
+- `start`, `end`, the character offsets into `redacted_text`
+- `str`, the original text string
+- `id`, an identifier for this annotation
+- `negation`, whether affirmed or negated
+- `temporality`, whether recent or historical
+- `experiencer`, whether the patient or other
+- `sty`, the semantic type of this annotation
+- `cui`, the concept identifier
+- `pref`, the preferred text of this cui (a synonym of str)
+- `study_concepts`, an array
+- `ruled_by`, an array how this concept was identified
 
 # PostgreSQL indexing and queries
 
 To index just a single (top-level) field from the JSON document (note it has to be in double brackets):
+
 ```
 CREATE INDEX seriesinstanceuid ON semehr.semehr_results ((semehr_results->>'SeriesInstanceUID'));
 ```
 
 That can be queried like this:
+
 ```
 SELECT COUNT(*) FROM semehr.semehr_results WHERE semehr_results->>'SeriesInstanceUID' = '1.2.3.4.5';
 ```

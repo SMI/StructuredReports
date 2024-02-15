@@ -1,8 +1,9 @@
 # SemEHR anonymisation
 
 This code will anonymise text files and produce two outputs:
-* the redacted text file
-* a metadata file describing which PII elements were found, with their position in the document.
+
+- the redacted text file
+- a metadata file describing which PII elements were found, with their position in the document.
 
 The metadata output can be in JSON format or XML format.
 SMI uses the XML format for two reasons, it is more comprehensive
@@ -10,9 +11,10 @@ and it can be used as input to the eHOST program for manual
 annotation and correction. This is essential for training and
 verification.
 
-The anonymisation is implemented using a rule based approach. 
+The anonymisation is implemented using a rule based approach.
 
 ## Table of Contents
+
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Rules](#rules)
@@ -69,7 +71,7 @@ can be copied and modified.
   "use_spacy": false
 }
 ```
- 
+
 `mode` is either `mt` or `dir` meaning multithreaded or not.
 There is no requirement for using multiple threads.
 If `mt` then `number_threads` is the number of threads used.
@@ -107,13 +109,15 @@ All files matching the `rule_file_pattern` will be loaded.
 
 ## Rules
 
-Rules are defined using regular expressions and grouped into categories. 
+Rules are defined using regular expressions and grouped into categories.
 
 Two types of rules are defined.
+
 - Document structure rules: used for parsing document structures (Note: not used in SMI)
 - PHI (Protected health information) rules: used to identify PHI mentions
 
 Rule document structure
+
 ```
 {
     "RULE_CATEGORY_NAME": {
@@ -127,10 +131,11 @@ Rule document structure
 ```
 
 The `general data structure` of an atom rule.
+
 ```javascript
 
 "RULE_NAME": {
-    "pattern": "REGULAR_EXPRESSION_(WITH_GROUPS)", 
+    "pattern": "REGULAR_EXPRESSION_(WITH_GROUPS)",
     "flags": ["multiline",...]
     "data_labels": ["LABEL1", "LABEL2"],
     "data_type": "DATA TYPE"
@@ -140,6 +145,7 @@ The `general data structure` of an atom rule.
 ```
 
 For example
+
 ```
 {
   "PHI_rules": {
@@ -177,15 +183,15 @@ The `data_type` is used to identify what type of information was extracted.
 
 Note: these are not used in SMI.
 
-These rules are used to identify `locators` of section headings in the document. 
+These rules are used to identify `locators` of section headings in the document.
 Everything after a `locator` and before the next `locator` belongs to a `section`.
-
 
 ### PHI rules
 
 These rules are used to identify typed PHIs. They are stored in the part of
 the rule document that are indexed with the key `sent_rules` as described below.
 It is composed of a list of `rule sets`.
+
 ```javascript
 "sent_rules":{
     "RULE_SET_NAME": [
@@ -226,10 +232,10 @@ which is to identify identifiers from the text.
 
 ```
 
-
 ## Run the anonymisation process
 
 If SemEHR is installed as docker version: run into the container with bash terminal with `docker-compose`:
+
 ```
 docker-compose -f YOUR-COMPOSE-FILE-YML-PATH run --entrypoint /bin/bash semehr
 ```
@@ -256,6 +262,7 @@ The folders are specified in the config file as:
 Input files must be in the SMI format for best results. This is the
 output from `CTP_DicomToText.py` (see the SmiServices repo) but is
 easily created manually. It has headers like this:
+
 ```
 [[Patient Name]] Anne Boleyn
 [[Referring Physician Name]] Charles Dickens
@@ -277,6 +284,7 @@ the same name but with `.knowtator.xml` appended. The `phi` file will
 be in JSON format.
 
 The XML format contains a set of annotations like this:
+
 ```
 <?xml version="1.0" ?>
 <annotations>
@@ -294,6 +302,7 @@ The XML format contains a set of annotations like this:
 ```
 
 The phi output looks like this:
+
 ```
   {
     "doc": "inputfile1.txt",
@@ -322,13 +331,13 @@ As of June 2021, we have the following `rule sets` defined for SMI project.
 
 1. **NB** always make a copy of current rule file before making any changes to exiting rules.
 2. Add a rule file `NEW_rules.json` to the rule file folder
-    - Or edit an existing rule file.
-3. Prepare a set of documents for testing. It's better the set contains both 
-new situations you would like to improve on and also a good samples of mentions of other types of
-the same PHIs that you are modifying on.
+   - Or edit an existing rule file.
+3. Prepare a set of documents for testing. It's better the set contains both
+   new situations you would like to improve on and also a good samples of mentions of other types of
+   the same PHIs that you are modifying on.
 4. Run the anonymiser script to test and validate.
 5. There is also a test script `test_rules.py` which allows you to test the
-rules on a fragment of text, and show you which rules matched.
+   rules on a fragment of text, and show you which rules matched.
 
 ## Testing rules separately
 

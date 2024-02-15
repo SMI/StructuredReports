@@ -2,15 +2,16 @@
 
 The Annotation Service is designed to maintain a catalogue of phenotypes derived from
 medical reports and provide search access via a REST API. It consists of:
-* software to anonymise the reports in the Identifiable Zone
-* software to perform the annotation of the reports in the Identifiable Zone
-* a PPZ (Private Project Zone) in the NSH (National Safe Haven) to host the service
-* a VM (Virtual Machine) in the PPZ
-* a PostgreSQL database in the VM
-* a nginx proxy to perform HTTPS SSL decoding
-* a systemd service to run the REST API server
-* the REST API server software
-* a network interface exposed (only) to the eDRIS Research Coordinator VM
+
+- software to anonymise the reports in the Identifiable Zone
+- software to perform the annotation of the reports in the Identifiable Zone
+- a PPZ (Private Project Zone) in the NSH (National Safe Haven) to host the service
+- a VM (Virtual Machine) in the PPZ
+- a PostgreSQL database in the VM
+- a nginx proxy to perform HTTPS SSL decoding
+- a systemd service to run the REST API server
+- the REST API server software
+- a network interface exposed (only) to the eDRIS Research Coordinator VM
 
 # PPZ and VM
 
@@ -21,7 +22,7 @@ A VM called nsh-smi06 has been created inside the PPZ, with the internal
 IP address 192.168.63.18. It has ntpserver 10.0.50.248 and proxyserver 10.0.50.246.
 Externally the VM is accessible from the RC VM as 10.0.2.135 on port 8485.
 This is a proxy server giving access to other VMs; it's only port 8485 which
-routes through to the annotation server VM.  The NSSData-Server 10.0.2.18
+routes through to the annotation server VM. The NSSData-Server 10.0.2.18
 is used by cohort builders for accessing mysql on nssdata (in preference to
 RC-Server). NSSData-Server has been added to the source list on node8's
 firewall smi zone meaning the ports for SMI services are accessible to the
@@ -31,7 +32,7 @@ that are needed on the RC-Server). The traffic from the proxy reaches the VM
 with a source IP of 10.0.50.108, which you need to know for the firewall.
 
 Internet access from within the PPZ is available through a proxy on port 800
-but it requires authentication.  It only operates during working hours, and
+but it requires authentication. It only operates during working hours, and
 only allows access to the Ubuntu APT repository for OS updates, and to pypi.org
 for Python packages.
 
@@ -57,6 +58,7 @@ sudo apt-get install openjdk-11-jdk ant
 ## Install the database servers
 
 If you want mongodb then:
+
 ```
 sudo apt-get install mongodb
 ```
@@ -76,6 +78,7 @@ postgresql-server-dev-14_14.1-2.pgdg20.04+1_amd64.deb
 ```
 
 Then install (must be done in a specific order):
+
 ```
 sudo apt install libjson-perl libllvm9
 sudo dpkg -i libpq5_14.1-2.pgdg20.04+1_amd64.deb
@@ -97,6 +100,7 @@ sudo systemctl start postgresql
 ## Configure proxy
 
 Put this into a `proxy.env` file:
+
 ```
 proxy_user=abrooks
 proxy_pass="ask andrew for this"
@@ -120,13 +124,16 @@ export HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY
 This will listen for HTTPS SSL on port 8485 and pass requests onto port 8080.
 
 First create certificate with
+
 ```
 sudo openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/nginx.key -out /etc/ssl/certs/nginx.crt \
   subj "/C=GB/ST=Scotland/L=Edinburgh/O=The University of Edinburgh/OU=EPCC/CN=10.0.2.135"
 ```
+
 Don't answer 192.168.63.18 for Common Name because externally the address is 10.0.2.135
 
-Create  `/etc/nginx/sites-enabled/semehr`
+Create `/etc/nginx/sites-enabled/semehr`
+
 ```
 server {
     listen 8485 ssl http2; # HTTP/2 is only possible when using SSL
@@ -177,6 +184,7 @@ sudo -u semehr virtualenv /opt/semehr/venv
 Unpack the three repos into `~/src` so you have `~/src/SmiServices` and `~/src/StructuredReports` and `~/src/CogStack-SemEHR` (ensure you are using the correct branch in each one).
 
 Create the SmiServices wheel
+
 ```
 cd ~/src/SmiServices/src/common/Smi_Common_Python
 python3 ./setup.py bdist_wheel
@@ -193,6 +201,7 @@ sudo -u semehr bash -c "(source proxy.env; source /opt/semehr/venv/bin/activate 
 ```
 
 Now copy the rest of the software
+
 ```
 sudo rsync -a ~/src/CogStack-SemEHR /opt/semehr/
 sudo ln -s ../utils.py /opt/semehr/CogStack-SemEHR/RESTful_service/utils.py
@@ -223,6 +232,7 @@ WantedBy=multi-user.target
 ```
 
 Start with
+
 ```
 systemctl enable semehr.service
 systemctl start semehr.service
@@ -237,6 +247,7 @@ See the other documents.
 # Test
 
 Create a virtual network interface, because the external IP address is not available locally:
+
 ```
 sudo ip link add eth10 type dummy
 sudo ip addr add 10.0.2.135/32 brd + dev eth10 label eth10:0
@@ -246,28 +257,32 @@ sudo ip addr add 10.0.2.135/32 brd + dev eth10 label eth10:0
 ```
 
 Test the web page responds, using HTTPS on port 8485 to the external IP address:
+
 ```
 curl -k https://10.0.2.135:8485/vis/
 ```
 
 Test the password:
+
 ```
 curl -k https://10.0.2.135:8485/api/check_phrase/ENCRYPTED_PASSWORD/
 ```
+
 Using the correct encrypted password it should respond with `true` only.
 To get the encrypted version of the password you need to use sha256:
+
 ```
 printf "PASSWORD" | sha256sum | awk '{print$1}'
 ```
 
-
 To test the security you should also verify:
-* there is no response on any other port (on the external IP address), eg. 80, 8080, etc
-* there is no response on port 8485 (on the external IP address) from any other VM than the RC VM
-* ensure that a password is required
-* ensure that only the valid password can be used, others are rejected
 
-Note on security 
+- there is no response on any other port (on the external IP address), eg. 80, 8080, etc
+- there is no response on port 8485 (on the external IP address) from any other VM than the RC VM
+- ensure that a password is required
+- ensure that only the valid password can be used, others are rejected
+
+Note on security
 
 # Populate the database with the annotations
 
@@ -310,10 +325,11 @@ The REST API is accessible only to the Research Coordinator VM using
 Use the program from the tools directory `src/tools/semehr_service_check.sh`
 
 If the web service cannot be reached:
-* check that nginx is running `systemcal status nginx`. If it's not then check the logs `journalctl -u nginx`. It may be unable to start if the virtual IP address is not available.
-* check the virtual IP address is available `ifconfig -a`, look for 10.0.2.135. If not available then create it (see above) and then `systemctl restart nginx`.
-* check the web service is running `systemctl status semehr`. If it's not then check the logs `journalctl -u semehr`.
-* If the web service process is running but not responding then check that postgres is running `systemctl status postgresql` because each request to the web service makes a connection to the database.
+
+- check that nginx is running `systemcal status nginx`. If it's not then check the logs `journalctl -u nginx`. It may be unable to start if the virtual IP address is not available.
+- check the virtual IP address is available `ifconfig -a`, look for 10.0.2.135. If not available then create it (see above) and then `systemctl restart nginx`.
+- check the web service is running `systemctl status semehr`. If it's not then check the logs `journalctl -u semehr`.
+- If the web service process is running but not responding then check that postgres is running `systemctl status postgresql` because each request to the web service makes a connection to the database.
 
 # Internal structure of web service
 
@@ -323,7 +339,7 @@ This section describes the internal structure of the code.
 
 ## HTML interface
 
-The main search page is vis.html.  This is a standalone client-side search interface.
+The main search page is vis.html. This is a standalone client-side search interface.
 There is no state maintained in the web server, it is all held in the client.
 
 vis.html has external requirements: `jquery.min.js`, `jquery.dataTables.js`, `jquery.dataTables.css` and three images.
@@ -333,6 +349,7 @@ The API URL is hard-coded in `api.js` for example (`service_url: "http://localho
 ## Javascript interface
 
 vis.js makes these calls to the API:
+
 ```
 qbb.inf.needPassphrase() -- calls /api/need_passphrase
 qbb.inf.checkPhrase(phrase)  -- calls /api/check_phrase
@@ -348,10 +365,11 @@ qbb.inf.searchAnns($('#klsearch').val())  -- calls /api/search_anns
 ## Python interface
 
 The main class is called `DocAnn` which provides methods such as
-* load_mappings
-* get_doc_ann_by_mapping
-* get_available_mappings
-* do_search_anns
+
+- load_mappings
+- get_doc_ann_by_mapping
+- get_available_mappings
+- do_search_anns
 
 That class is subclassed as `PostgresDocAnn` specifically to use a PostgreSQL
 database. Other subclasses are not fully featured, `FileBasedDocAnn` and
@@ -361,10 +379,12 @@ database. Other subclasses are not fully featured, `FileBasedDocAnn` and
 
 The query interface allows for sets of CUIs to be collected into a "mapping".
 A mapping is a dictionary, stored in a JSON file, typically like this:
+
 ```
 {
     "phenotypeName": [ "cui1", "cui2", ... ],
 ```
+
 This is similar to the mapping used by nlp2phenome, see the
 [annotation learning](annotation_learning.md) document and in fact
 the same could be used: `cui1\tPref\tSty` (Pref and Sty are not

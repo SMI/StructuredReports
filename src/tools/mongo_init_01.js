@@ -10,12 +10,13 @@ db = conn.getDB("admin");
 
 //use admin;
 
-db.createUser(
-  {
-    user: "root",
-    pwd: "root", // cleartext password, or passwordPrompt()
-    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
-  }
-);
+db.createUser({
+  user: "root",
+  pwd: "root", // cleartext password, or passwordPrompt()
+  roles: [
+    { role: "userAdminAnyDatabase", db: "admin" },
+    "readWriteAnyDatabase",
+  ],
+});
 
 // No need to do this, next script will restart mongo: db.adminCommand( { shutdown: 1 } )

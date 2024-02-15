@@ -8,50 +8,54 @@ and the code which maps SNOMED codes to UMLS concepts also requires it.
 NOTE! The UMLS CANNOT be redistributed or used without an agreement.
 
 NOTE! The 2019 version of the UMLS database must be used for two reasons:
-* the annotation creation part of SemEHR uses the 2019 version so it makes
-sense to keep the concepts identical
-* the 2021 version of the UMLS removed the relationships from the MRREL file
-and the replacement MRHIER file is not so useful
+
+- the annotation creation part of SemEHR uses the 2019 version so it makes
+  sense to keep the concepts identical
+- the 2021 version of the UMLS removed the relationships from the MRREL file
+  and the replacement MRHIER file is not so useful
 
 ## UMLS Hierarchy
 
 There are two types of parent/child relationship:
-* Broader/Narrower
-* Parent/Child
+
+- Broader/Narrower
+- Parent/Child
 
 See the abbreviations used https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html
 
 Honghan thinks only Narrower is needed but the UMLS people say:
-* RB/RN are generally used when the relations are not part of a broader hierarchy.
-* PAR/CHD relations are generally part of a hierarchy. There may be some exceptions to this. 
+
+- RB/RN are generally used when the relations are not part of a broader hierarchy.
+- PAR/CHD relations are generally part of a hierarchy. There may be some exceptions to this.
 
 Maybe they mean that PAR/CHD are used between concepts within one
 particular source vocabulary (e.g. SNOMED) whereas RB/RN are not.
 
 "The Semantic Structure of the UMLS Metathesaurus" by Stuart J. Nelson says:
-> In some instances these
-relationships are labelled, indicating that the two concepts
-are similar, with one being broader in meaning (but
-otherwise similar) than the other. Contextual information
-shows where the concept occurs in a source hierarchy,
-together with its parents, and siblings. The relationship
-with a parent is often that of an "is-a" relationship, but
-some other vertical relationships have been labelled as
-well. While not entirely true, it is frequently useful to
-think of non-labelled parent-child relationships as being of
-some type of relationship which involves subsumption.
-That is, in some sense the parent concept is broader in
-meaning than the child. Co-occurring data do not have
-any label on the link between concepts; the fact that two
-concepts have both been used to index the same article
-implies an empirically discovered relationship. Two
-entries with the same semantic type have an implied
-relationship, that of "similar to".
 
+> In some instances these
+> relationships are labelled, indicating that the two concepts
+> are similar, with one being broader in meaning (but
+> otherwise similar) than the other. Contextual information
+> shows where the concept occurs in a source hierarchy,
+> together with its parents, and siblings. The relationship
+> with a parent is often that of an "is-a" relationship, but
+> some other vertical relationships have been labelled as
+> well. While not entirely true, it is frequently useful to
+> think of non-labelled parent-child relationships as being of
+> some type of relationship which involves subsumption.
+> That is, in some sense the parent concept is broader in
+> meaning than the child. Co-occurring data do not have
+> any label on the link between concepts; the fact that two
+> concepts have both been used to index the same article
+> implies an empirically discovered relationship. Two
+> entries with the same semantic type have an implied
+> relationship, that of "similar to".
 
 ## Creation
 
 Download the UMLS metathesaurus (warning, needs 40GB space!). Unpack:
+
 ```
 unzip umls-2019.zip
 cd 2019*
@@ -75,7 +79,6 @@ These have a useful selection of columns and also reformat the rows so,
 for example, the Narrower Concepts are all listed in a single row for
 each concept rather than as multiple rows.
 
-
 ```
 ./umls_to_csv.py [-h] [--sources SOURCES] [--chd] [--test TEST]
   --sources SOURCES  comma-separated list of sources default MTH,SNOMEDCT_US
@@ -88,6 +91,7 @@ to include only those defined in the Metathesaurus or in SMOMED.
 By default both of those are included. This means that relationships
 defined by other vocabularies are ignored. You can choose to filter only
 to MTH or only to SNOMEDCT_US or both using
+
 ```
 umls_to_csv.py --sources MTH
 umls_to_csv.py --sources SNOMEDCT_US
@@ -95,9 +99,10 @@ umls_to_csv.py --sources MTH,SNOMEDCT_US
 ```
 
 The difference, as an example using concept C0205076 (Chest Wall) is:
-* MTH - only has 1 child concept, fully expands to 2 children
-* SNOMED - has 16 child concepts, fully expands to 2283 children
-* both - same 16 child concepts, fully expands to 8075 children
+
+- MTH - only has 1 child concept, fully expands to 2 children
+- SNOMED - has 16 child concepts, fully expands to 2283 children
+- both - same 16 child concepts, fully expands to 8075 children
 
 The option `--chd` can be used to disable the inclusion of Child relations,
 as the default is to include them.
@@ -110,14 +115,14 @@ umls.py --cfg . --csvs MTH+SNOMED/
 
 # Input RRF files
 
-N.B. you can read the 
+N.B. you can read the
+
 ## SemGroups_2018.txt
 
 Maps a semantic type (tui) to a semantic type group
 i.e. groups together related tui into a set
 `Group|GroupName|Type|TypeLabel`
 eg. `ACTI|Activities & Behaviors|T052|Activity`
-
 
 ## MRSTY.RRF
 
@@ -145,16 +150,16 @@ C0205076|ENG|S|L0248726|VO|S0282525|Y|A2895894|130920016|78904004||SNOMEDCT_US|S
 ## MRREL.RRF
 
 Relationships between CUIs
+
 ```
 cui1    |aui1     |typ1|rel|cui2    |aui2    |typ2|rela|rui|srui|sab|sl|rg|dir|suppress|cvf
 ```
 
 e.g.
+
 ```
 C0000005|A13433185|SCUI|RB|C0036775|A7466261|SCUI||R86000559||MSHFRE|MSHFRE|||N||
 ```
-
-
 
 # Output CSV files
 
@@ -164,7 +169,7 @@ commas more easily.
 ## cui.csv
 
 Maps CUI (concept id) to TUI (semantic type id), and also gives
-the TUI group names and a label (description) of the CUI.  The CUI
+the TUI group names and a label (description) of the CUI. The CUI
 can have several semantic types so they are comma-separated.
 The source file (MRCONSO) has multiple rows per CUI so the
 preferred label is chosen from LAT='ENG' and TS='P' and STT='PF'
@@ -191,6 +196,7 @@ C0000039|RN|C0043950,C0615231,C3253442,C3885037,C0621533,C0216971,C1611431,C0381
 ## snomed.csv
 
 Map a SNOMED code to a CUI. If there were multiple CUIs only one was chosen.
+
 ```
 snomed|cui
 100000000|C0308478
