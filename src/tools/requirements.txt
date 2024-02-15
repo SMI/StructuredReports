@@ -1,10 +1,10 @@
-urllib3
 joblib
-SmiServices
-SemEHR
+mysql_connector_python
 psycopg2_binary
 pymongo
-pyyaml
-spacy
-mysql_connector_python
 pyre2_updated
+pyyaml
+SemEHR
+SmiServices
+spacy
+urllib3
