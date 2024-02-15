@@ -17,6 +17,8 @@ import logging
 import os
 import re
 import sys
+from types import TracebackType
+import typing
 sys.path.append('../../../SmiServices/src/common/Smi_Common_Python/')
 from SmiServices import DicomText
 from pydal import DAL, Field
@@ -51,7 +53,7 @@ db_directory = csv_directory
 class SRReviewDB():
     db_path = db_directory
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.db=DAL('sqlite://review_SR_report.sqlite.db', folder = SRReviewDB.db_path) # debug=True
         self.db.define_table(
             'ReviewedSRs', Field('filename', required=True, notnull=True), # unique=True
@@ -62,21 +64,26 @@ class SRReviewDB():
         self.db.executesql('CREATE INDEX IF NOT EXISTS filenameidx ON ReviewedSRs (filename);')
         self.username = getpass.getuser() # os.getlogin fails when in a GUI
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.db.close() # this should happen when we del the object but it doesn't, it's also not documented
         del self.db
 
-    def __enter__(self):
+    def __enter__(self) -> "SRReviewDB":
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: typing.Optional[type[BaseException]],
+        exc_val: typing.Optional[BaseException],
+        exc_tb: typing.Optional[TracebackType],
+    ) -> None:
         # XXX does __del__ also get called in this case?
         pass
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return('<SRReviewDB(%s)>' % SRReviewDB.db_path)
 
-    def get_review(self, filename, word):
+    def get_review(self, filename: str, word: str) -> str:
         review = ''
         for row in self.db(
                 (self.db.ReviewedSRs.filename == filename) &
@@ -85,7 +92,7 @@ class SRReviewDB():
             review = row['review']
         return review
 
-    def mark_as_reviewed(self, filename, word, review):
+    def mark_as_reviewed(self, filename: str, word: str, review: str) -> None:
         # If db already contains filename then only overwrite the old value if
         # it is safe, i.e. a true positive (PII) takes priority and can't be
         # replaced by a false positive
@@ -109,16 +116,16 @@ class SRReviewDB():
             )
         self.db.commit()
 
-    def mark_as_false_positive(self, filename, word):
+    def mark_as_false_positive(self, filename: str, word: str) -> None:
         self.mark_as_reviewed(filename, word, 'FP')
 
-    def mark_as_PII(self, filename, word):
+    def mark_as_PII(self, filename: str, word: str) -> None:
         self.mark_as_reviewed(filename, word, 'TP')
 
-    def mark_as_other(self, filename, word):
+    def mark_as_other(self, filename: str, word: str) -> None:
         self.mark_as_reviewed(filename, word, 'reviewed')
 
-    def dump_db(self):
+    def dump_db(self) -> None:
         print('{"files":[')
         first = True
         for row in self.db(self.db.ReviewedSRs).select(orderby = self.db.ReviewedSRs.last_modified):
@@ -127,7 +134,7 @@ class SRReviewDB():
         print(']\n}')
 
 
-def test_SRReviewDB():
+def test_SRReviewDB() -> None:
     db = SRReviewDB()
     print('test1 word1 = %s' % db.get_review('test1', 'word1'))
     print('test1 word2 = %s' % db.get_review('test1', 'word2'))
@@ -146,20 +153,20 @@ def test_SRReviewDB():
     assert(1==2)
 
 
-def write_db_false_positive(word, filename):
+def write_db_false_positive(word: str, filename: str) -> None:
     db = SRReviewDB()
     db.mark_as_false_positive(filename, word)
 
-def write_db_PII(word, filename):
+def write_db_PII(word: str, filename: str) -> None:
     db = SRReviewDB()
     db.mark_as_PII(filename, word)
 
-def write_db_reviewed(word, filename):
+def write_db_reviewed(word: str, filename: str) -> None:
     db = SRReviewDB()
     db.mark_as_other(filename, word)
 
 
-def write_csv(filename, word_filename_list):
+def write_csv(filename: str, word_filename_list: list[tuple[str, str]]) -> None:
     """ Write a CSV filename in the csv_directory which contains
     all rows in word_filename_list. Columns assumed to be in the order
     as specified in the writerow() call below (word,filename).
@@ -178,7 +185,7 @@ def write_csv(filename, word_filename_list):
     fd.close()
 
 
-def load_report(report_filename, root_dir = ''):
+def load_report(report_filename: str, root_dir: str = '') -> dict[str,typing.Any]:
     """ Read the report into a dictionary indexed by the Word
     Word,Classification,ProblemValueWindow,Offset,Resource
     If root_dir is given it is prepended onto all paths in the report.
@@ -215,7 +222,7 @@ def load_report(report_filename, root_dir = ''):
     return csv_words
 
 
-def load_SR(path):
+def load_SR(path: str) -> str:
     """ Load a DICOM SR and extract the text.
     Removes any tag strings inside [[Tag]] lines.
     """
@@ -227,19 +234,19 @@ def load_SR(path):
     return text
 
 
-def word_to_gui_label(word):
+def word_to_gui_label(word: str) -> str:
     """ Given a word return a string for the combo box,
     which includes a count of how many documents contained that word.
     """
     return '%6d: %s' % (len(csv_words[word]), word)
 
-def gui_label_to_word(word):
+def gui_label_to_word(word: str) -> str:
     """ Given the word as displayed in the combo box,
     convert it back to the raw word.
     """
     return re.sub('^ *[0-9]*: ', '', word)
 
-def find_path_given_filename(word, filename):
+def find_path_given_filename(word: str, filename: str) -> str:
     """ Given a word and a filename, return the full file path.
     XXX uses [0] because the generator returns a list but there should only be one result.
     """
@@ -247,8 +254,9 @@ def find_path_given_filename(word, filename):
         if os.path.basename(f['filename']) == filename:
             return f['filename']
     # SLOWER: return [f['filename'] for f in csv_words[word] if os.path.basename(f['filename']) == filename][0]
+    raise Exception("could not find filepath")
 
-def find_index_of_path_given_filename(word, filename):
+def find_index_of_path_given_filename(word: str, filename: str) -> int:
     """ Given a word and a filename, return the index in the list of the full file path.
     """
     idx = -1
@@ -258,7 +266,7 @@ def find_index_of_path_given_filename(word, filename):
             break
     return idx
 
-def create_gui(csv_words):
+def create_gui(csv_words: dict[str, typing.Any]) -> typing.Any:
     """ Create the GUI window and return the window object
     """
     list_of_words_with_counts = sorted([
@@ -283,7 +291,7 @@ def create_gui(csv_words):
     return gui_window
 
 
-def run_gui(gui_window):
+def run_gui(gui_window: typing.Any) -> None:
     """ Run the GUI given the main window object
     """
     good_list = []
