@@ -134,7 +134,7 @@ class DicomText:
         else:
             return ''
 
-    def list_of_PNAMEs(self) -> list[str]:
+    def list_of_PNAMEs(self) -> typing.List[str]:
         """ Return a list of the values of all tags with a VR of PN
         """
         names = set()
@@ -143,7 +143,7 @@ class DicomText:
                 names.add(str(elem.value))
         return list(names)
 
-    def _data_element_parser(self, data_element: pydicom.DataElement) -> tuple[str, str]:
+    def _data_element_parser(self, data_element: pydicom.DataElement) -> typing.Tuple[str, str]:
         """ Internal function called by the parse and redact callbacks
         to consistently convert the data_element into the string which
         will be returned, in both raw and html-redacted versions.
@@ -322,7 +322,7 @@ class DicomText:
         return replacement if replacedAny else None
 
 
-    def redact(self, annot_list: list[dict[str, typing.Any]]) -> bool:
+    def redact(self, annot_list: typing.List[typing.Dict[str, typing.Any]]) -> bool:
         """ Redact the text in the DICOM using the annotation list
         which is a list of dicts { start_char, end_char, text }.
         Uses the annotation list and _p_text to find and redact text
