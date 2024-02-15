@@ -2,7 +2,7 @@
 """
 import os
 import random
-import re
+import typing
 
 import pydicom
 from SmiServices import Dicom
@@ -56,12 +56,13 @@ class DicomText:
     _redact_char_digit = '9'         # character used to redact digits in text
 
     def __init__(
-        self, filename, \
-        include_header = _include_header, \
-        replace_HTML_entities = _replace_HTML_entities, \
-        replace_HTML_char = _replace_HTML_char, \
-        replace_newline_char = _replace_newline_char,
-        include_unexpected_tags = _include_unexpected_tags,
+        self,
+        filename: str,
+        include_header: bool = _include_header, 
+        replace_HTML_entities: bool = _replace_HTML_entities, 
+        replace_HTML_char : str= _replace_HTML_char, 
+        replace_newline_char : str = _replace_newline_char,
+        include_unexpected_tags : bool = _include_unexpected_tags,
     ):
         """ The DICOM file is read during construction.
         If include_header is True some DICOM header fields are output (default True).
@@ -73,8 +74,8 @@ class DicomText:
         self._r_text = '' # maintain string progress during redaction walk
         self._redacted_text = ''
         self._redact_offset = 0
-        self._offset_list = [] # XXX not used
-        self._annotations = []
+        self._offset_list: list[dict[str, typing.Any]] = [] # XXX not used
+        self._annotations: list[dict[str, typing.Any]] = []
         self._filename = filename
         self._dicom_raw = pydicom.dcmread(filename)
         # Copy class settings to instance settings with overrides
@@ -86,10 +87,10 @@ class DicomText:
         # XXX do we need to decode the text?
         self._dicom_raw.decode()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<DicomText: {self._filename}>'
 
-    def setRedactChar(self, rchar):
+    def setRedactChar(self, rchar: str) -> None:
         """ Change the character used to anonymise/redact text.
         Can be a single character or an empty string.
         XXX haven't tried a multi-character string yet.
@@ -100,38 +101,40 @@ class DicomText:
         """
         DicomText._redact_char = rchar
 
-    def setReplaceHTMLChar(self, rchar):
+    def setReplaceHTMLChar(self, rchar: str) -> None:
         """ Change the character used to remove HTML.
         Can be a single character or an empty string.
         XXX haven't tried a multi-character string yet.
         """
         self._replace_HTML_char = rchar
 
-    def setReplaceNewlineChar(self, rchar):
+    def setReplaceNewlineChar(self, rchar: str) -> None:
         """ Change the character used to remove HTML.
         Can be a single character or an empty string.
         XXX haven't tried a multi-character string yet.
         """
         self._replace_newline_char = rchar
 
-    def SOPInstanceUID(self):
+    def SOPInstanceUID(self) -> str:
         """ Simply returns the SOPInstanceUID from the DICOM file
         in case you need to uniquely identify this input file.
         """
         return self._dicom_raw['SOPInstanceUID'].value
 
-    def tag(self, tagname):
+    def tag(self, tagname: str) -> str:
         """ Simply returns the value of the tag from the DICOM file.
         The tag is specified by name not by number:number.
         Returns the empty string if tag is not present.
         """
         tagcode = pydicom.datadict.tag_for_keyword(tagname)
+        if not tagcode:
+            return ''
         if tagcode in self._dicom_raw:
             return self._dicom_raw[tagcode].value
         else:
             return ''
 
-    def list_of_PNAMEs(self):
+    def list_of_PNAMEs(self) -> list[str]:
         """ Return a list of the values of all tags with a VR of PN
         """
         names = set()
@@ -140,7 +143,7 @@ class DicomText:
                 names.add(str(elem.value))
         return list(names)
 
-    def _data_element_parser(self, data_element):
+    def _data_element_parser(self, data_element: pydicom.DataElement) -> tuple[str, str]:
         """ Internal function called by the parse and redact callbacks
         to consistently convert the data_element into the string which
         will be returned, in both raw and html-redacted versions.
@@ -169,11 +172,11 @@ class DicomText:
                 rc_parsed = rc
         return (rc, rc_parsed)
 
-    def _dataset_read_callback(self, dataset, data_element):
+    def _dataset_read_callback(self, dataset: pydicom.Dataset, data_element: pydicom.DataElement) -> None:
         """ Internal function called during a walk of the dataset.
         Builds a class-member string _p_text as it goes.
         """
-        rc, rc_parsed = self._data_element_parser(data_element)
+        _, rc_parsed = self._data_element_parser(data_element)
         if rc_parsed == '':
             return
         self._offset_list.append( {
@@ -182,7 +185,7 @@ class DicomText:
         }, )
         self._p_text = self._p_text + rc_parsed
 
-    def parse(self):
+    def parse(self) -> None:
         """ Walk the dataset to extract the text which can then be
         returned via the text() method.
         """
@@ -193,8 +196,10 @@ class DicomText:
         if self._include_header:
             # Add all the known [[something]] headers
             for srkey in sr_keys_to_extract:
-                if srkey['tag'] in self._dicom_raw and srkey['tag'] != 'TextValue':
-                    line = '[[%s]] %s\n' % (srkey['label'], srkey['decode_func'](str(self._dicom_raw[srkey['tag']].value)))
+                tag: str = srkey['tag'] # type: ignore
+                if tag in self._dicom_raw and tag != 'TextValue':
+                    decode_func: typing.Callable[[typing.Any], str] = srkey['decode_func'] # type: ignore
+                    line = '[[%s]] %s\n' % (srkey['label'], decode_func(str(self._dicom_raw[tag].value)))
                     self._p_text = self._p_text + line
             # Collect all names in the whole document and add [[Other Names]] header
             names_list = self.list_of_PNAMEs()
@@ -237,7 +242,7 @@ class DicomText:
                 content_sequence_item.walk(self._dataset_read_callback)
             self._p_text = self._p_text + '[[EndContentSequence]]\n'
 
-    def redact_string(self, plaintext, offset, rlen, VR):
+    def redact_string(self, plaintext: str, offset: int, rlen: int, VR: str) -> str:
         """ Simple function to replace characters from the middle of a string.
         Starts at offset for rlen characters, replaced with X.
         If the VR (Dicom Value Representation) suggests a restricted
@@ -260,14 +265,14 @@ class DicomText:
         rc = plaintext[0:offset] + redacted_part + plaintext[offset+rlen:]
         return rc
 
-    def _dataset_redact_callback(self, dataset, data_element):
+    def _dataset_redact_callback(self, dataset: typing.Any, data_element: typing.Any) -> typing.Optional[str]:
         """ Internal function called during a walk of the dataset during redaction.
         Builds a class-member string _r_text as it goes.
         Uses the annotation list in self._annotations to redact text.
         """
         rc, rc_parsed = self._data_element_parser(data_element)
         if rc_parsed == '':
-            return
+            return None
         rc_without_html = rc_parsed
         # The current string is now len(self._r_text) ..to.. +len(rc)
         current_start = len(self._r_text)
@@ -317,7 +322,7 @@ class DicomText:
         return replacement if replacedAny else None
 
 
-    def redact(self, annot_list):
+    def redact(self, annot_list: list[dict[str, typing.Any]]) -> bool:
         """ Redact the text in the DICOM using the annotation list
         which is a list of dicts { start_char, end_char, text }.
         Uses the annotation list and _p_text to find and redact text
@@ -344,7 +349,7 @@ class DicomText:
                 rc = False
         return rc
 
-    def redact_PN_DA_callback(self, dataset, data_element):
+    def redact_PN_DA_callback(self, dataset: pydicom.Dataset, data_element: pydicom.DataElement) -> None:
         if data_element.VR == "PN":
             data_element.value = DicomText._redact_char.rjust(len(data_element.value), DicomText._redact_char)
         if data_element.VR == "DA":
@@ -352,22 +357,22 @@ class DicomText:
         if data_element.VR == "DT":
             data_element.value = "19000101000000"
 
-    def text(self):
+    def text(self) -> str:
         """ Returns the text after parse() has been called.
         """
         return self._p_text
 
-    def redacted_text(self):
+    def redacted_text(self) -> str:
         """ Returns the redacted text after redact() has been called.
         """
         return self._redacted_text
 
-    def write(self, newfile):
+    def write(self, newfile: str) -> None:
         """ Save the (redacted) DICOM as a new file.
         """
         self._dicom_raw.save_as(newfile)
 
-    def write_redacted_text_into_dicom_file(self, destfile):
+    def write_redacted_text_into_dicom_file(self, destfile: str) -> None:
         """ Open the specified file (must exist) and copy our redacted
         text into that file. The intention is that the redacted text
         from DICOM file A can be inserted into an already-anonymised
@@ -383,7 +388,7 @@ class DicomText:
         # Save the modified file
         dicom_dest.save_as(destfile)
 
-def test_DicomText():
+def test_DicomText() -> None:
     """ The test function requires a specially-crafted DICOM file
     as provided with SRAnonTool that has been modified to include HTML.
     """

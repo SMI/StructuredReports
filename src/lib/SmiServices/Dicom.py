@@ -1,6 +1,7 @@
 """ Functions to assist with decoding DICOM files representing from JSON as Python dicts
 """
 import re
+import typing
 from collections.abc import Mapping
 
 import pydicom
@@ -117,7 +118,7 @@ def test_decode_date():
 # using ^ as a separator between Surname^First^Middle^Title^Suffix
 # Returns the decoded human-readable string.
 
-def sr_decode_PNAME(pname):
+def sr_decode_PNAME(pname: typing.Any):
     if pname == None:
         return ''
     # Can be inside a list, but only use the first element XXX
