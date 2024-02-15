@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # test SQL
+import sys
+
 import psycopg2
 from psycopg2 import sql
-from psycopg2.extras import Json
 from psycopg2.extensions import AsIs
-import sys
+from psycopg2.extras import Json
 
 x='myCol'
 y='myTable'

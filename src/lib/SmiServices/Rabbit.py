@@ -10,19 +10,18 @@
 #
 # 1.01 abrooks Tue 27 Oct 15:30:01 GMT 2020 - changed Queue name for CTP
 #      and added new fields to CTP message.
-
 # XXX bugs: cannot insert OriginalPublishTimestamp as a long.
 # XXX currently only used for testing so contains debug statements.
 # XXX needs specific classes for the messages and for the queues
 #  so we can hold a message object and ack it later not when received.
-
-import os   # for os.path.basename()
-import yaml # for yaml.load()
-import uuid # for uuid.uuid4()
 import json # for json.dumps()
-import time # for time.time() and time.gmtime() and time.strftime()
-import pika # for rabbit API
+import os   # for os.path.basename()
 import sys
+import time # for time.time() and time.gmtime() and time.strftime()
+import uuid # for uuid.uuid4()
+
+import pika # for rabbit API
+import yaml # for yaml.load()
 
 
 #LOGGER = logging.getLogger(__name__)

@@ -5,7 +5,6 @@
 #  config file template in $CS/data/semehr_processor.json
 #  gcp/gate/bioyodie which requires java
 #  RAM disk in /run/user/$id
-
 import argparse
 import datetime
 import json
@@ -14,6 +13,7 @@ import os
 import pprint
 import shutil
 import sys
+
 from SemEHR.semehr_processor import process_semehr
 
 # Configuration

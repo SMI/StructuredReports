@@ -10,14 +10,20 @@
 # To anonymise *DICOM* files you need CTP_SRAnonTool.sh
 # (which uses CTP_DicomToText, this script, and CTP_XMLToDicom).
 # NOTE: this script has supersceded semehr_anon.sh.
-
-import argparse, json, logging, re, sys, os, glob
-from logging import handlers
+import argparse
+import glob
+import json
+import logging
+import os
+import re
 import shutil # for copyfile
-import tempfile # for TemporaryDirectory
 import subprocess # for run
-from SmiServices import Knowtator
+import sys
+import tempfile # for TemporaryDirectory
+from logging import handlers
+
 from SemEHR.anonymiser import do_anonymisation_by_conf
+from SmiServices import Knowtator
 
 # Configuration
 use_spacy = False

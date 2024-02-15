@@ -24,11 +24,11 @@
 #  <span end="1183" start="1173"/>
 #  <spannedText>T CAMPBELL</spannedText>
 # </annotation>
-
 import argparse
 import json
 import os
 import sys
+
 from SmiServices import Knowtator
 
 parser = argparse.ArgumentParser(description = 'Convert PHI to Knowtator XML')

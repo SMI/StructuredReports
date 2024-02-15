@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 # Convert a DICOM file into plain text in a suitable format
 # for passing into the anonymisation/annotations parts of SemEHR.
 # Can alternatively read from the MongoDB dicom database instead of files.
@@ -18,21 +17,21 @@
 #     the dicom database instead of from DICOM files.
 #   MongoDatabases | SemEHRStoreOptions for testing if the record
 #     read from the dicom database already exists in the SemEHR db.
-
 import argparse
-import logging, logging.handlers
-import os
-import sys
 import json
-import yaml
-import pydicom
+import logging.handlers
+import os
 import re
+import sys
+
+import pydicom
+import yaml
 from deepmerge import Merger    # for deep merging yaml dictionaries
-from SmiServices import Mongo
 from SmiServices import Dicom
 from SmiServices import DicomText
-from SmiServices import StructuredReport as SR
 from SmiServices import IdentifierMapper
+from SmiServices import Mongo
+from SmiServices import StructuredReport as SR
 
 # List of DICOM SR tags which we want exported in metadata json files
 metadata_fields = [

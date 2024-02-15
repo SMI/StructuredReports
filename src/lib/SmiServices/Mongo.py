@@ -1,5 +1,6 @@
-from pymongo import MongoClient
 import re
+
+from pymongo import MongoClient
 
 class SmiPyMongoCollection:
     """Python class to help get records from a specific collection in a MongoDB.

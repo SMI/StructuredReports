@@ -3,11 +3,11 @@
 # Usage:  default.yaml "project" file.dcm
 # Requires a version of smiRabbit which omits the timestamp
 # so CTP doesn't get confused by a 32-bit integer when it expects 64.
-
 import os
 import sys
-import yaml
+
 import smiRabbit
+import yaml
 
 yaml_file = sys.argv[1] # eg. $SMI_ROOT/configs/smi_dataExtract_abrooks_test.yaml
 project   = sys.argv[2] # eg. abrooks_test

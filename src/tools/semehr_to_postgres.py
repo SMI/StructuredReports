@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
-
 # Add the semehr_results to the PostgreSQL database.
 #   Reads the json files containing annotations,
 #   adds the content of the redacted (anonymous) text files
 #   and adds the SOPInstanceUID as a primary key index.
 # Can be used to query the PostgreSQL database.
-
 # NOTE:
 #   To do: log into the SMI_LOGS_ROOT directory or LogsRoot from yaml
-
 # Usage:
 #   --drop-table - will delete the table before doing anything else (can be used alone)
 #   --add-index       - will add several optional indexes (can be used alone)
 #   -j   directory of .json files
 #   -t   directory of .txt file (the redacted text)
 #   -q   optional query to perform, eg. cui:C0205076 to find documents mentioning "chest wall"
-
 # Table semehr_results schema is SOPInstanceUID, semehr_results
 # where the semehr_results columns contains jsonb:
 #  "PatientID": "xxx",
@@ -26,7 +22,6 @@
 #  "ModalitiesInStudy": "CT\\SR",
 #  "SeriesInstanceUID": "1.2.840.113704.7.1.1.1485948920.1205405541.11190.194.2.26535"
 #  "redacted_text", "sentences", "annotations", "phenotypes"
-
 # output_docs has features:
 #   "PREF": "Rhythm"
 #   "Experiencer": "Patient"
@@ -61,20 +56,20 @@
 #   "phenotypes": [ {start,end,major_type,minor_type}, ... ]
 #   "sentences": [ {start,end}, ... ]
 # }
-
 import argparse
 import glob
 import json
 import logging
-import os, os.path
+import os.path
 import pprint
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extras import Json
-from psycopg2.extensions import AsIs
 import re
 import sys
+
+import psycopg2
 import yaml
+from psycopg2 import sql
+from psycopg2.extensions import AsIs
+from psycopg2.extras import Json
 
 # DB config
 pgHost = 'localhost'

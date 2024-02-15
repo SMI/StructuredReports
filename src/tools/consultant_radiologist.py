@@ -5,15 +5,17 @@
 #  (and also look for Chest X-Ray SRs if possible)
 # Run with:
 # PYTHONPATH=~/h/src/github/SmiServices/src/common/Smi_Common_Python ./consultant_radiologist.py 
-
 import json
 import re
 import sys
 from tempfile import TemporaryFile
-from pymongo import MongoClient
-from bson.json_util import dumps
-from SmiServices import Dicom, DicomText, StructuredReport
+
 import SmiServices.StructuredReport as SR
+from bson.json_util import dumps
+from pymongo import MongoClient
+from SmiServices import Dicom
+from SmiServices import DicomText
+from SmiServices import StructuredReport
 
 num_random_docs = 1000
 num_context_chars = 40

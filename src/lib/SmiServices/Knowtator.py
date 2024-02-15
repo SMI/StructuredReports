@@ -4,11 +4,10 @@
 # and is intended only for working with that software.
 # It has been extended to work like the ann_converter
 # so the output can be used as input to eHOST.
-
-from operator import itemgetter # for sorted()
-import xml.etree.ElementTree    # untangle and xmltodict not available in NSH
-import xml.dom.minidom as minidom
 import re
+import xml.dom.minidom as minidom
+import xml.etree.ElementTree    # untangle and xmltodict not available in NSH
+from operator import itemgetter # for sorted()
 
 
 # ---------------------------------------------------------------------

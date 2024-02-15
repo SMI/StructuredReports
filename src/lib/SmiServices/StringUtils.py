@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # String utilities shared between DicomText.py and StructuredReport.py
-
 import re
-
-from html.parser import HTMLParser
 from html.entities import name2codepoint
+from html.parser import HTMLParser
 
 # ---------------------------------------------------------------------
 

@@ -2,8 +2,8 @@
 # test cursors
 import psycopg2
 from psycopg2 import sql
-from psycopg2.extras import Json
 from psycopg2.extensions import AsIs
+from psycopg2.extras import Json
 
 pgConnection = psycopg2.connect(host='localhost', user='semehr', password='semehr', dbname='semehr')
 

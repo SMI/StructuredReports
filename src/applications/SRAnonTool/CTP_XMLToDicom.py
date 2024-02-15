@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 # Program to replace (redact) text in a DICOM file
 # by reading a list of annotations from an XML file
 # saying which character positions to redact.
@@ -8,15 +7,16 @@
 # calculating the offset as it goes,
 # and replacing sections which match annotations.
 # Usage: -y default.yaml -i input.dcm -x input.xml -o output.dcm
-
-import os, sys
 import argparse
-import logging, logging.handlers
-import xml.etree.ElementTree    # untangle and xmltodict not available in NSH
-from deepmerge import Merger    # for deep merging dictionaries
-import pydicom
+import logging.handlers
+import os
 import random
+import sys
+import xml.etree.ElementTree    # untangle and xmltodict not available in NSH
+
+import pydicom
 import yaml
+from deepmerge import Merger    # for deep merging dictionaries
 sys.path.append('../../common/') # if we are in the application directory
 sys.path.append('src/common')    # if we are in the root of the repo
 if 'SMI_ROOT' in os.environ:     # $SMI_ROOT/lib/python3

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 # Create a HTML file to mark up a text file with annotations taken from a JSON file.
 # The JSON file must be a dict with an "annotations" key, being an array of annotation dicts
 # each of which has "start", "end" (character offsets in text file),
@@ -9,11 +8,9 @@
 # because there might be overlapping and nested regions.
 # Usage:  ann_to_html.py  *.txt   -- assumes the json files have a .json extension
 # Usage:  ann_to_html.py -t file.txt -j file.json -o file.html
-
 import argparse
 import json
 import sys
-import argparse
 
 HTML_header = """<html><head><style>
 /* Tooltip container */
@@ -156,4 +153,3 @@ elif args.txtfiles:
 else:
     print('ERROR: must specify -t or give a list of text files')
     exit(1)
-

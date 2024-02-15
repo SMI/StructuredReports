@@ -5,10 +5,14 @@
 #   Assumes AssemblyInfo.cs contains a line like this:
 #     [assembly: AssemblyVersion("1.15.1")]
 #   Uses the find_packages function but skips tests
-
-from setuptools import setup, find_packages
-from os.path import join, abspath, dirname, isdir
 import sys
+from os.path import abspath
+from os.path import dirname
+from os.path import isdir
+from os.path import join
+
+from setuptools import find_packages
+from setuptools import setup
 
 # Read requirements.txt in current directory
 # and convert it into the form required by setuptools
@@ -59,4 +63,3 @@ setup(
     requires=[translate_req(r) for r in requirements],
     install_requires=requirements
 )
-

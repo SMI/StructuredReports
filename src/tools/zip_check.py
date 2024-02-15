@@ -4,7 +4,6 @@
 # This assumes each zip file contains one whole day of annotations.
 # Each zip file has been produced in a batch by year on a single hostname.
 # Usage: zip_check.py *.zip
-
 import os
 import sys
 import zipfile

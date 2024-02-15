@@ -6,9 +6,9 @@
 # dcm2json file.dcm | dicom_tag_lookup.py | jq '..|.SeriesInstanceUID|.Value'
 # Usage: -k keeps the numeric value of the tag in the output
 # and doesn't modify the TransferSyntaxUID or SOPClassUID.
-
 import re
 import sys
+
 from pydicom.datadict import keyword_for_tag
 
 keep_numeric_string = True if len(sys.argv)>1 and sys.argv[1] == '-k' else False

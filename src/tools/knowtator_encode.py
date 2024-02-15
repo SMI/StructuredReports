@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 # Encode the semehr_results output as a knowtator.xml file.
 # Usage: knowtator_encode.py -o output_dir -i file.json...
 #  use --anonymise to change annotation class to semehr_sensitive_info
@@ -9,12 +8,12 @@
 # so when changing the filename it replaces .json with .txt.knowtator.xml
 # The resulting XML files have annotation span (start,end chars)
 # and spanned text, and a class which is the "pref(cui)" text.
-
 import argparse
 import json
 import os
 import sys
 import xml.etree.ElementTree
+
 from SmiServices import Knowtator
 
 parser = argparse.ArgumentParser(description='Convert semehr_results JSON to eHOST knowtator.xml')

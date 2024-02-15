@@ -9,7 +9,6 @@
 # TODO: run NER on the text and highlight PII which may have been missed.
 # TODO: allow undo if user clicks wrong button.
 # TODO: Use a database?
-
 import argparse
 import csv
 import datetime

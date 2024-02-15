@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-
 # Class to map from CHI number to EUPI.
 # The class keeps a connection open to MySQL for speed.
+import os
+import re
+import sys
 
 import mysql.connector
-import os, re, sys, yaml
+import yaml
 
 class CHItoEUPI():
 

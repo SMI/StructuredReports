@@ -3,9 +3,14 @@
 # Can redact a directory of txt files.
 # Deduces the XML filename by appending .knowtator.xml (or replacing .txt).
 # Output goes to the same file or to a given directory.
-
-import argparse, logging, re, sys, os, glob
+import argparse
+import glob
+import logging
+import os
+import re
+import sys
 import xml.etree.ElementTree
+
 from SmiServices import Knowtator
 
 

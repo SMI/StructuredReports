@@ -1,13 +1,15 @@
 # Parse a DICOM Structured Report in JSON format as output by the MongoDB database.
-
 import os
 import re
 import sys
 from tempfile import TemporaryFile
-from SmiServices import Dicom
-from SmiServices.Dicom import tag_is, tag_val, has_tag
-from SmiServices.StringUtils import redact_html_tags_in_string
+
 import pydicom
+from SmiServices import Dicom
+from SmiServices.Dicom import has_tag
+from SmiServices.Dicom import tag_is
+from SmiServices.Dicom import tag_val
+from SmiServices.StringUtils import redact_html_tags_in_string
 
 
 # ---------------------------------------------------------------------

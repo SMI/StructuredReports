@@ -3,14 +3,14 @@
 # amd filling in the tags with the given parameters or random values.
 # To do:
 # Should have options for specifying name, output path, etc.
+import argparse
+import json
+import os
+import random
+import sys
 
 import pydicom
 from pydicom.dataset import FileMetaDataset
-import argparse
-import json
-import random
-import os
-import sys
 
 in_json = 'sample_SR.json'
 out_dcm = 'sample_SR.dcm'

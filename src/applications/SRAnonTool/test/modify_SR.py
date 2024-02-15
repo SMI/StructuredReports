@@ -2,8 +2,8 @@
 # Read in report02.dcm and write report02mod.dcm
 # with all instances of "The patient" replaced by one of the actual names
 # found in the DICOM tags.
-
 import random
+
 import pydicom
 
 ds = pydicom.dcmread('report02.dcm')

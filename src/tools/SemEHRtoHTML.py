@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
-
 # Combine SemEHR output along with an anonymisation step to produce marked-up HTML.
 # Also output Neo4J Cypher commands to construct a graph database.
-
 # Read the SemEHR output files,
 #  extract the locations of the words which have been tagged with meanings
 # Read the original source text files,
 #  run SpaCy to find the locations of the words which are named entities,
 # Combine the two sets of results into one sorted list
 # Pass the list to the SpaCy visualiser to produce HTML
-
-import spacy
-from spacy import displacy
-import json
 import ast
 import glob
+import json
 import os
-import yaml
 from operator import itemgetter # for sorting a list of dicts by value
+
+import spacy
+import yaml
+from spacy import displacy
 
 # Configuration
 #   the default spaCy model, can be changed in the default.yaml file

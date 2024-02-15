@@ -17,7 +17,6 @@
 # "terms":[ {"q":["C0004994","C4750566","C99"]}],
 # "filter":{"sopinstanceuid":["1.2.840.113704.7.1.2223360322.9052.1312473964.2821","dummy"]},
 # "returnFields":["SOPInstanceUID"]}
-
 import csv
 import json
 import sys

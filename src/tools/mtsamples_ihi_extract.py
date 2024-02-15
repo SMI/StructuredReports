@@ -4,12 +4,11 @@
 #  Also writes fake metadata files. These would normally be written by
 #  CTP_DicomToText as it extracts the data from MongoDB but to simulate this
 #  we can create them now instead.
-
 import csv
+import errno
 import json
 import os
 import sys
-import errno
 
 sample_csv_dir  = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data')
 sample_csv_file = os.path.join(sample_csv_dir, 'mtsamples_ihi.csv')  # input CSV file

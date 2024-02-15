@@ -1,13 +1,15 @@
 """ Functions to assist with decoding text in DICOM files
 """
-
 import os
-import pydicom
-import re
 import random
+import re
+
+import pydicom
 from SmiServices import Dicom
-from SmiServices.StructuredReport import sr_keys_to_extract, sr_keys_to_ignore
-from SmiServices.StringUtils import string_match_ignore_linebreak, redact_html_tags_in_string
+from SmiServices.StringUtils import redact_html_tags_in_string
+from SmiServices.StringUtils import string_match_ignore_linebreak
+from SmiServices.StructuredReport import sr_keys_to_extract
+from SmiServices.StructuredReport import sr_keys_to_ignore
 
 
 # ---------------------------------------------------------------------

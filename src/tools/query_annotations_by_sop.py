@@ -18,12 +18,12 @@
 #   For each filename, query the DB for its annotations,
 #     see if any annotations are in the list,
 #     or in the extended (narrower) list
-
 import csv
 import json
 import os
 import re
 import sys
+
 import psycopg2
 sys.path.append('/opt/semehr/CogStack-SemEHR/RESTful_service')
 from umls import UMLSmap

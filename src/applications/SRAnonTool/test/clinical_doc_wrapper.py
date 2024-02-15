@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 # This stub program simulates the effect of running
 #   ${semehr_dir}/CogStack-SemEHR/analysis/clinical_doc_wrapper.py
 #
@@ -14,7 +13,6 @@
 #   ${semehr_dir}/data/anonymised/
 #
 #   ${semehr_dir} is typically /opt/semehr
-
 import argparse
 import glob
 import logging

@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-
 # Read the three files:  image.csv, series.csv, study.csv
 # to determine which PatientID goes with which Series,
 # and write a file "sample_SR.csv" containing:
 #   id, SOPInstanceUID, SeriesInstanceUID, StudyInstanceUID, PatientID, ModalitiesInStudy
 # to be used by the sample_SR.sh program.
-
 # ==> image.csv <==
 # StudyInstanceUID,SeriesInstanceUID,PatientID,SOPInstanceUID,BurnedInAnnotation,RelativeFileArchiveURI,MessageGuid,SliceLocation,SliceThickness,SpacingBetweenSlices,SpiralPitchFactor,KVP,ExposureTime,Exposure,ImageType,ManufacturerModelName,Manufacturer,SoftwareVersions,XRayTubeCurrent,PhotometricInterpretation,ContrastBolusRoute,ContrastBolusAgent,AcquisitionNumber,AcquisitionDate,AcquisitionTime,ImagePositionPatient,PixelSpacing,FieldOfViewDimensions,FieldOfViewDimensionsInFloat,DerivationDescription,LossyImageCompression,LossyImageCompressionMethod,LossyImageCompressionRatio,LossyImageCompressionRetired,ScanOptions,DicomFileSize
-
 # ==> series.csv <==
 # StudyInstanceUID,SeriesInstanceUID,Modality,InstitutionName,ProtocolName,ProcedureCodeSequence_CodeValue,PerformedProcedureStepDescription,SeriesDescription,SeriesDate,SeriesTime,BodyPartExamined,DeviceSerialNumber,SeriesNumber
-
 # ==> study.csv <==
 # PatientID,StudyInstanceUID,StudyDate,StudyTime,ModalitiesInStudy,StudyDescription,AccessionNumber,PatientSex,PatientAge,NumberOfStudyRelatedInstances,PatientBirthDate
-
 import csv
 
 image_list = []

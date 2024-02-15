@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-
 # Usage: [-s semehr_dir] [-d file.dcm] [-p pattern] [-y default.yaml]
-
 # Given a real DICOM Structured Report extract the text using our CTP_DicomToText.py
 # then create a fake XML file to simulate the running of the SemEHR anonymiser
 # then run our CTP_XMLToDicom.py to reconstruct a DICOM file.
 # Whilst this does make assumptions about the behaviour of SemEHR, it does
 # allow us to test the text extraction, redaction and DICOM recreation all work.
-
 import argparse
 import logging
 import os
-from os.path import join, abspath, dirname
-import pydicom
 import re
 import shutil
 import sys
+from os.path import abspath
+from os.path import dirname
+from os.path import join
+
+import pydicom
 from SmiServices import DicomText
 
 # Configurable:

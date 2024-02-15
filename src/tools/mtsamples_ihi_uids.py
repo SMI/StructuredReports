@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-
 # Rewrite the meta JSON files with content taken from a CSV file,
 # so we can update the SOPInstanceUIDs etc
-
 # The meta files contain:
 # {"SOPClassUID": "1.2.3.4.5", "SOPInstanceUID": "doc0001.txt",
 #  "StudyInstanceUID": "1.2.34.567.0001",
 #  "SeriesInstanceUID": "1.2.34.5678.0001",
 #  "ContentDate": "20201005", "ModalitiesInStudy": "CT\\SR",
 #  "PatientID": "1234567890"}
-
 import csv
 import json
 import os

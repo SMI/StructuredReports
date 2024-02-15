@@ -4,10 +4,10 @@
 # so they all end up overwriting each other in the returned dict, so we need our own row_to_dict function.
 import psycopg2
 from psycopg2 import sql
-from psycopg2.extras import Json
-from psycopg2.extras import DictCursor
-from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import AsIs
+from psycopg2.extras import DictCursor
+from psycopg2.extras import Json
+from psycopg2.extras import RealDictCursor
 
 def row_to_dict(row, colnames):
     retdict = {}

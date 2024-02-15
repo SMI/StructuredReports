@@ -5,7 +5,6 @@
 #   mapping.json [projectschema.xml]
 # Reads a list of mapping names from the given JSON file.
 # Output goes to stdout or the given XML file.
-
 import json
 import sys
 

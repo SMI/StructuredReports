@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
-
 # Add the semehr_results to the MongoDB.
 #   Reads the json files containing annotations,
 #   adds the content of the redacted (anonymous) text files
 #   and adds the SOPInstanceUID as a primary key index.
 # Can be used to query the MongoDB to check collection size and index speedup.
-
 # NOTE:
 #   To do: log into the SMI_LOGS_ROOT directory or LogsRoot from yaml
-
 # Usage:
 #   --drop-collection - will delete the collection before doing anything else (can be used alone)
 #   --add-index       - will add several optional indexes (can be used alone)
 #   -j   directory of .json files
 #   -t   directory of .txt file (the redacted text)
 #   -q   optional query to perform, eg. cui:C0205076 to find documents mentioning "chest wall"
-
 # output_docs has features:
 #   "PREF": "Rhythm"
 #   "Experiencer": "Patient"
@@ -60,17 +56,19 @@
 #   "phenotypes": [ {start,end,major_type,minor_type}, ... ]
 #   "sentences": [ {start,end}, ... ]
 # }
-
-from pymongo import MongoClient, ASCENDING, TEXT
-from pymongo.errors import DuplicateKeyError
 import argparse
 import glob
 import json
 import logging
-import os, os.path
+import os.path
 import pprint
 import sys
+
 import yaml
+from pymongo import ASCENDING
+from pymongo import MongoClient
+from pymongo import TEXT
+from pymongo.errors import DuplicateKeyError
 
 # Mongo
 mongoHost = 'localhost' # 'nsh-smi02'
