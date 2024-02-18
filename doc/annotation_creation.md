@@ -38,17 +38,19 @@ repopulated; it would not be possible to mix the two outputs.
 The first (optional) step is to anonymise the documents:
 
 ```
-semehr_anon.py --all -i txt_dir -o anon_dir [--xml]
+semehr_anon.py -i txt_dir -o anon_dir [--xml]
 ```
 
-Note: using `--all` writes an output file for every input file, otherwise
-only files actually anonymised (those containing PII) are written.
 
 The annotation step can be performed with:
 
 ```
 semehr_annotate.sh -i anon_dir/ -o annot_dir/
 ```
+
+Input files must be named `*.txt` and output files will be named similarly `*.json`.
+It requires a config file specified with `-c` unless CogStack-SemEHR is in a
+well-known location typically `/opt/semehr/CogStack-SemEHR`
 
 ## DICOM SR annotation
 
