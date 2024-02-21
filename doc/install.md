@@ -75,6 +75,8 @@ git clone https://github.com/SMI/nlp2phenome
 git clone https://git.ecdf.ed.ac.uk/SMI/service-docs.git
 git clone https://git.ecdf.ed.ac.uk/SMI/metacat.git
 git clone https://github.com/SMI/CogStack-SemEHR
+sudo yum install git-lfs
+git clone https://git.ecdf.ed.ac.uk/SMI/data.git
 ```
 
 ## Install SemEHR annotation database via Docker
@@ -100,6 +102,9 @@ sudo chgrp smi-admin /opt/semehr
 sudo chmod g+w /opt/semehr/
 ln -s ~/src/CogStack-SemEHR /opt/semehr/CogStack-SemEHR
 ```
+
+If you want to use the annotation features you'll need some additional
+files, see the [annotation database](annotation_database.md) document.
 
 ## Python virtual environment
 

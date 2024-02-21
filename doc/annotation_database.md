@@ -20,10 +20,7 @@ jq
 
 Download:
 
-- https://cogstack.rosalind.kcl.ac.uk/exports/customised_handlers.tar.gz
-- http://netix.dl.sourceforge.net/project/gate/gate/8.1/gate-8.1-build5169-ALL.zip
-- https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-1.2.1-se.tar.gz
-- https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-resource-prep-output.2019.fixed.zip
+- https://git.ecdf.ed.ac.uk/SMI/data.git
 
 ## Install the required software
 

@@ -6,7 +6,7 @@ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 
 sudo apt-get update
-sudo apt-get install ant curl openjdk-11-jdk subversion unzip vim git apt-transport-https
+sudo apt-get install ant curl openjdk-11-jdk subversion unzip vim git git-lfs apt-transport-https
 sudo apt-get install python3 python3-pip python3-virtualenv python3-setuptools python3-dev python3-testresources
 sudo apt-get install postgresql-13 mongodb libpq-dev
 
@@ -37,6 +37,7 @@ cd ~/SemEHR
 git clone https://github.com/SMI/StructuredReports
 git clone https://github.com/SMI/CogStack-SemEHR
 git clone https://github.com/SMI/nlp2phenome
+git clone https://git.ecdf.ed.ac.uk/SMI/data.git
 
 git clone https://github.com/SMI/SmiServices
 cd SmiServices/src/common/Smi_Common_Python
@@ -54,15 +55,8 @@ cd ~/SemEHR/CogStack-SemEHR/installation
 echo ~/SemEHR/ | bash install_semehr.sh
 sudo apt remove -y python2-dev
 
-cd ~/SemEHR
-wget https://cogstack.rosalind.kcl.ac.uk/exports/bio-yodie-resource-prep-output.2019.fixed.zip
-unzip bio-yodie-resource-prep-output.2019.fixed.zip
-rm -fr __MACOSX
-mv ~/SemEHR/gcp/bio-yodie-1-2-1/bio-yodie-resources/en/databases ~/SemEHR/gcp/bio-yodie-1-2-1/bio-yodie-resources/en/databases.old
-mv ~/SemEHR/gcp/bio-yodie-1-2-1/bio-yodie-resources/en/gazetteer-en-bio ~/SemEHR/gcp/bio-yodie-1-2-1/bio-yodie-resources/en/gazetteer-en-bio.old
-mv output/en/{databases,gazetteer-en-bio} ~/SemEHR/gcp/bio-yodie-1-2-1/bio-yodie-resources/en/
-rm bio-yodie-resource-prep-output.2019.fixed.zip
-rmdir output/databases output/en output
+cd ~/SemEHR/data/CogStack-SemEHR
+./install.sh
 
 cd ~/SemEHR/structuredreports/src/tools
 ./mtsamples_ihi_extract.py
