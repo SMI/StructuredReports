@@ -2,8 +2,6 @@
 #   Uses setuptools instead of distutils
 # Requires:
 #   Requirements.txt with list of dependencies
-#   Assumes AssemblyInfo.cs contains a line like this:
-#     [assembly: AssemblyVersion("1.15.1")]
 #   Uses the find_packages function but skips tests
 import sys
 from os.path import abspath
