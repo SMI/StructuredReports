@@ -45,12 +45,23 @@ semehr_anon.py -i txt_dir -o anon_dir [--xml]
 The annotation step can be performed with:
 
 ```
-semehr_annotate.sh -i anon_dir/ -o annot_dir/
+semehr_annotate.py -i anon_dir/ -o annot_dir/
 ```
 
 Input files must be named `*.txt` and output files will be named similarly `*.json`.
 It requires a config file specified with `-c` unless CogStack-SemEHR is in a
 well-known location typically `/opt/semehr/CogStack-SemEHR`
+
+Usage: `semehr_annotate.py -i input -o output -c semehr_processor.json -s CogStack-SemEHR/ -g gcp/`
+
+```
+  -i INPUT, --input INPUT directory of *.txt files
+  -o OUTPUT, --output OUTPUT directory of *.json files
+  -c CONF, --conf path to semehr_processor.json filename
+  -s SEMEHR, --semehr /opt/semehr/CogStack-SemEHR
+  -g GCP, --gcp /opt/gcp (contains bio-yodie-1-2-1, gate, gcp-2.5-18658)
+  -d, --debug
+```
 
 ## DICOM SR annotation
 
@@ -62,7 +73,7 @@ in SMI format).
 Use the `CTP_DicomToText.py` script to extract the text, for example from MongoDB in SMI extract all documents with metadata for a given StudyDate:
 
 ```
-CTP_DicomToText -y dataLoad.yaml -y dataExtract.yaml \
+CTP_DicomToText.py -y dataLoad.yaml -y dataExtract.yaml \
     -i <StudyDate> \
     -o txt_dir/  -m meta_dir/
 ```
@@ -78,7 +89,7 @@ semehr_to_postgres.py -j annot_dir/ -t txt_dir/ -m meta_dir/
 ```
 
 The `annot_dir` is the directory of annotations in JSON format
-as produced by `semehr_annotate.sh`.
+as produced by `semehr_annotate.py`.
 The `txt_dir` is the directory of corresponding text files
 which will be added to the database alongside their annotations.
 It could be `anon_dir` from `semehr_anon.py` if you want to
@@ -162,19 +173,19 @@ ie. the words matching minor_type will be highlighted.
 
 ## Troubleshooting
 
-Check which version of bio-yodie is used. The path `bio-yodie-1-2-1` is hardcoded. However you need to download the full-size version from Honghan.
+* Check which version of bio-yodie is used. The path `bio-yodie-1-2-1` is hardcoded. However you need to download the full-size version from Honghan.
 
-`Failed to do SemEHR process [Errno 2] No such file or directory: '/home/ubuntu/SemEHR/data/study/study.json'`
+* `Failed to do SemEHR process [Errno 2] No such file or directory: '/home/ubuntu/SemEHR/data/study/study.json'`
 Just comment out the study in the config. (Check what the study config does?)
 
-`output_docs` has `stroke_study` annotations - why?
+* `output_docs` has `stroke_study` annotations - why?
 Because of the supplemental-gazetteer files you left in bio-yodie.
-The study annotations can be ignored if you've already created them in the master database.
+The study annotations can be ignored if you have already created them in the master database.
 
-nothing in semehr_results
+* nothing in semehr_results - 
 Because documents needed to be called %s.txt - fix the template in the config file
 
-run in PICTURES vm - millions of docanalysis lines like this:
+* run in PICTURES vm - millions of docanalysis lines like this:
 
 ```bash
 docanalysis(587) root 2021-07-05 15:40:19,789 INFO to be developed [2558, 2573] ruled by hypothetical_filters.json
@@ -182,7 +193,7 @@ docanalysis(587) root 2021-07-05 15:40:19,789 INFO to be developed [2558, 2573] 
 
 see above
 
-also errors like this:
+* also errors like this:
 
 ```bash
 docanalysis(587) root 2021-07-05 15:40:19,810 INFO very slow [2662, 2671] ruled by hypothetical_filters.json
@@ -190,4 +201,4 @@ docanalysis(587) root 2021-07-05 15:40:19,810 INFO very slow [2662, 2671] ruled 
     'cmp' is an invalid keyword argument for sort()docanalysis(587) root 2021-07-05 15:40:19,811 INFO knee [1285, 1289] ruled by not_mention_filters.json
 ```
 
-Fixed the source code to use a different cmp, see the repo commits
+Now fixed the source code to use a different cmp, see the repo commits

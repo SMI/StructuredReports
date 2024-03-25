@@ -86,7 +86,7 @@ export PYTHONPATH=/path/to/Smi_Common_Python # if SmiServices is not yet in your
 
 ```
 # input files must be named *.txt, output files will be *.json
-./semehr_annotate.sh -i ~/SemEHR/structuredreports/src/data/mtsamples_ihi_docs/ -o ~/SemEHR/structuredreports/src/data/mtsamples_ihi_semehr_results/
+./semehr_annotate.py -i ~/SemEHR/structuredreports/src/data/mtsamples_ihi_docs/ -o ~/SemEHR/structuredreports/src/data/mtsamples_ihi_semehr_results/
 ```
 
 ## Import the semehr_results into the MongoDB database
