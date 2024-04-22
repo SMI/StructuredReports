@@ -33,6 +33,6 @@ jobs:
           set -exuo pipefail
           python -m venv venv
           . venv/bin/activate
-          pushd src/lib
+          pushd src/library
           python -m pip install -r requirements.txt -r requirements-dev.txt
           python -m pytest SmiServices/*.py
