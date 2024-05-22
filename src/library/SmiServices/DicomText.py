@@ -191,13 +191,15 @@ class DicomText:
         """
         self._p_text = ''
         # Start by enumerating all known desired tags (whitelist)
-        #  except explicitly do not include TextValue, handled below
+        #  except explicitly do not include TextValue/ImageComments, handled below
         list_of_tagname_desired = [ k['tag'] for k in sr_keys_to_extract]
         if self._include_header:
             # Add all the known [[something]] headers
             for srkey in sr_keys_to_extract:
                 tag: str = srkey['tag'] # type: ignore
-                if tag in self._dicom_raw and tag != 'TextValue':
+                redact_tag: bool = srkey['redact'] # type: ignore
+                # If tag is not TextValue and not ImageComments then:
+                if tag in self._dicom_raw and not redact_tag:
                     decode_func: typing.Callable[[typing.Any], str] = srkey['decode_func'] # type: ignore
                     line = '[[%s]] %s\n' % (srkey['label'], decode_func(str(self._dicom_raw[tag].value)))
                     self._p_text = self._p_text + line
@@ -216,15 +218,26 @@ class DicomText:
                         line = '[[%s]] %s\n' % (tagname, drkey.value)
                         self._p_text = self._p_text + line
                         if DicomText._warn_unexpected_tag:
+                            # XXX should we logging.warn?
                             print('Warning: including unexpected tag "%s" = "%s"' % (tagname, str(drkey.value)[0:20]))
                     else:
                         if DicomText._warn_unexpected_tag:
+                            # XXX should we logging.warn?
                             print('Warning: ignored unexpected tag "%s" = "%s"' % (tagname, str(drkey.value)[0:20]))
-        # Now handle the TextValue tag
+        # Now handle the TextValue and ImageComments tags
         # Wrap the text with [[Text]] and [[EndText]] for SemEHR
-        if 'TextValue' in self._dicom_raw:
-            textval = str(self._dicom_raw['TextValue'].value)
-            self._p_text = self._p_text + '[[Text]]\n'
+        for srkey in sr_keys_to_extract:
+            if not srkey['redact']:
+                continue
+            # Should only be TextValue and ImageComments
+            # which get written as [[Text]] and [[ImageComments]]
+            tagname = srkey['tag']
+            taglabel = srkey['label']
+            if tagname not in self._dicom_raw:
+                continue
+            textval = str(self._dicom_raw[tagname].value)
+            self._p_text = self._p_text + ('[[%s]]\n' % taglabel)
+            # XXX ImageComments might be XML, do we want to redact its tags?
             if self._replace_HTML_entities and '<' in textval:
                 self._p_text = self._p_text + redact_html_tags_in_string(
                     textval,
@@ -233,7 +246,7 @@ class DicomText:
                 )
             else:
                 self._p_text = self._p_text + textval
-            self._p_text = self._p_text + '\n[[EndText]]\n'
+            self._p_text = self._p_text + ('\n[[End%s]]\n' % taglabel)
         # Now the text in the ContentSequence
         # Wrap the text with [[ContentSequence]] and [[EndContentSequence]] for SemEHR
         if 'ContentSequence' in self._dicom_raw:
@@ -334,9 +347,10 @@ class DicomText:
         self._r_text = ''    # XXX could start with '\n' to match semehr behaviour
         self._redacted_text = ''
         self._annotations = annot_list
-        # A 'TextValue' element is not a sequence so manually call the callback
-        if 'TextValue' in self._dicom_raw:
-            self._dataset_redact_callback(None, self._dicom_raw['TextValue'])
+        # TextValue and ImageComments are not sequences so manually call the callback
+        for srkey in sr_keys_to_extract:
+            if srkey['redact'] and (srkey['tag'] in self._dicom_raw):
+                self._dataset_redact_callback(None, self._dicom_raw[ srkey['tag'] ])
         # A 'ContentSequence' needs to be walked
         if 'ContentSequence' in self._dicom_raw:
             for content_sequence_item in self._dicom_raw.ContentSequence:
@@ -345,7 +359,7 @@ class DicomText:
         # Now check that all annotations were redacted, return False if not
         for annot in self._annotations:
             if not annot.get('replaced'):
-                print('ERROR: could not find annotation (%s) in document' % repr(annot['text']))
+                print('ERROR: could not find annotation (%s) in document (%s)' % (repr(annot['text']), str(annot)))
                 rc = False
         return rc
 
@@ -379,8 +393,12 @@ class DicomText:
         DICOM file B.
         """
         dicom_dest = pydicom.dcmread(destfile)
+        # XXX need to replace this with a check on the 'redact' attribute
+        # rather than hardcode TextValue and ImageComments explicitly
         if 'TextValue' in self._dicom_raw:
             dicom_dest.TextValue = self._dicom_raw.TextValue
+        if 'ImageComments' in self._dicom_raw:
+            dicom_dest.ImageComments = self._dicom_raw.ImageComments
         if 'ContentSequence' in self._dicom_raw:
             dicom_dest.ContentSequence = self._dicom_raw.ContentSequence
         # Redact names and dates in case CTP didn't do it
