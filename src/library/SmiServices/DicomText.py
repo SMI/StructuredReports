@@ -349,13 +349,19 @@ class DicomText:
         self._redacted_text = ''
         self._annotations = annot_list
         # TextValue and ImageComments are not sequences so manually call the callback
+        # Adjust the _redact_offset for each header we would have inserted during a parse
+        # e.g. [[Text]] and [[EndText]]
         for srkey in sr_keys_to_extract:
             if srkey['redact'] and (srkey['tag'] in self._dicom_raw):
+                self._r_text += ('[[%s]]\n' % srkey['label'])
                 self._dataset_redact_callback(None, self._dicom_raw[ srkey['tag'] ])
-        # A 'ContentSequence' needs to be walked
+                #self._r_text += ('[[End%s]]\n' % srkey['label'])
+        # A 'ContentSequence' needs to be walked recursively
         if 'ContentSequence' in self._dicom_raw:
+            self._r_text += ('[[ContentSequence]]\n')
             for content_sequence_item in self._dicom_raw.ContentSequence:
                 content_sequence_item.walk(self._dataset_redact_callback)
+            #self._r_text += ('[[EndContentSequence]]\n')
         rc = True
         # Now check that all annotations were redacted, return False if not
         for annot in self._annotations:
