@@ -311,6 +311,8 @@ class DicomText:
                 replaced = False
                 # SemEHR may have an extra line at the start so start_char offset need adjusting
                 for offset in [self._redact_offset] + list(range(-offset_limit, offset_limit)):
+                    if annot_at+offset < 0:
+                        continue
                     # Do the comparison using text without html but replace inside text with html
                     if string_match_ignore_linebreak(rc_without_html[annot_at+offset : annot_end+offset], annot['text']):
                         replacement = self.redact_string(replacement, annot_at+offset, annot_end-annot_at, data_element.VR)
