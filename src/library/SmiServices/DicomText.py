@@ -302,14 +302,15 @@ class DicomText:
             # If already replaced then ignore
             if 'replaced' in annot:
                 continue
+            offset_limit = 32
             # Use the previously found offset to check if this annotation is within the current string
-            if ((annot['start_char'] + self._redact_offset >= current_start-32) and
-                    (annot['start_char'] + self._redact_offset < current_end+32)):
+            if ((annot['start_char'] + self._redact_offset >= current_start-offset_limit) and
+                    (annot['start_char'] + self._redact_offset < current_end+offset_limit)):
                 annot_at = annot['start_char'] - current_start
                 annot_end = annot['end_char'] - current_start
                 replaced = False
                 # SemEHR may have an extra line at the start so start_char offset need adjusting
-                for offset in [self._redact_offset] + list(range(-32, 32)):
+                for offset in [self._redact_offset] + list(range(-offset_limit, offset_limit)):
                     # Do the comparison using text without html but replace inside text with html
                     if string_match_ignore_linebreak(rc_without_html[annot_at+offset : annot_end+offset], annot['text']):
                         replacement = self.redact_string(replacement, annot_at+offset, annot_end-annot_at, data_element.VR)
