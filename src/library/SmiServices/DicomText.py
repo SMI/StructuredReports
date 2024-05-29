@@ -393,12 +393,12 @@ class DicomText:
         DICOM file B.
         """
         dicom_dest = pydicom.dcmread(destfile)
-        # XXX need to replace this with a check on the 'redact' attribute
-        # rather than hardcode TextValue and ImageComments explicitly
-        if 'TextValue' in self._dicom_raw:
-            dicom_dest.TextValue = self._dicom_raw.TextValue
-        if 'ImageComments' in self._dicom_raw:
-            dicom_dest.ImageComments = self._dicom_raw.ImageComments
+        # Replace the contents of the TextValue and ImageComments tags
+        for srkey in sr_keys_to_extract:
+            if not srkey['redact'] or srkey['tag'] not in self._dicom_raw:
+                continue
+            dicom_dest[ srkey['tag'] ] = self._dicom_raw[ srkey['tag'] ]
+        # And replace ContentSequence as it is not in sr_keys_to_extract
         if 'ContentSequence' in self._dicom_raw:
             dicom_dest.ContentSequence = self._dicom_raw.ContentSequence
         # Redact names and dates in case CTP didn't do it
