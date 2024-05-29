@@ -292,7 +292,7 @@ class DicomText:
         current_end   = current_start + len(rc)
         replacement = rc
         replacedAny = False
-        #print('At %d = %s' % (current_start, str(data_element.value)))
+        #print('AT %d (offset %d) = %s' % (current_start, self._redact_offset, str(data_element.value)))
         # Check every annotation to see, if not already done, if it appears in this rc
         for annot in self._annotations:
             # Sometimes it reports text:None so ignore
@@ -315,7 +315,7 @@ class DicomText:
                         replacement = self.redact_string(replacement, annot_at+offset, annot_end-annot_at, data_element.VR)
                         replaced = replacedAny = True
                         annot['replaced'] = True
-                        #print('REPLACE: %s in %s at %d (offset %d)' % (repr(annot['text']), repr(replacement), annot_at, offset))
+                        #print('REPLACE: %s in %s at %d (offset %d)' % (repr(annot['text']), repr(replacement)[:20], annot_at, offset))
                         self._redact_offset = offset
                         break
                 # Only need to report error at the end, no need for Warning here:
@@ -361,6 +361,9 @@ class DicomText:
             if not annot.get('replaced'):
                 print('ERROR: could not find annotation (%s) in document (%s)' % (repr(annot['text']), str(annot)))
                 rc = False
+        #with open('DicomText_parsed.txt','w') as fd: print(self._p_text, file=fd)
+        #with open('DicomText_redactbefore.txt','w') as fd: print(self._r_text, file=fd)
+        #with open('DicomText_redactafter.txt','w') as fd: print(self._redacted_text, file=fd)
         return rc
 
     def redact_PN_DA_callback(self, dataset: pydicom.Dataset, data_element: pydicom.DataElement) -> None:
