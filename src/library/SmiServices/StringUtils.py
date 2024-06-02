@@ -27,19 +27,27 @@ class RedactingHTMLParser(HTMLParser):
         # Build a list of line numbers and their character positions
         idx = 0
         eol_is_next = 0
+        crlf = False
         linenum = 1               # first line is 1, not zero
         self.linepos = [0]
         self.linepos.insert(1, 0) # first line is 1, not zero
         for ch in html_str:
+            #print('CH %s IDX %d LINENUM %d' % (repr(ch), idx, linenum))
             if ch == '\n' or ch == '\r':
                 # If prev newline char was same then is a new line
                 # otherwise CR,LF is a single newline
-                if eol_is_next and (eol_is_next == ch):
-                    linenum += 1
-                    self.linepos.insert(linenum, idx)
+                # Handle multiple repeated \r\n using crlf.
+                if eol_is_next:
+                    if (eol_is_next == ch) or crlf:
+                        linenum += 1
+                        self.linepos.insert(linenum, idx)
+                        crlf = False
+                    else:
+                        crlf = True
                 eol_is_next = ch
                 idx += 1
                 continue
+            crlf = False
             if eol_is_next:
                 linenum += 1
                 self.linepos.insert(linenum, idx)
@@ -213,7 +221,20 @@ new line
     
        """
     parser.feed(html_str)
+    #print('STR %s' % repr(html_str))
+    #print('EXP %s' % repr(expected))
     result = parser.result()
+    #print('RES %s' % repr(result))
+    assert(len(html_str) == len(result))
+    assert(result == expected)
+    html_str = "\r\n\r\nstuff\r\n\nnonsense\r\n\r\n<b>name here<b></b>"
+    expected = html_str.replace('<b>','   ').replace('</b>','    ')
+    parser = RedactingHTMLParser()
+    parser.feed(html_str)
+    #print('STR %s' % repr(html_str))
+    #print('EXP %s' % repr(expected))
+    result = parser.result()
+    #print('RES %s' % repr(result))
     assert(len(html_str) == len(result))
     assert(result == expected)
 
@@ -317,6 +338,6 @@ if __name__ == '__main__':
     rc = redact_html_tags_in_string(doc)
     print('REDACTED:')
     print(rc)
-    rc = remove_html_tags_in_string(doc)
-    print('REMOVED:')
-    print(rc)
+    #rc = remove_html_tags_in_string(doc)
+    #print('REMOVED:')
+    #print(rc)
