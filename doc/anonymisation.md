@@ -151,6 +151,9 @@ For example
   "PHI_rules": {
     "clinic": [
       {
+        "comment": "A full description of this rule in plain English.",
+        "test_true": [ "list of strings which the pattern must match", "more" ],
+        "test_false": [ "list of strings which the pattern must not match", "more" ],
         "pattern": "\\bplease\\s+contact(\\s+\\w+(\\s+\\w+){0,2})",
         "flags": [ "ignorecase" ],
         "data_labels": [ "name" ],
@@ -159,7 +162,9 @@ For example
 ```
 
 The pattern is a python regex but note that as it's in JSON it needs a
-double backslash. Note that the regex will be searched in fragments of
+double backslash so things like `\b` for boundary should be written `\\b`.
+
+Note that the regex will be searched in fragments of
 the document, not the whole document and not necessarily sentences.
 (In fact it may be whole sections defined by `working_fields`). This
 has implications for anchors such as `^` and `$`, and `multiline`.
@@ -178,6 +183,12 @@ The `data_type` is used to identify what type of information was extracted.
 `disabled` is optional; when true, the rule is not used.
 
 `comment` could also be used to give an explanation for the rule.
+The comment is optional but should be used to describe the rule in plain English.
+
+The tests are optional but should be used to allow automated testing of rules,
+using the `test_rules.py` script. All strings in the `test_true` list should
+contain something which matches the pattern and all strings in the `test_false` list
+should contain something that is not matched by the pattern.
 
 ### Document structure rules
 
