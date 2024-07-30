@@ -39,16 +39,6 @@ def version_from_txt():
         print(vernext, file=fd)
     return ver
 
-def version_from_AssemblyInfo():
-    ass_info = join(abspath(dirname(__file__)), '..', '..', 'SharedAssemblyInfo.cs')
-    try:
-        with open(ass_info) as fd:
-            ver = str([s.split('"')[1] for s in fd if 'AssemblyVersion' in s][0])
-    except:
-        print(f'ERROR: cannot read {ass_info} or file does not contain AssemblyVersion in the expected format, e.g. [assembly: AssemblyVersion("1.15.1")]', file=sys.stderr)
-        ver = '0.0.0'
-    return(ver)
-
 setup(
     name='SmiServices',
     version=version_from_txt(),
