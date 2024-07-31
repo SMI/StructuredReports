@@ -168,6 +168,8 @@ def main():
             args.input, args.output, args.semehr_anon_cfg_file,
             write_xml=args.write_xml, write_all=True,
         )
+    else:
+        raise FileNotFoundError(f"Input {args.input} is not a file or a directory")
 
 
 if __name__ == '__main__':
