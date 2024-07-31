@@ -131,7 +131,7 @@ anon_xml="${semehr_output_dir}/${doc_filename}.knowtator.xml"
 #  Reads  $input_dcm
 #  Writes $input_doc
 if [ $verbose -gt 0 ]; then
-	echo "RUN: CTP_DicomToText.py  -y $default_yaml0 -y $default_yaml1 -i ${input_dcm} -o ${input_dcm}.SRtext"
+	echo "RUN: CTP_DicomToText.py  -y $default_yaml0 -y $default_yaml1 -i ${input_dcm} -o ${input_doc}"
 fi
 CTP_DicomToText.py  -y $default_yaml0 -y $default_yaml1 \
 	-i "${input_dcm}" \
@@ -142,6 +142,9 @@ CTP_DicomToText.py  -y $default_yaml0 -y $default_yaml1 \
 #  Reads  $input_doc
 #  Writes $anon_doc, and $anon_xml via the --xml option
 #
+if [ $verbose -gt 0 ]; then
+	echo "RUN: semehr_anon.py -s ${semehr_dir} -i ${input_doc} -o ${anon_doc} --xml"
+fi
 semehr_anon.py -s "${semehr_dir}" -i "${input_doc}" -o "${anon_doc}" --xml || tidy_exit 5 "Error running SemEHR-anon given ${input_doc} from ${input_dcm}"
 # If there's still no XML file then exit
 if [ ! -f "$anon_xml" ]; then
