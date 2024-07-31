@@ -144,10 +144,10 @@ def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Redact text given knowtator XML')
-    parser.add_argument('-i', dest='input', action="store", help='directory of text, or filename of one text file')
-    parser.add_argument('-o', dest='output', action="store", help='path to output filename or directory where redacted text files will be written')
+    parser.add_argument('-i', dest='input', action="store", required=True, help='directory of text, or filename of one text file')
+    parser.add_argument('-o', dest='output', action="store", required=True, help='path to output filename or directory where redacted text files will be written')
     parser.add_argument('-x', '--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files', default=False)
-    parser.add_argument('-c', dest='semehr_anon_cfg_file', action="store", help='path to the anon config file e.g., "anonymisation_task.json"')
+    parser.add_argument('-c', dest='semehr_anon_cfg_file', action="store", required=True, help='path to the anon config file e.g., "anonymisation_task.json"')
     parser.add_argument('--spacy', dest='spacy', action='store_true', help='use SpaCy to identify names')
     args = parser.parse_args()
     if not args.input:
