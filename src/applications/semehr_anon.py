@@ -44,7 +44,6 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     cfg_json['anonymisation_output'] = output_dir
     cfg_json['extracted_phi'] = phi_file
     cfg_json['grouped_phi_output'] = '/dev/null'
-    cfg_json['rules_folder'] = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation/conf/rules')
     if 'logging_file' in cfg_json:
         del cfg_json['logging_file']
     cfg_json['annotation_mode'] = False
