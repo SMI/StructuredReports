@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='SR-to-Anon')
-    parser.add_argument('-y', dest='yamlfile', action="append", help='path to yaml config file (can be used more than once)')
+    parser.add_argument('-y', dest='yamlfile', action="append", default=[], help='path to yaml config file (can be used more than once)')
     parser.add_argument('-i', dest='input', action="store", help='SOPInstanceUID or path to raw DICOM file from which text will be redacted')
     parser.add_argument('-o', dest='output_dir', action="store", help='path to directory where extracted text will be written')
     parser.add_argument('-m', dest='metadata_dir', action="store", help='path to directory where extracted metadata will be written')
@@ -195,8 +195,6 @@ if __name__ == '__main__':
         args.output_dir = '.'
 
     cfg_dict = {}
-    if not args.yamlfile:
-        args.yamlfile = [os.path.join(os.environ['SMI_ROOT'], 'configs', 'smi_dataExtract.yaml')]
     for cfg_file in args.yamlfile:
         with open(cfg_file, 'r') as fd:
             # Merge all the yaml dicts into one
