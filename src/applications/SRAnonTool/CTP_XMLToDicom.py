@@ -50,9 +50,13 @@ if __name__ == "__main__":
             # Merge all the yaml dicst into one
             cfg_dict = Merger([(list, ["append"]),(dict, ["merge"])],["override"],["override"]).merge(cfg_dict, yaml.safe_load(fd))
 
-    log_dir = cfg_dict['LoggingOptions']['LogsRoot']
-    root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
-    extract_dir = cfg_dict['FileSystemOptions']['ExtractRoot']
+    log_dir = os.environ.get("SMI_LOGS_ROOT", None)
+    if not log_dir:
+        log_dir = cfg_dict['LoggingOptions']['LogsRoot']
+
+    root_dir = os.environ.get("SMI_PACS_ROOT", None)
+    if not root_dir:
+        root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
 
     # ---------------------------------------------------------------------
     # Now we know the LogsRoot we can set up logging
