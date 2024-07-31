@@ -32,11 +32,6 @@ def translate_req(req):
 def version_from_txt():
     with open('version.txt') as fd:
         ver = next(fd).strip()
-    version = ver.split('.')
-    version[2] = str(int(version[2]) + 1)
-    vernext = '.'.join(version)
-    with open('version.txt', 'w') as fd:
-        print(vernext, file=fd)
     return ver
 
 setup(
