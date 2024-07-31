@@ -200,6 +200,7 @@ if __name__ == '__main__':
             # Merge all the yaml dicts into one
             cfg_dict = Merger([(list, ["append"]),(dict, ["merge"])],["override"],["override"]).merge(cfg_dict, yaml.safe_load(fd))
 
+    mongo_dicom_db = {}
     if args.use_mongodb:
         # For reading SRs
         mongo_dicom_host = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('HostName',{})
