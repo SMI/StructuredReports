@@ -215,8 +215,13 @@ if __name__ == '__main__':
         mongo_semehr_pass = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('Password',{})
         mongo_semehr_db   = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('DatabaseName',{})
 
-    log_dir = cfg_dict['LoggingOptions']['LogsRoot']
-    root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
+    log_dir = os.environ.get("SMI_LOGS_ROOT", None)
+    if not log_dir:
+        log_dir = cfg_dict['LoggingOptions']['LogsRoot']
+
+    root_dir = os.environ.get("SMI_PACS_ROOT", None)
+    if not root_dir:
+        root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
 
     # ---------------------------------------------------------------------
     # Now we know the LogsRoot we can set up logging
