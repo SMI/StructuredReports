@@ -186,6 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--semehr-unique', dest='semehr_unique', action="store_true", help='only extract from MongoDB/dicom if not already in MongoDB/semehr')
     parser.add_argument('--replace-html', action="store", help='replace HTML with a character, default is dot (.), or "squash" to eliminate')
     parser.add_argument('--replace-newlines', action="store", help='replace carriage returns and newlines with a character (e.g. a space) or "squash" to eliminate')
+    parser.add_argument("--use-mongodb", action="store_true", help="Use MongoDB for reading/writing")
     args = parser.parse_args()
     if not args.input:
         parser.print_help()
@@ -201,17 +202,18 @@ if __name__ == '__main__':
             # Merge all the yaml dicts into one
             cfg_dict = Merger([(list, ["append"]),(dict, ["merge"])],["override"],["override"]).merge(cfg_dict, yaml.safe_load(fd))
 
-    # For reading SRs
-    mongo_dicom_host = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('HostName',{})
-    mongo_dicom_user = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('UserName',{})
-    mongo_dicom_pass = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('Password',{})
-    mongo_dicom_db   = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('DatabaseName',{})
+    if args.use_mongodb:
+        # For reading SRs
+        mongo_dicom_host = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('HostName',{})
+        mongo_dicom_user = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('UserName',{})
+        mongo_dicom_pass = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('Password',{})
+        mongo_dicom_db   = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('DatabaseName',{})
 
-    # For writing annotations
-    mongo_semehr_host = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('HostName',{})
-    mongo_semehr_user = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('UserName',{})
-    mongo_semehr_pass = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('Password',{})
-    mongo_semehr_db   = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('DatabaseName',{})
+        # For writing annotations
+        mongo_semehr_host = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('HostName',{})
+        mongo_semehr_user = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('UserName',{})
+        mongo_semehr_pass = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('Password',{})
+        mongo_semehr_db   = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('DatabaseName',{})
 
     log_dir = cfg_dict['LoggingOptions']['LogsRoot']
     root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
