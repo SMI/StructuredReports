@@ -179,13 +179,14 @@ if __name__ == '__main__':
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='SR-to-Anon')
-    parser.add_argument('-y', dest='yamlfile', action="append", help='path to yaml config file (can be used more than once)')
+    parser.add_argument('-y', dest='yamlfile', action="append", default=[], help='path to yaml config file (can be used more than once)')
     parser.add_argument('-i', dest='input', action="store", help='SOPInstanceUID or path to raw DICOM file from which text will be redacted')
     parser.add_argument('-o', dest='output_dir', action="store", help='path to directory where extracted text will be written')
     parser.add_argument('-m', dest='metadata_dir', action="store", help='path to directory where extracted metadata will be written')
     parser.add_argument('--semehr-unique', dest='semehr_unique', action="store_true", help='only extract from MongoDB/dicom if not already in MongoDB/semehr')
     parser.add_argument('--replace-html', action="store", help='replace HTML with a character, default is dot (.), or "squash" to eliminate')
     parser.add_argument('--replace-newlines', action="store", help='replace carriage returns and newlines with a character (e.g. a space) or "squash" to eliminate')
+    parser.add_argument("--use-mongodb", action="store_true", help="Use MongoDB for reading/writing")
     args = parser.parse_args()
     if not args.input:
         parser.print_help()
@@ -194,27 +195,32 @@ if __name__ == '__main__':
         args.output_dir = '.'
 
     cfg_dict = {}
-    if not args.yamlfile:
-        args.yamlfile = [os.path.join(os.environ['SMI_ROOT'], 'configs', 'smi_dataExtract.yaml')]
     for cfg_file in args.yamlfile:
         with open(cfg_file, 'r') as fd:
             # Merge all the yaml dicts into one
             cfg_dict = Merger([(list, ["append"]),(dict, ["merge"])],["override"],["override"]).merge(cfg_dict, yaml.safe_load(fd))
 
-    # For reading SRs
-    mongo_dicom_host = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('HostName',{})
-    mongo_dicom_user = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('UserName',{})
-    mongo_dicom_pass = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('Password',{})
-    mongo_dicom_db   = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('DatabaseName',{})
+    mongo_dicom_db = {}
+    if args.use_mongodb:
+        # For reading SRs
+        mongo_dicom_host = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('HostName',{})
+        mongo_dicom_user = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('UserName',{})
+        mongo_dicom_pass = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('Password',{})
+        mongo_dicom_db   = cfg_dict.get('MongoDatabases', {}).get('DicomStoreOptions',{}).get('DatabaseName',{})
 
-    # For writing annotations
-    mongo_semehr_host = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('HostName',{})
-    mongo_semehr_user = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('UserName',{})
-    mongo_semehr_pass = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('Password',{})
-    mongo_semehr_db   = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('DatabaseName',{})
+        # For writing annotations
+        mongo_semehr_host = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('HostName',{})
+        mongo_semehr_user = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('UserName',{})
+        mongo_semehr_pass = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('Password',{})
+        mongo_semehr_db   = cfg_dict.get('MongoDatabases', {}).get('SemEHRStoreOptions',{}).get('DatabaseName',{})
 
-    log_dir = cfg_dict['LoggingOptions']['LogsRoot']
-    root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
+    log_dir = os.environ.get("SMI_LOGS_ROOT", None)
+    if not log_dir:
+        log_dir = cfg_dict['LoggingOptions']['LogsRoot']
+
+    root_dir = os.environ.get("SMI_PACS_ROOT", None)
+    if not root_dir:
+        root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
 
     # ---------------------------------------------------------------------
     # Now we know the LogsRoot we can set up logging
@@ -227,7 +233,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------
     # Initialise the PatientID mapping by opening a DB connection
-    if cfg_dict:
+    if cfg_dict and args.metadata_dir is not None:
         try:
             IdentifierMapper.CHItoEUPI(cfg_dict)
         except:

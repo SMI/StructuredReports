@@ -30,7 +30,7 @@ use_spacy = False
 empty_knowtator_xml_document_string = '<?xml version="1.0" ?>\n<annotations>\n</annotations>\n'
 
 
-def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write_xml = False, write_all = False):
+def anonymise_dir(input_dir, output_dir, semehr_anon_cfg_file, write_xml = False, write_all = False):
 
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
@@ -44,7 +44,6 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     cfg_json['anonymisation_output'] = output_dir
     cfg_json['extracted_phi'] = phi_file
     cfg_json['grouped_phi_output'] = '/dev/null'
-    cfg_json['rules_folder'] = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation/conf/rules')
     if 'logging_file' in cfg_json:
         del cfg_json['logging_file']
     cfg_json['annotation_mode'] = False
@@ -106,7 +105,7 @@ def anonymise_dir(input_dir, output_dir, semehr_dir, semehr_anon_cfg_file, write
     return
 
 
-def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, write_xml = False, write_all = False):
+def anonymise_file(input_file, output_file, semehr_anon_cfg_file, write_xml = False, write_all = False):
     # The anonymiser works on whole directories so
     # create temporary input/output directories and copy the file there.
     input_file = os.path.abspath(input_file)
@@ -115,7 +114,7 @@ def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, wr
     output_dir = tempfile.TemporaryDirectory()
     shutil.copyfile(input_file, os.path.join(input_dir.name, os.path.basename(input_file)))
     anonymise_dir(
-        input_dir.name, output_dir.name, semehr_dir, semehr_anon_cfg_file,
+        input_dir.name, output_dir.name, semehr_anon_cfg_file,
         write_xml=write_xml, write_all=write_all,
     )
     shutil.copyfile(os.path.join(output_dir.name, os.path.basename(input_file)), output_file)
@@ -130,7 +129,6 @@ def anonymise_file(input_file, output_file, semehr_dir, semehr_anon_cfg_file, wr
 
 def main():
     global use_spacy
-    semehr_dir = None
 
 	# Configure logging
     if not os.environ.get('SMI_LOGS_ROOT'): raise Exception('Environment variable SMI_LOGS_ROOT must be set')
@@ -146,10 +144,10 @@ def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Redact text given knowtator XML')
-    parser.add_argument('-i', dest='input', action="store", help='directory of text, or filename of one text file')
-    parser.add_argument('-o', dest='output', action="store", help='path to output filename or directory where redacted text files will be written')
+    parser.add_argument('-i', dest='input', action="store", required=True, help='directory of text, or filename of one text file')
+    parser.add_argument('-o', dest='output', action="store", required=True, help='path to output filename or directory where redacted text files will be written')
     parser.add_argument('-x', '--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files', default=False)
-    parser.add_argument('-s', dest='semehr_dir', action="store", help='path to parent of CogStack-SemEHR directory')
+    parser.add_argument('-c', dest='semehr_anon_cfg_file', action="store", required=True, help='path to the anon config file e.g., "anonymisation_task.json"')
     parser.add_argument('--spacy', dest='spacy', action='store_true', help='use SpaCy to identify names')
     args = parser.parse_args()
     if not args.input:
@@ -159,27 +157,19 @@ def main():
     if args.spacy:
     	use_spacy = True # XXX global
 
-    if os.path.isdir(os.path.expandvars("$HOME/SemEHR")):
-        semehr_dir = os.path.expandvars("$HOME/SemEHR")
-    if os.path.isdir('/opt/semehr'):
-        semehr_dir = '/opt/semehr'
-    if args.semehr_dir:
-        semehr_dir = args.semehr_dir
-    if not semehr_dir:
-        raise Exception('cannot find CogStack-SemEHR in ~/SemEHR or /opt/semehr and -s option not used')
-    semehr_anon_cfg_file = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation', 'conf', 'anonymisation_task.json') # i.e. /opt/semehr/CogStack-SemEHR/anonymisation/conf/anonymisation_task.json
-
     if os.path.isfile(args.input):
         anonymise_file(
-            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            args.input, args.output, args.semehr_anon_cfg_file,
             write_xml=args.write_xml, write_all=True,
         )
 
     elif os.path.isdir(args.input):
         anonymise_dir(
-            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            args.input, args.output, args.semehr_anon_cfg_file,
             write_xml=args.write_xml, write_all=True,
         )
+    else:
+        raise FileNotFoundError(f"Input {args.input} is not a file or a directory")
 
 
 if __name__ == '__main__':

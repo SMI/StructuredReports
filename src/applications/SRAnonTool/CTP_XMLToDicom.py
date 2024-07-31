@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Anon-to-SR')
-    parser.add_argument('-y', dest='yamlfile', action="append", help='path to yaml extract config file (can be used more than once)')
+    parser.add_argument('-y', dest='yamlfile', action="append", default=[], help='path to yaml extract config file (can be used more than once)')
     parser.add_argument('-i', dest='input_dcm', action="store", help='Path to raw DICOM file')
     parser.add_argument('-x', dest='input_xml', action="store", help='Path to annotation XML file')
     parser.add_argument('-o', dest='output_dcm', action="store", help='Path to anonymised DICOM file to have redacted text inserted')
@@ -43,16 +43,18 @@ if __name__ == "__main__":
         exit(1)
 
     cfg_dict = {}
-    if not args.yamlfile:
-        args.yamlfile = [os.path.join(os.environ['SMI_ROOT'], 'configs', 'smi_dataExtract.yaml')]
     for cfg_file in args.yamlfile:
         with open(cfg_file, 'r') as fd:
             # Merge all the yaml dicst into one
             cfg_dict = Merger([(list, ["append"]),(dict, ["merge"])],["override"],["override"]).merge(cfg_dict, yaml.safe_load(fd))
 
-    log_dir = cfg_dict['LoggingOptions']['LogsRoot']
-    root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
-    extract_dir = cfg_dict['FileSystemOptions']['ExtractRoot']
+    log_dir = os.environ.get("SMI_LOGS_ROOT", None)
+    if not log_dir:
+        log_dir = cfg_dict['LoggingOptions']['LogsRoot']
+
+    root_dir = os.environ.get("SMI_PACS_ROOT", None)
+    if not root_dir:
+        root_dir = cfg_dict['FileSystemOptions']['FileSystemRoot']
 
     # ---------------------------------------------------------------------
     # Now we know the LogsRoot we can set up logging
