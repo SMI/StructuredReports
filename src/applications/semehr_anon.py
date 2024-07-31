@@ -150,6 +150,7 @@ def main():
     parser.add_argument('-o', dest='output', action="store", help='path to output filename or directory where redacted text files will be written')
     parser.add_argument('-x', '--xml', dest='write_xml', action="store_true", help='write knowtator.xml in output directory for all input files', default=False)
     parser.add_argument('-s', dest='semehr_dir', action="store", help='path to parent of CogStack-SemEHR directory')
+    parser.add_argument('-c', dest='semehr_anon_cfg_file', action="store", help='path to the anon config file e.g., "anonymisation_task.json"')
     parser.add_argument('--spacy', dest='spacy', action='store_true', help='use SpaCy to identify names')
     args = parser.parse_args()
     if not args.input:
@@ -167,17 +168,16 @@ def main():
         semehr_dir = args.semehr_dir
     if not semehr_dir:
         raise Exception('cannot find CogStack-SemEHR in ~/SemEHR or /opt/semehr and -s option not used')
-    semehr_anon_cfg_file = os.path.join(semehr_dir, 'CogStack-SemEHR', 'anonymisation', 'conf', 'anonymisation_task.json') # i.e. /opt/semehr/CogStack-SemEHR/anonymisation/conf/anonymisation_task.json
 
     if os.path.isfile(args.input):
         anonymise_file(
-            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            args.input, args.output, semehr_dir, args.semehr_anon_cfg_file,
             write_xml=args.write_xml, write_all=True,
         )
 
     elif os.path.isdir(args.input):
         anonymise_dir(
-            args.input, args.output, semehr_dir, semehr_anon_cfg_file,
+            args.input, args.output, semehr_dir, args.semehr_anon_cfg_file,
             write_xml=args.write_xml, write_all=True,
         )
 
