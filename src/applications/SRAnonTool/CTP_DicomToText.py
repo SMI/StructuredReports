@@ -229,7 +229,7 @@ if __name__ == '__main__':
 
     # ---------------------------------------------------------------------
     # Initialise the PatientID mapping by opening a DB connection
-    if cfg_dict:
+    if cfg_dict and args.metadata_dir is not None:
         try:
             IdentifierMapper.CHItoEUPI(cfg_dict)
         except:
