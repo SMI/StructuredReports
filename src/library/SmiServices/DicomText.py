@@ -5,6 +5,7 @@ import random
 import typing
 
 import pydicom
+import tempfile
 from SmiServices import Dicom
 from SmiServices.StringUtils import redact_html_tags_in_string
 from SmiServices.StringUtils import string_match_ignore_linebreak
@@ -422,7 +423,6 @@ def test_DicomText() -> None:
     """ The test function requires a specially-crafted DICOM file
     as provided with SRAnonTool that has been modified to include HTML.
     """
-    dcm = os.path.join(os.path.dirname(__file__), '../../../src/applications/SRAnonTool/test/report10html.dcm')
     expected_without_header = """[[ContentSequence]]
 # Request
 MRI: Knee
@@ -502,17 +502,225 @@ Internal derangement of the right knee with marked injury and with partial tear 
 [[EndContentSequence]]
 """
 
-    # Parse with the normal header tags included
-    dt = DicomText(dcm)
-    dt.parse()
-    assert(dt.text() == expected_with_header)
+    # This is report10html.dcm converted using dcm2json|dicom_tag_string_replace.py
+    report10htmljson="""{
+  "InstanceCreationDate": {"vr": "DA", "Value": ["20050530" ] },
+  "InstanceCreationTime": {"vr": "TM", "Value": ["160527" ] },
+  "InstanceCreatorUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.0.3.5.3" ] },
+  "SOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.88.11" ] },
+  "SOPInstanceUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.1.4.1787205428.166.1117461927.60" ] },
+  "StudyDate": {"vr": "DA" },
+  "ContentDate": {"vr": "DA", "Value": ["20050530" ] },
+  "StudyTime": {"vr": "TM" },
+  "ContentTime": {"vr": "TM", "Value": ["160527" ] },
+  "AccessionNumber": {"vr": "SH" },
+  "Modality": {"vr": "CS", "Value": ["SR" ] },
+  "Manufacturer": {"vr": "LO" },
+  "ReferringPhysicianName": {"vr": "PN" },
+  "CodingSchemeIdentificationSequence": {"vr": "SQ", "Value": [ {
+        "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+        "CodingSchemeUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.0.0.1" ] },
+        "CodingSchemeName": {"vr": "ST", "Value": ["OFFIS DCMTK Coding Scheme" ] },
+        "CodingSchemeResponsibleOrganization": {"vr": "ST", "Value": ["Kuratorium OFFIS e.V., Escherweg 2, 26121 Oldenburg, Germany" ] } } ] },
+  "StudyDescription": {"vr": "LO", "Value": ["OFFIS Structured Reporting Samples" ] },
+  "SeriesDescription": {"vr": "LO", "Value": ["RSNA '95, Picker, MR" ] },
+  "ReferencedPerformedProcedureStepSequence": {"vr": "SQ" },
+  "PatientName": {"vr": "PN", "Value": [{"Alphabetic": "Walz^John^R" } ] },
+  "PatientID": {"vr": "LO", "Value": ["PIKR752962" ] },
+  "PatientBirthDate": {"vr": "DA", "Value": ["19781024" ] },
+  "PatientSex": {"vr": "CS", "Value": ["M" ] },
+  "StudyInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.798806497.93296077602350.10" ] },
+  "SeriesInstanceUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.1.3.1787205428.166.1117461927.61" ] },
+  "StudyID": {"vr": "SH" },
+  "SeriesNumber": {"vr": "IS", "Value": [1 ] },
+  "InstanceNumber": {"vr": "IS", "Value": [1 ] },
+  "ValueType": {"vr": "CS", "Value": ["CONTAINER" ] },
+  "ConceptNameCodeSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "CodeValue": {"vr": "SH", "Value": ["DT.05" ] },
+        "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+        "CodeMeaning": {"vr": "LO", "Value": ["MR Report" ] }
+      }
+    ]
+  },
+  "ContinuityOfContent": {"vr": "CS", "Value": ["SEPARATE" ] },
+  "PerformedProcedureCodeSequence": {"vr": "SQ" },
+  "CurrentRequestedProcedureEvidenceSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "ReferencedSeriesSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "ReferencedSOPSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "ReferencedSOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.4" ] },
+                    "ReferencedSOPInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.274350678564784069" ] }
+                  }
+                ]
+              },
+              "SeriesInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.284225018829304176" ] }
+            }
+          ]
+        },
+        "StudyInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.798806497.93296077602350.10" ] }
+      }
+    ]
+  },
+  "CompletionFlag": {"vr": "CS", "Value": ["PARTIAL" ] },
+  "VerificationFlag": {"vr": "CS", "Value": ["UNVERIFIED" ] },
+  "ContentSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["RE.02" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Request" ] }
+            }
+          ]
+        },
+        "TextValue": {"vr": "UT", "Value": ["MRI: Knee" ] }
+      },
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["RE.01" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["History" ] }
+            }
+          ]
+        },
+        "TextValue": {"vr": "UT", "Value": ["16 year old with right knee pain after an injury playing basketball." ] }
+      },
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["CONTAINER" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["SH.06" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Findings" ] }
+            }
+          ]
+        },
+        "ContinuityOfContent": {"vr": "CS", "Value": ["SEPARATE" ] },
+        "ContentSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["<html>\\n<style>\\nP { color: red; }\\n</style>\\n<P><BR><P>\\nThere is bruising of the medial femoral condyle with some intrasubstance injury to the medial collateral ligament. The lateral collateral ligament in intact. The Baker's  cruciate ligament is irregular and slightly lax suggesting a partial tear. It does not appear to be completely torn. The posterior cruciate ligament is intact. The suprapatellar tendons are normal." ] }
+            },
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["There is a tear of the posterior limb of the medial meniscus which communicates with the superior articular surface. The lateral meniscus is intact. There is a Baker's cyst and moderate joint effusion." ] }
+            },
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["Internal derangement of the right knee with marked injury and with partial tear of the ACL; there is a tear of the posterior limb of the medial meniscus. There is a Baker's Cyst and joint effusion and intrasubstance injury to the medial collateral ligament." ] }
+            }
+          ]
+        }
+      },
+      {
+        "ReferencedSOPSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "ReferencedSOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.4" ] },
+              "ReferencedSOPInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.274350678564784069" ] }
+            }
+          ]
+        },
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["IMAGE" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["IR.02" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Best illustration of finding" ] }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+"""
 
-    # Parse without including the header tags
-    dt = DicomText(dcm, include_header = False)
-    dt.parse()
-    assert(dt.text() == expected_without_header)
+    # Create a fake temporary DICOM file from the JSON
+    with tempfile.NamedTemporaryFile() as fd:
+        dcm = fd.name
+        # Convert the JSON into a pydicom Dataset
+        ds = pydicom.dataset.Dataset.from_json(report10htmljson)
+        # Save the Dataset into a temporary file
+        ds.file_meta = pydicom.dataset.FileMetaDataset()
+        ds.file_meta.TransferSyntaxUID = '1.2.840.10008.1.2.1'
+        ds.save_as(dcm, write_like_original=False)#, enforce_file_format=True)
 
-    # Parse without including the header tags
-    dt = DicomText(dcm, include_header = False, replace_HTML_entities = False)
-    dt.parse()
-    assert(dt.text() == expected_without_header_with_html)
+        # Parse with the normal header tags included
+        dt = DicomText(dcm)
+        dt.parse()
+        assert(dt.text() == expected_with_header)
+
+        # Parse without including the header tags
+        dt = DicomText(dcm, include_header = False)
+        dt.parse()
+        assert(dt.text() == expected_without_header)
+
+        # Parse without including the header tags
+        dt = DicomText(dcm, include_header = False, replace_HTML_entities = False)
+        dt.parse()
+        assert(dt.text() == expected_without_header_with_html)
