@@ -91,6 +91,16 @@ class DicomText:
     def __repr__(self) -> str:
         return f'<DicomText: {self._filename}>'
 
+    def enableTag(self, tagname: str) -> None:
+        """ Enable the redation of a specific DICOM tag,
+        by turning redact=True for the tag in sr_keys_to_extract.
+        NOTE: this modifies the global variable, so all subsequent
+        instances of DicomText will use the new value.
+        """
+        for entry in sr_keys_to_extract:
+            if entry['tag']==tagname:
+                entry['redact']=True
+
     def setRedactChar(self, rchar: str) -> None:
         """ Change the character used to anonymise/redact text.
         Can be a single character or an empty string.
@@ -476,7 +486,45 @@ Internal derangement of the right knee with marked injury and with partial tear 
 [[Patient Birth Date]] 19781024
 [[Patient Sex]] M
 [[Referring Physician Name]] 
+[[ImageComments]] <DXA_RESULTS><EXAM_DATE time="14:16:15" id="82">19/02/2018</EXAM_DATE><SCAN type="DualFemur" id="19"><ROI region="Neck Left" id="0"><BMD units=" g/cm2" id="3">0.826</BMD><BMD_PYA units="%" id="7">80</BMD_PYA><BMD_TSCORE id="6">-1.5</BMD_TSCORE><BMD_PAM units="%" id="9">114</BMD_PAM><BMD_ZSCORE id="8">0.7</BMD_ZSCORE><BMC units=" g" id="5">5.08</BMC><AREA units=" cm2" id="2">6.15</AREA></ROI></SCAN></DXA_RESULTS>
 [[Other Names]] John R Walz
+[[ContentSequence]]
+# Request
+MRI: Knee
+# History
+16 year old with right knee pain after an injury playing basketball.
+# Findings
+# Finding
+......
+..................................
+
+.
+
+..
+
+.
+
+There is bruising of the medial femoral condyle with some intrasubstance injury to the medial collateral ligament. The lateral collateral ligament in intact. The Baker's  cruciate ligament is irregular and slightly lax suggesting a partial tear. It does not appear to be completely torn. The posterior cruciate ligament is intact. The suprapatellar tendons are normal.
+# Finding
+There is a tear of the posterior limb of the medial meniscus which communicates with the superior articular surface. The lateral meniscus is intact. There is a Baker's cyst and moderate joint effusion.
+# Finding
+Internal derangement of the right knee with marked injury and with partial tear of the ACL; there is a tear of the posterior limb of the medial meniscus. There is a Baker's Cyst and joint effusion and intrasubstance injury to the medial collateral ligament.
+# Best illustration of finding
+[[EndContentSequence]]
+"""
+    expected_with_header_and_imagecomments = """[[Study Description]] OFFIS Structured Reporting Samples
+[[Study Date]] 
+[[Series Description]] RSNA '95, Picker, MR
+[[Content Date]] 20050530
+[[Patient ID]] PIKR752962
+[[Patient Name]] John R Walz
+[[Patient Birth Date]] 19781024
+[[Patient Sex]] M
+[[Referring Physician Name]] 
+[[Other Names]] John R Walz
+[[ImageComments]]
+................................................19/02/2018.....................................................................................................0.826................................80.............................-1.5.......................................114.............................0.7....................................5.08................................6.15..................................
+[[EndImageComments]]
 [[ContentSequence]]
 # Request
 MRI: Knee
@@ -696,7 +744,8 @@ Internal derangement of the right knee with marked injury and with partial tear 
         }
       }
     ]
-  }
+  },
+  "ImageComments": { "vr": "LT", "Value": [ "<DXA_RESULTS><EXAM_DATE time=\\"14:16:15\\" id=\\"82\\">19/02/2018</EXAM_DATE><SCAN type=\\"DualFemur\\" id=\\"19\\"><ROI region=\\"Neck Left\\" id=\\"0\\"><BMD units=\\" g/cm2\\" id=\\"3\\">0.826</BMD><BMD_PYA units=\\"%\\" id=\\"7\\">80</BMD_PYA><BMD_TSCORE id=\\"6\\">-1.5</BMD_TSCORE><BMD_PAM units=\\"%\\" id=\\"9\\">114</BMD_PAM><BMD_ZSCORE id=\\"8\\">0.7</BMD_ZSCORE><BMC units=\\" g\\" id=\\"5\\">5.08</BMC><AREA units=\\" cm2\\" id=\\"2\\">6.15</AREA></ROI></SCAN></DXA_RESULTS>" ]}
 }
 """
 
@@ -724,3 +773,9 @@ Internal derangement of the right knee with marked injury and with partial tear 
         dt = DicomText(dcm, include_header = False, replace_HTML_entities = False)
         dt.parse()
         assert(dt.text() == expected_without_header_with_html)
+
+        # Parse with the normal header tags included - and enable ImageComments
+        dt = DicomText(dcm)
+        dt.enableTag('ImageComments')
+        dt.parse()
+        assert(dt.text() == expected_with_header_and_imagecomments)
