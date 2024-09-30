@@ -76,7 +76,43 @@ OR
 write_redacted_text_into_dicom_file  # to rewrite a second file with redacted text
 ```
 
-It also contains a `tag` method to return the value of the given named tag.
+Constructor
+```
+DicomText(filename : str,
+        include_header: bool, 
+        replace_HTML_entities: bool, 
+        replace_HTML_char : str, 
+        replace_newline_char : str,
+        include_unexpected_tags : bool)
+```
+The DICOM file `filename` is read during construction.
+If include_header is True some DICOM header fields are output (default True).
+If replace_HTML_entities is True then all HTML is replaced by dots (default True).
+If replace_HTML_char is given then it is used instead of dots (default is dots).
+If replace_newline_char is given then it is used to replace \r and \n (default is \n).
+After construction you can also change the behaviour with
+`setRedactChar(char)` or `setReplaceHTMLChar(char)` or `setReplaceNewlineChar(char)`.
+
+Properties can be returned: the `tag` method returns the value of the given named tag,
+specified by name not by number. Returns the empty string if tag is not present.
+The `SOPInstanceUID()` method returns the SOPInstanceUID.
+
+The `parse()` method will parse the DICOM file which has already been loaded
+and maintain some internal state about the parsed document. The parsed text
+can be returned with the `text()` method.
+
+The `redact()` method will redact the parsed text so `parse()` must already have been
+called. Returns False if not all redactions could be done successfully.
+The redacted text can be obtained with `redacted_text()` but it is more useful
+to write it back into the original DICOM file or into a new DICOM file
+using `write_redacted_text_into_dicom_file(originalFilename)` or
+`write(newFilename)` respectively. In the former case the file must already exist.
+
+The redaction will only consider the tags `TextValue` or `ContentSequence`
+but additional tags can also be included using `enableTag(tagName)`, the
+intention being to enable `ImageComments` specifically for the DEXA images
+which store metadata in XML format in that tag. Note that once enabled the
+setting persists.
 
 ## IdentifierMapper.py
 
