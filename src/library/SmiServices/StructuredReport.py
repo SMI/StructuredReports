@@ -19,7 +19,8 @@ from SmiServices.StringUtils import redact_html_tags_in_string
 #  tag is the DICOM tag name
 #  decode_func is a function to convert the value if needed
 #  redact is True if the value of this tag should be kept and redacted
-#   during anonymisation, false if tag is just for SemEHR header info
+#   during anonymisation, false if tag is just for SemEHR header info,
+#   see the DicomText.py parse() function.
 sr_keys_to_extract = [
     # These are all of type PN:
     { 'label':'Consulting Physician Name', 'tag':'ConsultingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
@@ -62,8 +63,17 @@ sr_keys_to_extract = [
     { 'label':'Allergies', 'tag':'Allergies', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
     { 'label':'Ethnic Group', 'tag':'EthnicGroup', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
     { 'label':'Referring Physician Name', 'tag':'ReferringPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    # TextValue is typically where the main text body resides:
     { 'label':'Text', 'tag':'TextValue', 'decode_func':Dicom.sr_decode_plaintext, 'redact':True},
-    { 'label':'ImageComments', 'tag':'ImageComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':True},
+    # ImageComments is often used by DEXA, but default to False and turn it on manually:
+    { 'label':'ImageComments', 'tag':'ImageComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    # Additional Comments tags are available:
+    { 'label':'PatientComments', 'tag':'PatientComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'CommentsOnThePerformedProcedureStep', 'tag':'CommentsOnThePerformedProcedureStep', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'RequestedProcedureComments', 'tag':'RequestedProcedureComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'CommentsOnRadiationDose', 'tag':'CommentsOnRadiationDose', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'FrameComments', 'tag':'FrameComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'AssertionComments', 'tag':'AssertionComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
 ]
 
 
