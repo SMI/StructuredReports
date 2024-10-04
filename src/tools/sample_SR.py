@@ -114,6 +114,9 @@ dataset = pydicom.dataset.Dataset.from_json(json_dict)
 dataset.PatientName = '%s^%s' % (patient_surname, patient_forename)
 dataset.ReferringPhysicianName = '%s^%s^^^Dr.' % (doctor_surname, doctor_forename)
 
+# Add a tag used by DEXA scans (Lunar iDXA in particular)
+dataset.ImageComments = "<DXA_RESULTS><EXAM_DATE time=\"14:15:16\" id=\"42\">11/03/2018</EXAM_DATE><SCAN type=\"DualFemur\" id=\"19\"><ROI region=\"Neck Left\" id=\"0\"><BMD units=\" g/cm2\" id=\"3\">0.826</BMD><BMD_PYA units=\"%\" id=\"7\">80</BMD_PYA><BMD_TSCORE id=\"6\">-1.5</BMD_TSCORE><BMD_PAM units=\"%\" id=\"9\">114</BMD_PAM><BMD_ZSCORE id=\"8\">0.7</BMD_ZSCORE><BMC units=\" g\" id=\"5\">5.08</BMC><AREA units=\" cm2\" id=\"2\">6.15</AREA></ROI></SCAN></DXA_RESULTS>"
+
 if args.sopid:
 	dataset.SOPInstanceUID = args.sopid
 if args.studyid:

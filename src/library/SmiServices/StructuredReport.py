@@ -15,49 +15,65 @@ from SmiServices.StringUtils import redact_html_tags_in_string
 # ---------------------------------------------------------------------
 # List of known keys which we either parse or can safely ignore
 # (all the others will be reported during testing to ensure no content is missed).
+#  label is the [[label]] output for SemEHR to use (see its JSON config file)
+#  tag is the DICOM tag name
+#  decode_func is a function to convert the value if needed
+#  redact is True if the value of this tag should be kept and redacted
+#   during anonymisation, false if tag is just for SemEHR header info,
+#   see the DicomText.py parse() function.
 sr_keys_to_extract = [
     # These are all of type PN:
-    { 'label':'Consulting Physician Name', 'tag':'ConsultingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Performing Physician Name', 'tag':'PerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Name Of Physicians Reading Study', 'tag':'NameOfPhysiciansReadingStudy', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Operators Name', 'tag':'OperatorsName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Other Patient Names', 'tag':'OtherPatientNames', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Patient Birth Name', 'tag':'PatientBirthName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Patient Mother Birth Name', 'tag':'PatientMotherBirthName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Secondary Reviewer Name', 'tag':'SecondaryReviewerName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Evaluator Name', 'tag':'EvaluatorName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Scheduled Performing Physician Name', 'tag':'ScheduledPerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Names Of Intended Recipients Of Results', 'tag':'NamesOfIntendedRecipientsOfResults', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Human Performer Name', 'tag':'HumanPerformerName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Verifying Observer Name', 'tag':'VerifyingObserverName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Person Name', 'tag':'PersonName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Content Creator Name', 'tag':'ContentCreatorName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Reviewer Name', 'tag':'ReviewerName', 'decode_func':Dicom.sr_decode_PNAME},
+    { 'label':'Consulting Physician Name', 'tag':'ConsultingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Performing Physician Name', 'tag':'PerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Name Of Physicians Reading Study', 'tag':'NameOfPhysiciansReadingStudy', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Operators Name', 'tag':'OperatorsName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Other Patient Names', 'tag':'OtherPatientNames', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Patient Birth Name', 'tag':'PatientBirthName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Patient Mother Birth Name', 'tag':'PatientMotherBirthName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Secondary Reviewer Name', 'tag':'SecondaryReviewerName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Evaluator Name', 'tag':'EvaluatorName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Scheduled Performing Physician Name', 'tag':'ScheduledPerformingPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Names Of Intended Recipients Of Results', 'tag':'NamesOfIntendedRecipientsOfResults', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Human Performer Name', 'tag':'HumanPerformerName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Verifying Observer Name', 'tag':'VerifyingObserverName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Person Name', 'tag':'PersonName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Content Creator Name', 'tag':'ContentCreatorName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Reviewer Name', 'tag':'ReviewerName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
     # Plain text:
-    { 'label':'Institution Name', 'tag':'InstitutionName', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Institution Address', 'tag':'InstitutionAddress', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Institutional Department Name', 'tag':'InstitutionalDepartmentName', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Patient Address', 'tag':'PatientAddress', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Institution Name', 'tag':'InstitutionName', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Institution Address', 'tag':'InstitutionAddress', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Institutional Department Name', 'tag':'InstitutionalDepartmentName', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Patient Address', 'tag':'PatientAddress', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
     # First version:
-    { 'label':'Study Description', 'tag':'StudyDescription', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Study Date', 'tag':'StudyDate', 'decode_func':Dicom.sr_decode_date},
-    { 'label':'Series Description', 'tag':'SeriesDescription', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Series Date', 'tag':'SeriesDate', 'decode_func':Dicom.sr_decode_date},
-    { 'label':'Performed Procedure Step Description', 'tag':'PerformedProcedureStepDescription', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'ProtocolName', 'tag':'ProtocolName', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'StudyComments', 'tag':'StudyComments', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Content Date', 'tag':'ContentDate', 'decode_func':Dicom.sr_decode_date},
-    { 'label':'Patient ID', 'tag':'PatientID', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Patient Name', 'tag':'PatientName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Patient Birth Date', 'tag':'PatientBirthDate', 'decode_func':Dicom.sr_decode_date},
-    { 'label':'Patient Sex', 'tag':'PatientSex', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Patient Age', 'tag':'PatientAge', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Patient Weight', 'tag':'PatientWeight', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Medical Alerts', 'tag':'MedicalAlerts', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Allergies', 'tag':'Allergies', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Ethnic Group', 'tag':'EthnicGroup', 'decode_func':Dicom.sr_decode_plaintext},
-    { 'label':'Referring Physician Name', 'tag':'ReferringPhysicianName', 'decode_func':Dicom.sr_decode_PNAME},
-    { 'label':'Text', 'tag':'TextValue', 'decode_func':Dicom.sr_decode_plaintext},
+    { 'label':'Study Description', 'tag':'StudyDescription', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Study Date', 'tag':'StudyDate', 'decode_func':Dicom.sr_decode_date, 'redact':False},
+    { 'label':'Series Description', 'tag':'SeriesDescription', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Series Date', 'tag':'SeriesDate', 'decode_func':Dicom.sr_decode_date, 'redact':False},
+    { 'label':'Performed Procedure Step Description', 'tag':'PerformedProcedureStepDescription', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'ProtocolName', 'tag':'ProtocolName', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'StudyComments', 'tag':'StudyComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Content Date', 'tag':'ContentDate', 'decode_func':Dicom.sr_decode_date, 'redact':False},
+    { 'label':'Patient ID', 'tag':'PatientID', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Patient Name', 'tag':'PatientName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    { 'label':'Patient Birth Date', 'tag':'PatientBirthDate', 'decode_func':Dicom.sr_decode_date, 'redact':False},
+    { 'label':'Patient Sex', 'tag':'PatientSex', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Patient Age', 'tag':'PatientAge', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Patient Weight', 'tag':'PatientWeight', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Medical Alerts', 'tag':'MedicalAlerts', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Allergies', 'tag':'Allergies', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Ethnic Group', 'tag':'EthnicGroup', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'Referring Physician Name', 'tag':'ReferringPhysicianName', 'decode_func':Dicom.sr_decode_PNAME, 'redact':False},
+    # TextValue is typically where the main text body resides:
+    { 'label':'Text', 'tag':'TextValue', 'decode_func':Dicom.sr_decode_plaintext, 'redact':True},
+    # ImageComments is often used by DEXA, but default to False and turn it on manually:
+    { 'label':'ImageComments', 'tag':'ImageComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    # Additional Comments tags are available:
+    { 'label':'PatientComments', 'tag':'PatientComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'CommentsOnThePerformedProcedureStep', 'tag':'CommentsOnThePerformedProcedureStep', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'RequestedProcedureComments', 'tag':'RequestedProcedureComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'CommentsOnRadiationDose', 'tag':'CommentsOnRadiationDose', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'FrameComments', 'tag':'FrameComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
+    { 'label':'AssertionComments', 'tag':'AssertionComments', 'decode_func':Dicom.sr_decode_plaintext, 'redact':False},
 ]
 
 
@@ -111,7 +127,6 @@ sr_keys_to_ignore = [
     'PerformedProcedureCodeSequence', # XXX what is this? does it ever exist?
     'PerformedProtocolCodeSequence',  # XXX what is this?
     'ReferringPhysicianName',
-    'ImageComments', # XXX do we want this?
     'TotalNumberOfExposures',
     'ExposedArea',
     'ExposedDoseSequence',
@@ -533,6 +548,8 @@ def test_SR_parse_key():
         },
         # Structured Reports often have the main body in a TextValue instead
         "TextValue": { "vr": "UT", "Value": [ "Hello World"]},
+        # Structured Reports sometimes have text in a ImageComments tag
+        "ImageComments": { "vr": "LT", "Value": [ "<DXA_RESULTS><EXAM_DATE time=\"14:16:15\" id=\"82\">19/02/2018</EXAM_DATE><SCAN type=\"DualFemur\" id=\"19\"><ROI region=\"Neck Left\" id=\"0\"><BMD units=\" g/cm2\" id=\"3\">0.826</BMD><BMD_PYA units=\"%\" id=\"7\">80</BMD_PYA><BMD_TSCORE id=\"6\">-1.5</BMD_TSCORE><BMD_PAM units=\"%\" id=\"9\">114</BMD_PAM><BMD_ZSCORE id=\"8\">0.7</BMD_ZSCORE><BMC units=\" g\" id=\"5\">5.08</BMC><AREA units=\" cm2\" id=\"2\">6.15</AREA></ROI></SCAN></DXA_RESULTS>" ]},
         # Add a sequence where you expect ConceptName=ConceptCode output
         "AcquisitionContextSequence": {
           "vr": "SQ",
@@ -598,6 +615,7 @@ def test_SR_parse_key():
         assert(
             fd.read() == '[[Document name]] Test\n'
             '[[Text]] Hello World\n'
+            '[[ImageComments]] ................................................19/02/2018.....................................................................................................0.826................................80.............................-1.5.......................................114.............................0.7....................................5.08................................6.15..................................\n'
             '[[Other Names]] Dr. Klugman\n'
             '[[Request]] MRI: Knee\n'
             '[[Physician]] Klugman^^^Dr.\n'

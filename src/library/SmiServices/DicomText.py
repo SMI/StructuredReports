@@ -5,6 +5,7 @@ import random
 import typing
 
 import pydicom
+import tempfile
 from SmiServices import Dicom
 from SmiServices.StringUtils import redact_html_tags_in_string
 from SmiServices.StringUtils import string_match_ignore_linebreak
@@ -89,6 +90,16 @@ class DicomText:
 
     def __repr__(self) -> str:
         return f'<DicomText: {self._filename}>'
+
+    def enableTag(self, tagname: str) -> None:
+        """ Enable the redation of a specific DICOM tag,
+        by turning redact=True for the tag in sr_keys_to_extract.
+        NOTE: this modifies the global variable, so all subsequent
+        instances of DicomText will use the new value.
+        """
+        for entry in sr_keys_to_extract:
+            if entry['tag']==tagname:
+                entry['redact']=True
 
     def setRedactChar(self, rchar: str) -> None:
         """ Change the character used to anonymise/redact text.
@@ -191,13 +202,15 @@ class DicomText:
         """
         self._p_text = ''
         # Start by enumerating all known desired tags (whitelist)
-        #  except explicitly do not include TextValue, handled below
+        #  except explicitly do not include TextValue/ImageComments, handled below
         list_of_tagname_desired = [ k['tag'] for k in sr_keys_to_extract]
         if self._include_header:
             # Add all the known [[something]] headers
             for srkey in sr_keys_to_extract:
                 tag: str = srkey['tag'] # type: ignore
-                if tag in self._dicom_raw and tag != 'TextValue':
+                redact_tag: bool = srkey['redact'] # type: ignore
+                # If tag is not TextValue and not ImageComments then:
+                if tag in self._dicom_raw and not redact_tag:
                     decode_func: typing.Callable[[typing.Any], str] = srkey['decode_func'] # type: ignore
                     line = '[[%s]] %s\n' % (srkey['label'], decode_func(str(self._dicom_raw[tag].value)))
                     self._p_text = self._p_text + line
@@ -216,15 +229,26 @@ class DicomText:
                         line = '[[%s]] %s\n' % (tagname, drkey.value)
                         self._p_text = self._p_text + line
                         if DicomText._warn_unexpected_tag:
+                            # XXX should we logging.warn?
                             print('Warning: including unexpected tag "%s" = "%s"' % (tagname, str(drkey.value)[0:20]))
                     else:
                         if DicomText._warn_unexpected_tag:
+                            # XXX should we logging.warn?
                             print('Warning: ignored unexpected tag "%s" = "%s"' % (tagname, str(drkey.value)[0:20]))
-        # Now handle the TextValue tag
+        # Now handle the TextValue and ImageComments tags
         # Wrap the text with [[Text]] and [[EndText]] for SemEHR
-        if 'TextValue' in self._dicom_raw:
-            textval = str(self._dicom_raw['TextValue'].value)
-            self._p_text = self._p_text + '[[Text]]\n'
+        for srkey in sr_keys_to_extract:
+            if not srkey['redact']:
+                continue
+            # Should only be TextValue and ImageComments
+            # which get written as [[Text]] and [[ImageComments]]
+            tagname = srkey['tag']
+            taglabel = srkey['label']
+            if tagname not in self._dicom_raw:
+                continue
+            textval = str(self._dicom_raw[tagname].value)
+            self._p_text = self._p_text + ('[[%s]]\n' % taglabel)
+            # XXX ImageComments might be XML, do we want to redact its tags?
             if self._replace_HTML_entities and '<' in textval:
                 self._p_text = self._p_text + redact_html_tags_in_string(
                     textval,
@@ -233,7 +257,7 @@ class DicomText:
                 )
             else:
                 self._p_text = self._p_text + textval
-            self._p_text = self._p_text + '\n[[EndText]]\n'
+            self._p_text = self._p_text + ('\n[[End%s]]\n' % taglabel)
         # Now the text in the ContentSequence
         # Wrap the text with [[ContentSequence]] and [[EndContentSequence]] for SemEHR
         if 'ContentSequence' in self._dicom_raw:
@@ -279,7 +303,7 @@ class DicomText:
         current_end   = current_start + len(rc)
         replacement = rc
         replacedAny = False
-        #print('At %d = %s' % (current_start, str(data_element.value)))
+        #print('AT %d (offset %d) = %s' % (current_start, self._redact_offset, str(data_element.value)))
         # Check every annotation to see, if not already done, if it appears in this rc
         for annot in self._annotations:
             # Sometimes it reports text:None so ignore
@@ -289,14 +313,15 @@ class DicomText:
             # If already replaced then ignore
             if 'replaced' in annot:
                 continue
+            offset_limit = 32
             # Use the previously found offset to check if this annotation is within the current string
-            if ((annot['start_char'] + self._redact_offset >= current_start-32) and
-                    (annot['start_char'] + self._redact_offset < current_end+32)):
+            if ((annot['start_char'] + self._redact_offset >= current_start-offset_limit) and
+                    (annot['start_char'] + self._redact_offset < current_end+offset_limit)):
                 annot_at = annot['start_char'] - current_start
                 annot_end = annot['end_char'] - current_start
                 replaced = False
                 # SemEHR may have an extra line at the start so start_char offset need adjusting
-                for offset in [self._redact_offset] + list(range(-32, 32)):
+                for offset in [self._redact_offset] + list(range(-offset_limit, offset_limit)):
                     if annot_at+offset < 0:
                         continue
                     # Do the comparison using text without html but replace inside text with html
@@ -304,7 +329,7 @@ class DicomText:
                         replacement = self.redact_string(replacement, annot_at+offset, annot_end-annot_at, data_element.VR)
                         replaced = replacedAny = True
                         annot['replaced'] = True
-                        #print('REPLACE: %s in %s at %d (offset %d)' % (repr(annot['text']), repr(replacement), annot_at, offset))
+                        #print('REPLACE: %s in %s at %d (offset %d)' % (repr(annot['text']), repr(replacement)[:20], annot_at, offset))
                         self._redact_offset = offset
                         break
                 # Only need to report error at the end, no need for Warning here:
@@ -336,19 +361,29 @@ class DicomText:
         self._r_text = ''    # XXX could start with '\n' to match semehr behaviour
         self._redacted_text = ''
         self._annotations = annot_list
-        # A 'TextValue' element is not a sequence so manually call the callback
-        if 'TextValue' in self._dicom_raw:
-            self._dataset_redact_callback(None, self._dicom_raw['TextValue'])
-        # A 'ContentSequence' needs to be walked
+        # TextValue and ImageComments are not sequences so manually call the callback
+        # Adjust the _redact_offset for each header we would have inserted during a parse
+        # e.g. [[Text]] and [[EndText]]
+        for srkey in sr_keys_to_extract:
+            if srkey['redact'] and (srkey['tag'] in self._dicom_raw):
+                self._r_text += ('[[%s]]\n' % srkey['label'])
+                self._dataset_redact_callback(None, self._dicom_raw[ srkey['tag'] ])
+                #self._r_text += ('[[End%s]]\n' % srkey['label'])
+        # A 'ContentSequence' needs to be walked recursively
         if 'ContentSequence' in self._dicom_raw:
+            self._r_text += ('[[ContentSequence]]\n')
             for content_sequence_item in self._dicom_raw.ContentSequence:
                 content_sequence_item.walk(self._dataset_redact_callback)
+            #self._r_text += ('[[EndContentSequence]]\n')
         rc = True
         # Now check that all annotations were redacted, return False if not
         for annot in self._annotations:
             if not annot.get('replaced'):
-                print('ERROR: could not find annotation (%s) in document' % repr(annot['text']))
+                print('ERROR: could not find annotation (%s) in document (%s)' % (repr(annot['text']), str(annot)))
                 rc = False
+        #with open('DicomText_parsed.txt','w') as fd: print(self._p_text, file=fd)
+        #with open('DicomText_redactbefore.txt','w') as fd: print(self._r_text, file=fd)
+        #with open('DicomText_redactafter.txt','w') as fd: print(self._redacted_text, file=fd)
         return rc
 
     def redact_PN_DA_callback(self, dataset: pydicom.Dataset, data_element: pydicom.DataElement) -> None:
@@ -381,8 +416,12 @@ class DicomText:
         DICOM file B.
         """
         dicom_dest = pydicom.dcmread(destfile)
-        if 'TextValue' in self._dicom_raw:
-            dicom_dest.TextValue = self._dicom_raw.TextValue
+        # Replace the contents of the TextValue and ImageComments tags
+        for srkey in sr_keys_to_extract:
+            if not srkey['redact'] or srkey['tag'] not in self._dicom_raw:
+                continue
+            dicom_dest[ srkey['tag'] ] = self._dicom_raw[ srkey['tag'] ]
+        # And replace ContentSequence as it is not in sr_keys_to_extract
         if 'ContentSequence' in self._dicom_raw:
             dicom_dest.ContentSequence = self._dicom_raw.ContentSequence
         # Redact names and dates in case CTP didn't do it
@@ -394,7 +433,6 @@ def test_DicomText() -> None:
     """ The test function requires a specially-crafted DICOM file
     as provided with SRAnonTool that has been modified to include HTML.
     """
-    dcm = os.path.join(os.path.dirname(__file__), '../../../src/applications/SRAnonTool/test/report10html.dcm')
     expected_without_header = """[[ContentSequence]]
 # Request
 MRI: Knee
@@ -448,6 +486,7 @@ Internal derangement of the right knee with marked injury and with partial tear 
 [[Patient Birth Date]] 19781024
 [[Patient Sex]] M
 [[Referring Physician Name]] 
+[[ImageComments]] <DXA_RESULTS><EXAM_DATE time="14:16:15" id="82">19/02/2018</EXAM_DATE><SCAN type="DualFemur" id="19"><ROI region="Neck Left" id="0"><BMD units=" g/cm2" id="3">0.826</BMD><BMD_PYA units="%" id="7">80</BMD_PYA><BMD_TSCORE id="6">-1.5</BMD_TSCORE><BMD_PAM units="%" id="9">114</BMD_PAM><BMD_ZSCORE id="8">0.7</BMD_ZSCORE><BMC units=" g" id="5">5.08</BMC><AREA units=" cm2" id="2">6.15</AREA></ROI></SCAN></DXA_RESULTS>
 [[Other Names]] John R Walz
 [[ContentSequence]]
 # Request
@@ -473,18 +512,270 @@ Internal derangement of the right knee with marked injury and with partial tear 
 # Best illustration of finding
 [[EndContentSequence]]
 """
+    expected_with_header_and_imagecomments = """[[Study Description]] OFFIS Structured Reporting Samples
+[[Study Date]] 
+[[Series Description]] RSNA '95, Picker, MR
+[[Content Date]] 20050530
+[[Patient ID]] PIKR752962
+[[Patient Name]] John R Walz
+[[Patient Birth Date]] 19781024
+[[Patient Sex]] M
+[[Referring Physician Name]] 
+[[Other Names]] John R Walz
+[[ImageComments]]
+................................................19/02/2018.....................................................................................................0.826................................80.............................-1.5.......................................114.............................0.7....................................5.08................................6.15..................................
+[[EndImageComments]]
+[[ContentSequence]]
+# Request
+MRI: Knee
+# History
+16 year old with right knee pain after an injury playing basketball.
+# Findings
+# Finding
+......
+..................................
 
-    # Parse with the normal header tags included
-    dt = DicomText(dcm)
-    dt.parse()
-    assert(dt.text() == expected_with_header)
+.
 
-    # Parse without including the header tags
-    dt = DicomText(dcm, include_header = False)
-    dt.parse()
-    assert(dt.text() == expected_without_header)
+..
 
-    # Parse without including the header tags
-    dt = DicomText(dcm, include_header = False, replace_HTML_entities = False)
-    dt.parse()
-    assert(dt.text() == expected_without_header_with_html)
+.
+
+There is bruising of the medial femoral condyle with some intrasubstance injury to the medial collateral ligament. The lateral collateral ligament in intact. The Baker's  cruciate ligament is irregular and slightly lax suggesting a partial tear. It does not appear to be completely torn. The posterior cruciate ligament is intact. The suprapatellar tendons are normal.
+# Finding
+There is a tear of the posterior limb of the medial meniscus which communicates with the superior articular surface. The lateral meniscus is intact. There is a Baker's cyst and moderate joint effusion.
+# Finding
+Internal derangement of the right knee with marked injury and with partial tear of the ACL; there is a tear of the posterior limb of the medial meniscus. There is a Baker's Cyst and joint effusion and intrasubstance injury to the medial collateral ligament.
+# Best illustration of finding
+[[EndContentSequence]]
+"""
+
+    # This is report10html.dcm converted using dcm2json|dicom_tag_string_replace.py
+    report10htmljson="""{
+  "InstanceCreationDate": {"vr": "DA", "Value": ["20050530" ] },
+  "InstanceCreationTime": {"vr": "TM", "Value": ["160527" ] },
+  "InstanceCreatorUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.0.3.5.3" ] },
+  "SOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.88.11" ] },
+  "SOPInstanceUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.1.4.1787205428.166.1117461927.60" ] },
+  "StudyDate": {"vr": "DA" },
+  "ContentDate": {"vr": "DA", "Value": ["20050530" ] },
+  "StudyTime": {"vr": "TM" },
+  "ContentTime": {"vr": "TM", "Value": ["160527" ] },
+  "AccessionNumber": {"vr": "SH" },
+  "Modality": {"vr": "CS", "Value": ["SR" ] },
+  "Manufacturer": {"vr": "LO" },
+  "ReferringPhysicianName": {"vr": "PN" },
+  "CodingSchemeIdentificationSequence": {"vr": "SQ", "Value": [ {
+        "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+        "CodingSchemeUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.0.0.1" ] },
+        "CodingSchemeName": {"vr": "ST", "Value": ["OFFIS DCMTK Coding Scheme" ] },
+        "CodingSchemeResponsibleOrganization": {"vr": "ST", "Value": ["Kuratorium OFFIS e.V., Escherweg 2, 26121 Oldenburg, Germany" ] } } ] },
+  "StudyDescription": {"vr": "LO", "Value": ["OFFIS Structured Reporting Samples" ] },
+  "SeriesDescription": {"vr": "LO", "Value": ["RSNA '95, Picker, MR" ] },
+  "ReferencedPerformedProcedureStepSequence": {"vr": "SQ" },
+  "PatientName": {"vr": "PN", "Value": [{"Alphabetic": "Walz^John^R" } ] },
+  "PatientID": {"vr": "LO", "Value": ["PIKR752962" ] },
+  "PatientBirthDate": {"vr": "DA", "Value": ["19781024" ] },
+  "PatientSex": {"vr": "CS", "Value": ["M" ] },
+  "StudyInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.798806497.93296077602350.10" ] },
+  "SeriesInstanceUID": {"vr": "UI", "Value": ["1.2.276.0.7230010.3.1.3.1787205428.166.1117461927.61" ] },
+  "StudyID": {"vr": "SH" },
+  "SeriesNumber": {"vr": "IS", "Value": [1 ] },
+  "InstanceNumber": {"vr": "IS", "Value": [1 ] },
+  "ValueType": {"vr": "CS", "Value": ["CONTAINER" ] },
+  "ConceptNameCodeSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "CodeValue": {"vr": "SH", "Value": ["DT.05" ] },
+        "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+        "CodeMeaning": {"vr": "LO", "Value": ["MR Report" ] }
+      }
+    ]
+  },
+  "ContinuityOfContent": {"vr": "CS", "Value": ["SEPARATE" ] },
+  "PerformedProcedureCodeSequence": {"vr": "SQ" },
+  "CurrentRequestedProcedureEvidenceSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "ReferencedSeriesSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "ReferencedSOPSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "ReferencedSOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.4" ] },
+                    "ReferencedSOPInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.274350678564784069" ] }
+                  }
+                ]
+              },
+              "SeriesInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.284225018829304176" ] }
+            }
+          ]
+        },
+        "StudyInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.798806497.93296077602350.10" ] }
+      }
+    ]
+  },
+  "CompletionFlag": {"vr": "CS", "Value": ["PARTIAL" ] },
+  "VerificationFlag": {"vr": "CS", "Value": ["UNVERIFIED" ] },
+  "ContentSequence": {
+    "vr": "SQ",
+    "Value": [
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["RE.02" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Request" ] }
+            }
+          ]
+        },
+        "TextValue": {"vr": "UT", "Value": ["MRI: Knee" ] }
+      },
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["RE.01" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["History" ] }
+            }
+          ]
+        },
+        "TextValue": {"vr": "UT", "Value": ["16 year old with right knee pain after an injury playing basketball." ] }
+      },
+      {
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["CONTAINER" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["SH.06" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Findings" ] }
+            }
+          ]
+        },
+        "ContinuityOfContent": {"vr": "CS", "Value": ["SEPARATE" ] },
+        "ContentSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["<html>\\n<style>\\nP { color: red; }\\n</style>\\n<P><BR><P>\\nThere is bruising of the medial femoral condyle with some intrasubstance injury to the medial collateral ligament. The lateral collateral ligament in intact. The Baker's  cruciate ligament is irregular and slightly lax suggesting a partial tear. It does not appear to be completely torn. The posterior cruciate ligament is intact. The suprapatellar tendons are normal." ] }
+            },
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["There is a tear of the posterior limb of the medial meniscus which communicates with the superior articular surface. The lateral meniscus is intact. There is a Baker's cyst and moderate joint effusion." ] }
+            },
+            {
+              "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+              "ValueType": {"vr": "CS", "Value": ["TEXT" ] },
+              "ConceptNameCodeSequence": {
+                "vr": "SQ",
+                "Value": [
+                  {
+                    "CodeValue": {"vr": "SH", "Value": ["RE.05" ] },
+                    "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+                    "CodeMeaning": {"vr": "LO", "Value": ["Finding" ] }
+                  }
+                ]
+              },
+              "TextValue": {"vr": "UT", "Value": ["Internal derangement of the right knee with marked injury and with partial tear of the ACL; there is a tear of the posterior limb of the medial meniscus. There is a Baker's Cyst and joint effusion and intrasubstance injury to the medial collateral ligament." ] }
+            }
+          ]
+        }
+      },
+      {
+        "ReferencedSOPSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "ReferencedSOPClassUID": {"vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.4" ] },
+              "ReferencedSOPInstanceUID": {"vr": "UI", "Value": ["2.16.840.1.113662.4.8796818069641.806010667.274350678564784069" ] }
+            }
+          ]
+        },
+        "RelationshipType": {"vr": "CS", "Value": ["CONTAINS" ] },
+        "ValueType": {"vr": "CS", "Value": ["IMAGE" ] },
+        "ConceptNameCodeSequence": {
+          "vr": "SQ",
+          "Value": [
+            {
+              "CodeValue": {"vr": "SH", "Value": ["IR.02" ] },
+              "CodingSchemeDesignator": {"vr": "SH", "Value": ["99_OFFIS_DCMTK" ] },
+              "CodeMeaning": {"vr": "LO", "Value": ["Best illustration of finding" ] }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ImageComments": { "vr": "LT", "Value": [ "<DXA_RESULTS><EXAM_DATE time=\\"14:16:15\\" id=\\"82\\">19/02/2018</EXAM_DATE><SCAN type=\\"DualFemur\\" id=\\"19\\"><ROI region=\\"Neck Left\\" id=\\"0\\"><BMD units=\\" g/cm2\\" id=\\"3\\">0.826</BMD><BMD_PYA units=\\"%\\" id=\\"7\\">80</BMD_PYA><BMD_TSCORE id=\\"6\\">-1.5</BMD_TSCORE><BMD_PAM units=\\"%\\" id=\\"9\\">114</BMD_PAM><BMD_ZSCORE id=\\"8\\">0.7</BMD_ZSCORE><BMC units=\\" g\\" id=\\"5\\">5.08</BMC><AREA units=\\" cm2\\" id=\\"2\\">6.15</AREA></ROI></SCAN></DXA_RESULTS>" ]}
+}
+"""
+
+    # Create a fake temporary DICOM file from the JSON
+    with tempfile.NamedTemporaryFile() as fd:
+        dcm = fd.name
+        # Convert the JSON into a pydicom Dataset
+        ds = pydicom.dataset.Dataset.from_json(report10htmljson)
+        # Save the Dataset into a temporary file
+        ds.file_meta = pydicom.dataset.FileMetaDataset()
+        ds.file_meta.TransferSyntaxUID = '1.2.840.10008.1.2.1'
+        ds.save_as(dcm, write_like_original=False)#, enforce_file_format=True)
+
+        # Parse with the normal header tags included
+        dt = DicomText(dcm)
+        dt.parse()
+        assert(dt.text() == expected_with_header)
+
+        # Parse without including the header tags
+        dt = DicomText(dcm, include_header = False)
+        dt.parse()
+        assert(dt.text() == expected_without_header)
+
+        # Parse without including the header tags
+        dt = DicomText(dcm, include_header = False, replace_HTML_entities = False)
+        dt.parse()
+        assert(dt.text() == expected_without_header_with_html)
+
+        # Parse with the normal header tags included - and enable ImageComments
+        dt = DicomText(dcm)
+        dt.enableTag('ImageComments')
+        dt.parse()
+        assert(dt.text() == expected_with_header_and_imagecomments)
