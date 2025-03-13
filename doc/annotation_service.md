@@ -15,21 +15,19 @@ medical reports and provide search access via a REST API. It consists of:
 
 # PPZ and VM
 
-A PPZ has been provisioned which is an isolated network subnet with a proxy
-server to allow limited internet access.
+A PPZ has been provisioned which is an isolated network subnet with a web proxy
+server to allow limited outbound internet access for downloading OS updates.
 
 A VM called nsh-smi06 has been created inside the PPZ, with the internal
 IP address 192.168.63.18. It has ntpserver 10.0.50.248 and proxyserver 10.0.50.246.
-Externally the VM is accessible from the RC VM as 10.0.2.135 on port 8485.
-This is a proxy server giving access to other VMs; it's only port 8485 which
-routes through to the annotation server VM. The NSSData-Server 10.0.2.18
-is used by cohort builders for accessing mysql on nssdata (in preference to
-RC-Server). NSSData-Server has been added to the source list on node8's
-firewall smi zone meaning the ports for SMI services are accessible to the
-eDRIS RCs on the RC-Server and the NSSData-Server. (Whilst our services are
-not needed on the RC-Server there are one or two smi services routed via node8
-that are needed on the RC-Server). The traffic from the proxy reaches the VM
-with a source IP of 10.0.50.108, which you need to know for the firewall.
+
+Previously the VM was accessible from the RC VM via a proxy, so the RC would
+communicate with 10.0.2.135 port 8485 which would appear to the server as
+coming from 10.0.50.108. This intermediate is no longer present in NSH v2.
+
+The RC can communicate with the server using hostname 192.168.63.18 port 8485.
+The server will see traffic coming from 10.60.65.164, the RC VM. Thus nsh-smi06
+needs to have its firewall open to port 8485 coming from 10.60.65.164.
 
 Internet access from within the PPZ is available through a proxy on port 800
 but it requires authentication. It only operates during working hours, and
