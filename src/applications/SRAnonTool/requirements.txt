@@ -33,7 +33,7 @@ Pygments==2.18.0
 pymongo==4.8.0
 pyre2-updated==0.3.8
 PyYAML==6.0.1
-requests==2.32.3
+requests==2.32.4
 rich==13.7.1
 SemEHR @ git+https://github.com/SMI/CogStack-SemEHR.git@96d14866f43b28402f2c659cf93548123d1fb472
 shellingham==1.5.4
