@@ -62,7 +62,6 @@ import json
 import logging
 import os.path
 import pprint
-import re
 import sys
 
 import psycopg2
@@ -73,6 +72,7 @@ from psycopg2.extras import Json
 
 # DB config
 pgHost = 'localhost'
+pgPort = 5432
 pgUser = 'semehr'
 pgPass = 'semehr' 
 pgDatabaseName = 'semehr'
@@ -89,7 +89,7 @@ verbose = False
 def postgres_open():
     global pgConnection
     logging.info('Connecting to postgres')
-    pgConnection = psycopg2.connect(host=pgHost, user=pgUser, password=pgPass, dbname=pgDatabaseName)
+    pgConnection = psycopg2.connect(host=pgHost, port=pgPort, user=pgUser, password=pgPass, dbname=pgDatabaseName)
     # Set the schema name so it doesn't need to be specified before each table name
     pgConnection.cursor().execute(sql.SQL("SET search_path TO {},public").format(sql.Identifier(pgSchemaName)))
     pgConnection.commit()
@@ -384,7 +384,7 @@ def postgres_query_key(featurename, featureval, countOnly):
 
 
 def main():
-    global pgHost, pgUser, pgPass, pgDatabaseName, pgTableName, verbose
+    global pgHost, pgPort, pgUser, pgPass, pgDatabaseName, pgTableName, verbose
 
     log_dir = '.'
     if os.environ['SMI_LOGS_ROOT']:
@@ -394,6 +394,7 @@ def main():
     parser.add_argument('-v', dest='verbose', action='store_true', help='more verbose')
     parser.add_argument('-y', dest='yaml', action="store", help='default.yaml for PostgreSQL connection parameters')
     parser.add_argument('--pg-host', dest='pgHost', action="store", help="PostgreSQL hostname", default=pgHost)
+    parser.add_argument('--pg-port', dest='pgPort', action="store", help="PostgreSQL port number", default=pgPort)
     parser.add_argument('--pg-user', dest='pgUser', action="store", help="PostgreSQL username", default=pgUser)
     parser.add_argument('--pg-pass', dest='pgPass', action="store", help="PostgreSQL password", default=pgPass)
     parser.add_argument('--pg-database', dest='pgDatabaseName', action="store", help="PostgreSQL database name", default=pgDatabaseName)
@@ -421,11 +422,13 @@ def main():
             cfg = yaml.safe_load(ymlfile)
             pgCfg = cfg.get('PostgresDatabases',{}).get('SemEHRStoreOptions')
             pgHost = pgCfg.get('HostName', '')
+            pgPort = pgCfg.get('Port', '')
             pgUser = pgCfg.get('UserName', '')
             pgPass = pgCfg.get('Password', '')
             pgDatabaseName = pgCfg.get('DatabaseName', '')
             log_dir = cfg.get('LoggingOptions',{}).get('LogsRoot',log_dir)
     if args.pgHost: pgHost = args.pgHost
+    if args.pgPort: pgPort = args.pgPort
     if args.pgUser: pgUser = args.pgUser
     if args.pgPass: pgPass = args.pgPass
     if args.pgDatabaseName: pgDatabaseName = args.pgDatabaseName
@@ -455,7 +458,7 @@ def main():
         postgres_insert_dir(args.jsonfiles[0], args.txtdir, args.metadatadir)
         return
     #   If you give one or more actual filenames:
-    elif len(args.jsonfiles) > 0:
+    if len(args.jsonfiles) > 0:
         postgres_insert_files(args.jsonfiles)
         return
 
