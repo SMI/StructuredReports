@@ -87,19 +87,20 @@ class CTP_Start_Message(smiMessage):
     """ SMI message to send a file to CTP.
     The yaml_dict is default.yaml but only needed for debugging. """
 
-    def __init__(self, yaml_dict, dicom_file_path, extraction_directory, project_number):
+    def __init__(self, yaml_dict, dicom_file_path, extraction_directory, project_number, job_identifier = None, output_file_path = None):
         super().__init__()
         self.msg_dict = {}
         self.msg_dict['DicomFilePath'] = dicom_file_path
         self.msg_dict['ExtractionDirectory'] = extraction_directory
-        self.msg_dict['OutputPath'] = os.path.basename(dicom_file_path) #"op" #yaml_dict['FileSystemOptions']['ExtractRoot']
-        self.msg_dict['ExtractionJobIdentifier'] = str(uuid.uuid4())
+        self.msg_dict['OutputPath'] = os.path.basename(dicom_file_path) if not output_file_path else output_file_path
+        self.msg_dict['ExtractionJobIdentifier'] = str(uuid.uuid4()) if not job_identifier else job_identifier
         self.msg_dict['ProjectNumber'] = project_number
         self.msg_dict['IsIdentifiableExtraction'] = False
         self.msg_dict['IsNoFilterExtraction'] = False
         self.msg_dict['JobSubmittedAt'] = time.strftime("%Y-%m-%dT%H:%MZ",time.gmtime())
-        print("CTP input file will be %s/%s" % (yaml_dict['FileSystemOptions']['FileSystemRoot'], dicom_file_path))
-        print("CTP output file will be %s/%s/%s" % (yaml_dict['FileSystemOptions']['ExtractRoot'], self.msg_dict['ExtractionDirectory'], self.msg_dict['OutputPath']))
+        if yaml_dict:
+            print("CTP input file will be %s/%s" % (yaml_dict['FileSystemOptions']['FileSystemRoot'], dicom_file_path))
+            print("CTP output file will be %s/%s/%s" % (yaml_dict['FileSystemOptions']['ExtractRoot'], self.msg_dict['ExtractionDirectory'], self.msg_dict['OutputPath']))
 
 
 class IsIdentifiable_Start_Message(smiMessage):
