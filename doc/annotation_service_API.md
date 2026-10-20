@@ -197,7 +197,7 @@ api_url=paste0("https://", hostname, ":", port, "/api/")
 # curl -g -k 'https://20.68.25.9:8485/api/search_anns/C0205076/?j={"terms":[{"q":"C0205076"}]}'
 
 # Allow insecure requests (as the certificate is self-signed)
-httr::set_config(config(ssl_verifypeer = 0L))
+httr::set_config(config(ssl_verifypeer = 0L, ssl_verifyhost = 0L))
 
 # Check password
 password="CHANGEME"
